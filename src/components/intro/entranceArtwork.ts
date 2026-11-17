@@ -12,6 +12,18 @@ export function drawEntranceArtwork(ctx: CanvasRenderingContext2D, width: number
   const wall = ctx.createLinearGradient(0, 0, 0, height);
   wall.addColorStop(0, '#010102'); wall.addColorStop(.6, '#080305'); wall.addColorStop(1, '#14050a');
   ctx.fillStyle = wall; ctx.fillRect(0, 0, width, height);
+  if (mobile) {
+    const overhead = ctx.createRadialGradient(width * .5, height * .16, 0, width * .5, height * .21, width * .85);
+    overhead.addColorStop(0, '#76112745'); overhead.addColorStop(.5, '#30081625'); overhead.addColorStop(1, '#00000000');
+    ctx.fillStyle = overhead; ctx.fillRect(0, 0, width, height * .65);
+    // Quiet recessed wall panels give the suspension a sense of depth.
+    ctx.strokeStyle = '#b7283a16'; ctx.lineWidth = Math.max(1, width * .002);
+    for (const side of [-1, 1]) {
+      ctx.beginPath(); ctx.moveTo(width * (.5 + side * .42), height * .1);
+      ctx.lineTo(width * (.5 + side * .29), height * .58);
+      ctx.lineTo(width * (.5 + side * .43), height * .73); ctx.stroke();
+    }
+  }
   const floorY = height * .735, sourceY = stage.height * .81;
   const sourceHeight = stage.height - sourceY;
   const sourceWidth = Math.min(stage.width, sourceHeight * width / (height - floorY));
@@ -53,7 +65,7 @@ export function drawEntranceArtwork(ctx: CanvasRenderingContext2D, width: number
     ctx.restore();
   };
   if (mobile) {
-    metalText('BREAK', width * .1, height * .23, width * .8, width * .2);
+    // BREAK lives in the foreground UI on portrait screens, above the rope.
     metalText('THROUGH.', width * .12, height * .745, width * .76, width * .14);
   } else {
     metalText('BREAK', width * .115, height * .43, width * .32, width * .078);

@@ -1,0 +1,47 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": [
+    "replace-membership-reveal",
+    "user-supplied-component",
+    "preserve-plan-enquiry"
+  ],
+  "allowed_write_scope": [
+    "src/components/ui/receipt-printer.tsx",
+    "src/components/membership/NexusMembershipPrinter.tsx",
+    "src/components/membership/membership-printer.css",
+    "src/components/hero/HeroSection.tsx",
+    "src/components/layout/Navbar.tsx",
+    "scripts/test-membership-printer.cjs",
+    "artifacts/membership"
+  ],
+  "acceptance": [
+    "replace vault with supplied thermal-printer design",
+    "Basic Pro Elite selection and enquiry preserved",
+    "print stop repeat and tear",
+    "receipt snapshots preserve selected plan",
+    "responsive and keyboard accessible",
+    "reduced motion and optional audio",
+    "no made-up prices or payments"
+  ],
+  "validators": [
+    "node node_modules/typescript/bin/tsc --noEmit",
+    "node scripts/test-membership-printer.cjs",
+    "desktop and mobile screenshots"
+  ],
+  "evidence": {
+    "typescript": "PASS: node node_modules/typescript/bin/tsc --noEmit",
+    "browser": "PASS: scripts/test-membership-printer.cjs; zero page errors",
+    "checks": [
+      "vault replaced; animated feed, stop, repeat and keyboard tear",
+      "immutable plan snapshots, honest pricing and selected-plan enquiry",
+      "pointer tear, mute and Plans navigation",
+      "mobile touch print/tear, 320px resize, keyboard, reduced motion, unavailable audio"
+    ],
+    "visual": "Desktop idle/printed and mobile printed screenshots inspected",
+    "dependencies": "Reused installed framer-motion and lucide-react; no dependency changes",
+    "preview": "Development server listening on port 3001"
+  }
+}

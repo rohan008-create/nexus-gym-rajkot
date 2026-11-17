@@ -1,0 +1,18 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": ["full-screen-ray-marching", "transparent-debris-overdraw"],
+  "allowed_write_scope": ["src/components/intro/SmokeEffect.tsx", "src/components/intro/CinematicLeather.tsx", "artifacts/entrance/smoothness-policy.json"],
+  "acceptance": ["preserve smoke and bag-to-hero transition", "reduce smoke fragment workload", "stop drawing faded leather"],
+  "validators": ["npx tsc --noEmit", "node scripts/test-entrance-design.cjs", "runtime WebGL smoke viewport assertion"],
+  "evidence": {
+    "typescript": "PASS",
+    "entrance_design": "PASS: desktop, mobile, reduced motion, skip, intro disposal; no page errors",
+    "runtime_smoke_viewport": "PASS: three observed smoke draws used an offscreen 720x293 viewport at 1440x900 CSS size",
+    "visual_review": "Idle and fracture screenshots inspected",
+    "legacy_entrance_test": "FAIL: existing Replay intro button absent; transition, scroll unlock, focus and trial dialog assertions completed before timeout",
+    "limitation": "No before/after FPS benchmark; reduced fragment workload verified directly"
+  }
+}

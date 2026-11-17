@@ -1,5 +1,7 @@
 ﻿import { useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
+import { useEffect } from 'react';
+import { useFBO } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Ray-marched density, advected through 3D space. No smoke textures or sprites.
@@ -60,9 +62,26 @@ void main(){
 `;
 export default function SmokeEffect({ animate }: { animate: boolean }) {
   const mesh = useRef<THREE.Mesh>(null);
-  const { size, camera, viewport } = useThree();
+  const { size, camera, viewport, gl } = useThree();
   const uniforms = useMemo(() => ({ time: { value: 12 }, aspect: { value: 1 } }), []);
   const shader = useMemo(() => fragment.replaceAll('STEPS', size.width < 700 ? '12' : '20'), [size.width < 700]);
+  // Smoke is soft: ray-march at half CSS resolution, independent of device DPR.
+  // The bag, typography and tearing sheets retain the canvas's full resolution.
+  const buffer = useFBO(Math.max(1, Math.ceil(size.width * .5)), Math.max(1, Math.ceil(size.height * .65 * .5)), {
+    depthBuffer: false, stencilBuffer: false, type: THREE.UnsignedByteType,
+  });
+  const pass = useMemo(() => {
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const geometry = new THREE.PlaneGeometry(2, 2);
+    const material = new THREE.ShaderMaterial({ uniforms, fragmentShader: shader,
+      vertexShader: 'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
+      depthTest: false, depthWrite: false, toneMapped: false });
+    scene.add(new THREE.Mesh(geometry, material));
+    return { scene, camera, geometry, material };
+  }, [shader, uniforms]);
+  useEffect(() => () => { pass.geometry.dispose(); pass.material.dispose(); }, [pass]);
+  const displayUniforms = useMemo(() => ({ smoke: { value: buffer.texture } }), [buffer]);
   const target = useMemo(() => new THREE.Vector3(), []);
   const offset = useMemo(() => new THREE.Vector3(), []);
   useFrame((_, delta) => {
@@ -75,8 +94,15 @@ export default function SmokeEffect({ animate }: { animate: boolean }) {
     mesh.current.quaternion.copy(camera.quaternion);
     mesh.current.scale.set(view.width, view.height*.65, 1);
     uniforms.aspect.value = view.width/(view.height*.65);
-  });
+    const previousTarget = gl.getRenderTarget();
+    try {
+      gl.setRenderTarget(buffer);
+      gl.render(pass.scene, pass.camera);
+    } finally {
+      gl.setRenderTarget(previousTarget);
+    }
+  }, -1);
   return <mesh ref={mesh} name="ProceduralSmokeVolume" renderOrder={1} userData={{ procedural: true, steps: size.width < 700 ? 12 : 20 }}>
-    <planeGeometry args={[1, 1]} /><shaderMaterial uniforms={uniforms} vertexShader="varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}" fragmentShader={shader} transparent depthWrite={false} toneMapped={false} side={THREE.DoubleSide} />
+    <planeGeometry args={[1, 1]} /><shaderMaterial uniforms={displayUniforms} vertexShader="varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}" fragmentShader="varying vec2 vUv;uniform sampler2D smoke;void main(){gl_FragColor=texture2D(smoke,vUv);}" transparent depthWrite={false} toneMapped={false} side={THREE.DoubleSide} />
   </mesh>;
 }

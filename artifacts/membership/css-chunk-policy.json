@@ -1,0 +1,33 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": [
+    "reproduced-trainer-css-404",
+    "single-network-preview-port"
+  ],
+  "allowed_write_scope": [
+    "src/app/layout.tsx",
+    "src/components/trainers/Lanyard.jsx",
+    "package.json",
+    "artifacts/membership/css-chunk-policy.json"
+  ],
+  "acceptance": [
+    "trainer styles load with app layout",
+    "no missing dynamic trainer CSS",
+    "current website available on LAN port 3000"
+  ],
+  "validators": [
+    "TypeScript",
+    "browser trainers and membership on port 3000",
+    "HTTP CSS checks"
+  ],
+  "evidence": {
+    "typescript": "PASS",
+    "membership": "PASS on LAN port 3000: print/stop/repeat/tear, snapshots, enquiry, mobile, reduced motion",
+    "css": "PASS: all requested CSS returned HTTP 200 on root and /hero cold loads and reloads; no page errors",
+    "manifest": "Lanyard lazy module now lists only JavaScript; styles loaded in layout CSS",
+    "runtime": "Single verified Nexus listener on 0.0.0.0:3000, PID 13968; no listener on 3001"
+  }
+}

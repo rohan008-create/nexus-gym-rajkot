@@ -1,0 +1,44 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": [
+    "reproduced-missing-yaw",
+    "billboard-strap",
+    "compressed-chain-buckling"
+  ],
+  "allowed_write_scope": [
+    "src/components/intro/strapGeometry.ts",
+    "src/components/intro/HangingRope.tsx",
+    "src/components/intro/suspensionMotion.ts",
+    "src/hooks/useBagAnimation.ts",
+    "src/components/intro/BagExplosion.tsx",
+    "scripts/test-suspension.cjs",
+    "scripts/test-bag-rotation.cjs",
+    "artifacts/entrance/rotation-policy.json"
+  ],
+  "acceptance": [
+    "drag rotates bag in 3D",
+    "strap twists with bag instead of camera",
+    "fixed anchor and stable elastic motion",
+    "black/red preserved",
+    "drag does not trigger explosion"
+  ],
+  "validators": [
+    "node scripts/test-suspension.cjs",
+    "node scripts/test-bag-rotation.cjs",
+    "npx tsc --noEmit",
+    "node scripts/test-entrance-design.cjs",
+    "browser rotation and strap checks"
+  ],
+  "evidence": {
+    "baseline": "FAIL: dragged Y rotation was exactly zero before fix",
+    "unit": "PASS: 3D yaw/pitch/depth, recovery, fixed anchor, twist continuity across +/-pi, thickness, buffer reuse",
+    "simulation": "PASS: 30/60/120fps, frame stalls, settling and reduced motion",
+    "typescript": "PASS",
+    "entrance": "PASS: desktop, mobile, reduced motion, tap, skip, disposal; no page errors",
+    "browser": "PASS: GPU buffer measurements show mobile end-across Z -0.965 and desktop -0.879 during drag, fixed top [0,10,0] and top-across [1,0,0]; drag/release, orbit and tap reveal passed",
+    "visual": "Inspected mobile turned/orbit and desktop turned screenshots"
+  }
+}

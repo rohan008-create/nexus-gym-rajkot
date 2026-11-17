@@ -3,7 +3,7 @@ import { ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import * as THREE from 'three';
 import PunchingBagModel, { BagAsset } from './PunchingBagModel';
-import HangingChains from './HangingChains';
+import HangingRope from './HangingRope';
 import CinematicEnvironment from './CinematicEnvironment';
 import CameraControls from './CameraControls';
 import LeatherFragments from './LeatherFragments';
@@ -54,14 +54,27 @@ function Ready({ onReady }: { onReady: React.Dispatch<React.SetStateAction<boole
 
 export default function BagExplosion({ asset, reduced, idle, onStart, onComplete, onPhase, fracturedModelUrl, breakthrough = false, canStart = true, onPrepared }: Props) {
   const { gl, camera, size } = useThree();
+  const controls = useThree(s => s.controls) as unknown as { enabled: boolean } | null;
   const [phase, setPhase] = useState<ExplosionState>('IDLE');
   const [burst, setBurst] = useState(false), [ready, setReady] = useState(false);
   useEffect(() => { onPrepared?.(ready); }, [ready, onPrepared]);
   const started = useRef(false), startedAt = useRef(0), elapsed = useRef(0), lastPhase = useRef<ExplosionState>('IDLE');
   const effectElapsed = useRef(0);
   const transform = useRef(new THREE.Matrix4());
-  const bodyGroup = useRef<THREE.Group>(null), chainJolt = useRef<THREE.Group>(null);
-  const pivot = useBagAnimation(idle && phase === 'IDLE' && !reduced, phase !== 'IDLE');
+  const bodyGroup = useRef<THREE.Group>(null);
+  const pull = useRef({ held: false, x: 0, y: 0, yaw: 0, pitch: 0 });
+  const [dragging, setDragging] = useState(false);
+  const drag = useRef({ id: -1, plane: new THREE.Plane(), start: new THREE.Vector3(), point: new THREE.Vector3(), normal: new THREE.Vector3(), x: 0, y: 0, yaw: 0, pitch: 0 });
+  const pivot = useBagAnimation(idle && phase === 'IDLE' && !reduced, phase !== 'IDLE', pull);
+  const release = () => {
+    pull.current.held = false; drag.current.id = -1; setDragging(false);
+    if (controls) controls.enabled = phase === 'IDLE';
+  };
+  useEffect(() => {
+    const cancel = () => { pull.current.held = false; drag.current.id = -1; setDragging(false); if (controls) controls.enabled = phase === 'IDLE'; };
+    window.addEventListener('pointerup', cancel); window.addEventListener('pointercancel', cancel); window.addEventListener('blur', cancel);
+    return () => { window.removeEventListener('pointerup', cancel); window.removeEventListener('pointercancel', cancel); window.removeEventListener('blur', cancel); };
+  }, [controls, phase]);
   const cameraBase = useRef(new THREE.Vector3());
   const completionTimer = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => clearTimeout(completionTimer.current), []);
@@ -101,11 +114,6 @@ export default function BagExplosion({ asset, reduced, idle, onStart, onComplete
       bodyGroup.current.scale.set(1 + pressure * .045, 1 - pressure * .055, 1 + pressure * .045);
     }
     if (t >= .5 && lastPhase.current === 'EXPLODING') { lastPhase.current = 'FALLING'; setPhase('FALLING'); onPhase('FALLING'); }
-    if (chainJolt.current) {
-      chainJolt.current.rotation.z = reduced ? 0 : Math.sin(t * 27) * .003 * Math.exp(-t * 2.4);
-      // The torn suspension clears with the front page, rather than hanging over the hero.
-      if (breakthrough) chainJolt.current.position.y = 7.15 + (reduced ? 0 : THREE.MathUtils.smoothstep(t, .42, 1.15) * 12);
-    }
     const shakeTime = breakthrough ? t - .25 : t;
     if (!reduced && shakeTime >= 0 && shakeTime < .65) { const amplitude = (breakthrough ? .085 : .045) * Math.exp(-shakeTime * 7); camera.position.copy(cameraBase.current); camera.position.x += Math.sin(shakeTime * 91) * amplitude; camera.position.y += Math.sin(shakeTime * 117) * amplitude * .65; }
     else camera.position.copy(cameraBase.current);
@@ -116,17 +124,48 @@ export default function BagExplosion({ asset, reduced, idle, onStart, onComplete
   return <>
     {breakthrough && <RiftSurface elapsed={elapsed} active={active} reduced={reduced} />}
     <CinematicEnvironment animate={!reduced} cinematic={breakthrough} elapsed={elapsed} />
+    <HangingRope pivot={pivot} reduced={reduced} active={active} elapsed={elapsed} />
+    {/* Lower the mobile assembly slightly; the ceiling anchor stays fixed. */}
+    <group position={[0, size.width < 700 ? -.35 : 0, 0]}>
     <group position={[0, 3.2, 0]} ref={pivot}>
-      <group position={[0, 7.15, 0]} ref={chainJolt}><group position={[0, -7.15, 0]}><HangingChains /></group></group>
       <group position={[0, -3.2, 0]} ref={bodyGroup} visible={!burst}>
         <PunchingBagModel {...asset} />
         {/* Pick a simple volume, rather than ray-testing every stitch and leather triangle. */}
         <mesh name="BagInteraction" onClick={trigger}
+          onPointerDown={event => {
+            if (active || !ready || !canStart || event.button !== 0 || gesture.current.multi) return;
+            const d = drag.current; d.id = event.pointerId; d.start.copy(event.point);
+            d.plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(d.normal), event.point);
+            pull.current.held = true; pull.current.x = pivot.current?.position.x ?? 0;
+            pull.current.y = (pivot.current?.position.y ?? 3.2) - 3.2;
+            pull.current.yaw = pivot.current?.rotation.y ?? 0; pull.current.pitch = pivot.current?.rotation.x ?? 0;
+            d.x = pull.current.x; d.y = pull.current.y; d.yaw = pull.current.yaw; d.pitch = pull.current.pitch;
+            setDragging(true); if (controls) controls.enabled = false;
+            (event.target as Element).setPointerCapture(event.pointerId);
+          }}
+          onPointerMove={event => {
+            const d = drag.current;
+            if (!pull.current.held || d.id !== event.pointerId) return;
+            if (gesture.current.multi) { release(); return; }
+            if (event.ray.intersectPlane(d.plane, d.point)) {
+              const dx = d.point.x - d.start.x, dy = d.point.y - d.start.y;
+              pull.current.x = THREE.MathUtils.clamp(d.x + dx * .65, -.95, .95);
+              pull.current.y = THREE.MathUtils.clamp(d.y + dy * .65, -.75, .25);
+              pull.current.yaw = THREE.MathUtils.clamp(d.yaw + dx * 2.3, -2.6, 2.6);
+              pull.current.pitch = THREE.MathUtils.clamp(d.pitch - dy * .22, -.22, .22);
+            }
+          }}
+          onPointerUp={event => {
+            if (drag.current.id !== event.pointerId) return;
+            (event.target as Element).releasePointerCapture(event.pointerId); release();
+          }}
+          onPointerCancel={release}
           onPointerOver={() => { if (!active && ready) gl.domElement.style.cursor = 'pointer'; }} onPointerOut={() => { gl.domElement.style.cursor = ''; }}>
           <cylinderGeometry args={[.65, .65, 3.2, 12]} />
           <meshBasicMaterial transparent opacity={0} colorWrite={false} depthWrite={false} forceSinglePass />
         </mesh>
       </group>
+    </group>
     </group>
     <Suspense fallback={null}>
       {breakthrough && !fracturedModelUrl ? <>
@@ -140,6 +179,6 @@ export default function BagExplosion({ asset, reduced, idle, onStart, onComplete
     </Suspense>
     <InternalFilling elapsed={effectElapsed} transform={transform.current} mobile={size.width < 700} reduced={reduced} active={burst} cinematic={breakthrough} />
     <ShockwaveEffect elapsed={effectElapsed} reduced={reduced} active={active && !reduced} cinematic={breakthrough} />
-    <CameraControls enabled={!active} />
+    <CameraControls enabled={!active && !dragging} />
   </>;
 }

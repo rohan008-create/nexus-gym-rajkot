@@ -57,6 +57,7 @@ export default function PunchingBagIntro({ asset = {}, animationState = 'intact'
       <Framing />
     </Canvas></SceneBoundary>}
     {breakthrough && !complete && <div className={`entrance-campaign-ui${phase !== 'IDLE' ? ' is-breaking' : ''}`}>
+      <span className="entrance-mobile-break" aria-hidden="true">BREAK</span>
       <img className="entrance-brand" src="/assets/nexus-logo.png" alt="Nexus Fitness Club" />
       <p className="entrance-location"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M12 21s7-6.1 7-12A7 7 0 0 0 5 9c0 5.9 7 12 7 12Z" fill="#ef1328" stroke="white" strokeWidth="1.5" /><circle cx="12" cy="9" r="2.2" fill="#080808" /></svg>RAJKOT, GUJARAT</p>
       <div className="entrance-campaign-footer"><span>01 / THE BREAKTHROUGH</span><span>BUILT TO GO BEYOND.</span></div>

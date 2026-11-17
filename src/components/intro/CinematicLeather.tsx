@@ -46,8 +46,9 @@ export default function CinematicLeather({ active, elapsed, transform, mobile, r
   useEffect(() => () => { materials.outside.dispose(); materials.inside.dispose(); materials.logo.dispose(); }, [materials]);
   useFrame(() => {
     if (!root.current) return;
-    root.current.visible = active;
-    if (!active) return;
+    const t = Math.max(0, elapsed.current - .15);
+    root.current.visible = active && t < (reduced ? .5 : 1.12);
+    if (!root.current.visible) return;
     if (!initialized.current) {
       baseRotation.setFromRotationMatrix(transform);
       pieces.forEach((piece, i) => {
@@ -56,7 +57,6 @@ export default function CinematicLeather({ active, elapsed, transform, mobile, r
       });
       initialized.current = true;
     }
-    const t = Math.max(0, elapsed.current - .15);
     const travel = reduced ? 0 : (1 - Math.exp(-.8 * t)) / .8;
     const fade = 1 - THREE.MathUtils.smoothstep(t, reduced ? .05 : .42, reduced ? .5 : 1.12);
     materials.outside.opacity = materials.inside.opacity = materials.logo.opacity = fade;

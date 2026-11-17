@@ -13,7 +13,7 @@ import ProgramsSection from '../sections/ProgramsSection';
 import ArmorySection from '../armory/ArmorySection';
 import NexusAdvantageSection from '../advantage/NexusAdvantageSection';
 import NexusTrainersSection from '../trainers/NexusTrainersSection';
-import NexusLockerRoom from '../membership/NexusLockerRoom';
+import NexusMembershipPrinter from '../membership/NexusMembershipPrinter';
 import HumanEvolution from '../evolution/HumanEvolution';
 import WhatsAppBooking from '../booking/WhatsAppBooking';
 import NexusVoices from '../voices/NexusVoices';
@@ -39,8 +39,8 @@ export default function HeroSection({ onReplayIntro, entranceEnabled = true, int
   }, [status, onPrepared]);
   const navigate = useCallback((destination: Destination) => {
     setActive(destination);
-    if (destination !== 'Home' && destination !== 'Programs') setPanel(destination);
-    document.getElementById(destination === 'Home' ? 'home' : destination === 'Programs' ? 'programs' : 'about')?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth', block: 'start' });
+    if (destination !== 'Home' && destination !== 'Programs' && destination !== 'Plans') setPanel(destination);
+    document.getElementById(destination === 'Home' ? 'home' : destination === 'Programs' ? 'programs' : destination === 'Plans' ? 'membership' : 'about')?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth', block: 'start' });
   }, [reduced]);
   // Entrance timing only plays the prepared GSAP timeline. Keep the large
   // landing tree unchanged while the two front sheets are animating.
@@ -76,7 +76,7 @@ export default function HeroSection({ onReplayIntro, entranceEnabled = true, int
     }} />
     <NexusAdvantageSection />
     <NexusTrainersSection />
-    <NexusLockerRoom onEnquire={plan => { setMembershipPlan(plan); setTrial(true); }} />
+    <NexusMembershipPrinter onEnquire={plan => { setMembershipPlan(plan); setTrial(true); }} />
     <HumanEvolution onJourney={() => { setMembershipPlan(undefined); setTrial(true); }} />
     <WhatsAppBooking />
     <NexusVoices />

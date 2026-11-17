@@ -11,7 +11,7 @@ export default function Navbar({ active, onNavigate, onTrial }: { active: Destin
   return <header className={`site-nav ${scrolled ? 'is-scrolled' : ''}`}>
     <a href="#home" className="brand" aria-label="Nexus Fitness Club home" onClick={e => { e.preventDefault(); navigate('Home'); }}><img src="/assets/nexus-logo.png" alt="Nexus Fitness Club" width="2172" height="724" /></a>
     <nav className={`nav-links ${open ? 'is-open' : ''}`} id="primary-navigation" aria-label="Main navigation">
-      {(['Home', 'About', 'Programs', 'Plans', 'Location'] as Destination[]).map(item => <a key={item} href={item === 'Home' ? '#home' : item === 'Programs' ? '#programs' : '#about'} aria-current={active === item ? 'page' : undefined} onClick={e => { e.preventDefault(); navigate(item); }}>{item}<ArrowUpRight size={14} aria-hidden /></a>)}
+      {(['Home', 'About', 'Programs', 'Plans', 'Location'] as Destination[]).map(item => <a key={item} href={item === 'Home' ? '#home' : item === 'Programs' ? '#programs' : item === 'Plans' ? '#membership' : '#about'} aria-current={active === item ? 'page' : undefined} onClick={e => { e.preventDefault(); navigate(item); }}>{item}<ArrowUpRight size={14} aria-hidden /></a>)}
       <button className="nav-mobile-trial" onClick={() => { setOpen(false); onTrial(); }}>Book Free Trial</button>
     </nav>
     <button className="trial-button" aria-label="Book Free Trial" onClick={onTrial}><CalendarDays size={17} aria-hidden /><span>Book Free Trial</span></button>

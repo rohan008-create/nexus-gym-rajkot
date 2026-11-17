@@ -2,6 +2,7 @@
 import dynamic from 'next/dynamic';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+import { Lightning } from '../components/ui/lightning';
 import './entrance.css';
 
 const Intro = dynamic(() => import('../components/intro/PunchingBagIntro'), { ssr: false, loading: () => <div className="loading" aria-label="Loading 3D scene" /> });
@@ -77,6 +78,9 @@ export default function Page() {
     </div>}
     {stage !== 'revealed' && <div className="entrance-overlay" role="region" aria-label="Break through to Nexus">
       <Intro key={run} breakthrough canStart={prepared} onExplosionStart={start} onExplosionComplete={finish} />
+      {stage === 'waiting' && prepared && !reduced && <div className="entrance-thunder" aria-hidden="true">
+        <Lightning className="entrance-lightning" interactive={false} placement="sides" color="#ff2945" cloudColor="#5c1222" clouds={.32} branches={3} amplitude={.85} reach={.88} frequency={.65} speed={.8} glow={.8} intensity={1.05} thickness={1.6} quality={.65} fade="bottom" opacity={.8} seed={7} />
+      </div>}
       {stage === 'waiting' && <button className="entrance-skip" disabled={!prepared} onClick={finish}>{prepared ? 'ENTER NEXUS ↗' : 'PREPARING NEXUS'}</button>}
     </div>}
   </div>;

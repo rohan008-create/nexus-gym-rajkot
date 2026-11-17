@@ -3,8 +3,6 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-import './Lanyard.css';
-
 const CARD_SIZES = {
   portrait: [1.6, 2.25],
   landscape: [2.25, 1.6]

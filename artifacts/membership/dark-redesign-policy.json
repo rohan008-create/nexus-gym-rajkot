@@ -1,0 +1,35 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": [
+    "printer-centered-redesign",
+    "remove-beige-panel"
+  ],
+  "allowed_write_scope": [
+    "src/components/membership/NexusMembershipPrinter.tsx",
+    "src/components/membership/membership-printer.css",
+    "src/components/ui/receipt-printer.tsx",
+    "artifacts/membership/dark-redesign-policy.json"
+  ],
+  "acceptance": [
+    "black seamless background",
+    "standalone charcoal printer",
+    "compact plan controls",
+    "preserve print stop tear and enquiries",
+    "responsive screenshots"
+  ],
+  "validators": [
+    "TypeScript",
+    "membership browser checks on port 3000",
+    "desktop/mobile visual inspection"
+  ],
+  "evidence": {
+    "typescript": "PASS",
+    "membership": "PASS: print, stop, repeat, pointer/touch tear, keyboard, immutable plan snapshots, enquiry, 320px, reduced motion, optional audio",
+    "appearance": "PASS: computed black section background; stage transparent with no frame/shadow; charcoal printer; no horizontal overflow",
+    "visual": "Inspected final desktop idle and full mobile section screenshots",
+    "preview": "Existing LAN server on port 3000"
+  }
+}
