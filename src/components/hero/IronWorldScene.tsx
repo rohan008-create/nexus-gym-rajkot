@@ -1,15 +1,12 @@
 'use client';
-
-import { Component, useEffect, useMemo, useRef, useState } from 'react';
+import { Component, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { RoundedBox } from '@react-three/drei';
+import { Environment, Lightformer, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 
 export type GymStatus = 'loading' | 'ready' | 'error';
 type Props = { active: boolean; reduced: boolean; onStatus: (status: GymStatus) => void; pointer: React.MutableRefObject<{ x: number; y: number }> };
 type V3 = [number, number, number];
-const steel = '#686e78', frame = '#262b33', red = '#cf1932';
-
 class SceneBoundary extends Component<{ children: React.ReactNode; onError: () => void }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
@@ -17,161 +14,94 @@ class SceneBoundary extends Component<{ children: React.ReactNode; onError: () =
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-function Beam({ at, size, color = frame, glow = false }: { at: V3; size: V3; color?: string; glow?: boolean }) {
-  return <mesh position={at}><boxGeometry args={size} /><meshStandardMaterial color={color} metalness={glow ? .2 : .75} roughness={.36} emissive={glow ? color : '#000000'} emissiveIntensity={glow ? 3 : 0} /></mesh>;
-}
-
-function Barbell({ at = [0, 0, 0], scale = 1 }: { at?: V3; scale?: number }) {
-  return <group position={at} scale={scale} name="loaded-barbell">
-    <mesh rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[.038, .038, 3.4, 12]} /><meshStandardMaterial color="#b4bdc8" metalness={.92} roughness={.23} /></mesh>
-    {[-1, 1].map(side => <group key={side}>
-      {[0, 1, 2].map(i => <group key={i} position={[side * (1.08 + i * .14), 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <mesh><cylinderGeometry args={[.47 - i * .065, .47 - i * .065, .115, 28]} /><meshStandardMaterial color={i === 0 ? '#ad1830' : '#20252b'} metalness={.55} roughness={.42} /></mesh>
-        <mesh position={[0, .065, 0]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[.3 - i * .045, .012, 6, 28]} /><meshStandardMaterial color="#69717d" metalness={.8} roughness={.3} /></mesh>
-      </group>)}
-      <mesh position={[side * 1.57, 0, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[.075, .075, .09, 16]} /><meshStandardMaterial color={red} metalness={.7} roughness={.3} /></mesh>
+function Plate({ radius = 1, red = false }: { radius?: number; red?: boolean }) {
+  const geometry = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.absarc(0, 0, radius, 0, Math.PI * 2, false);
+    const hole = new THREE.Path(); hole.absarc(0, 0, radius * .18, 0, Math.PI * 2, true); shape.holes.push(hole);
+    return new THREE.ExtrudeGeometry(shape, { depth: .2, bevelEnabled: true, bevelThickness: .055, bevelSize: .04, bevelSegments: 3, steps: 1, curveSegments: 64 });
+  }, [radius]);
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  return <group>
+    <mesh geometry={geometry} dispose={null}><meshStandardMaterial color={red ? '#bc1732' : '#20242c'} metalness={.7} roughness={.3} /></mesh>
+    {[.255, -.055].map(z => <group key={z} position={[0, 0, z]}>
+      <mesh><torusGeometry args={[radius * .85, .018, 8, 80]} /><meshStandardMaterial color={red ? '#ff4058' : '#7d8794'} metalness={.85} roughness={.25} /></mesh>
+      <mesh><torusGeometry args={[radius * .21, .033, 10, 40]} /><meshStandardMaterial color="#b5bdc9" metalness={.95} roughness={.2} /></mesh>
+      {[0, 1, 2].map(i => <mesh key={i} position={[Math.cos(i * Math.PI * 2 / 3) * radius * .57, Math.sin(i * Math.PI * 2 / 3) * radius * .57, 0]} rotation={[0, 0, i * Math.PI * 2 / 3]}><capsuleGeometry args={[.035, radius * .28, 3, 6]} /><meshStandardMaterial color={red ? '#e2354c' : '#4f5865'} metalness={.6} roughness={.35} /></mesh>)}
     </group>)}
   </group>;
 }
-
-function Rack() {
-  return <group position={[.2, 0, -.6]} name="power-rack">
-    {[-1.35, 1.35].flatMap(x => [-1.1, 1.1].map(z => <group key={`${x}-${z}`}>
-      <Beam at={[x, 2.1, z]} size={[.13, 4.2, .13]} />
-      <Beam at={[x, .09, z]} size={[.48, .12, .48]} />
-      {Array.from({ length: 13 }, (_, i) => <mesh key={i} position={[x, .65 + i * .23, z + .069]}><circleGeometry args={[.022, 8]} /><meshBasicMaterial color="#08090b" /></mesh>)}
-    </group>))}
-    {[-1.35, 1.35].map(x => <Beam key={x} at={[x, 4.16, 0]} size={[.16, .16, 2.38]} />)}
-    <Beam at={[0, 4.16, -1.1]} size={[2.84, .19, .16]} color={red} />
-    <Beam at={[0, 3.98, 1.1]} size={[2.84, .065, .065]} color={steel} />
-    <Beam at={[0, .2, -1.1]} size={[2.8, .13, .13]} />
-    {[-1.35, 1.35].map(x => <Beam key={x} at={[x, 2.55, 1.2]} size={[.18, .16, .4]} color={red} />)}
-    <Barbell at={[0, 2.7, 1.17]} />
-    <Beam at={[0, .18, 1.4]} size={[1.2, .18, 3.4]} />
-    {[-.1, 2.4].map(z => <Beam key={z} at={[0, .47, z]} size={[.17, .8, .17]} />)}
-    <RoundedBox args={[.79, .22, 2.18]} radius={.09} smoothness={2} position={[0, .91, 1.25]}><meshStandardMaterial color="#96142a" roughness={.7} /></RoundedBox>
-    <Beam at={[0, .94, 1.25]} size={[.03, .012, 1.7]} color="#e14c5e" />
-  </group>;
-}
-
-function Dumbbell({ at }: { at: V3 }) {
-  return <group position={at} rotation={[0, 0, Math.PI / 2]}>
-    <mesh><cylinderGeometry args={[.045, .045, .66, 8]} /><meshStandardMaterial color={steel} metalness={.9} roughness={.26} /></mesh>
-    {[-.27, .27].map(y => <mesh key={y} position={[0, y, 0]} rotation={[0, Math.PI / 6, 0]}><cylinderGeometry args={[.19, .19, .21, 6]} /><meshStandardMaterial color="#343944" metalness={.6} roughness={.4} /></mesh>)}
-  </group>;
-}
-
-function DumbbellRack() {
-  return <group position={[-3.8, 0, .2]} rotation={[0, .12, 0]} name="dumbbell-rack">
-    {[-1.25, 1.25].map(x => <Beam key={x} at={[x, .8, 0]} size={[.13, 1.6, .7]} />)}
-    {[.66, 1.33].map(y => <group key={y}>
-      <Beam at={[0, y, 0]} size={[3.1, .1, .65]} />
-      <Beam at={[0, y + .04, .34]} size={[3.1, .07, .04]} color={red} />
-      {[-1.12, -.38, .38, 1.12].map(x => <Dumbbell key={x} at={[x, y + .24, 0]} />)}
+function Dumbbell() {
+  return <group rotation={[.1, .2, -.55]}>
+    <mesh rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[.115, .115, 2.8, 24]} /><meshStandardMaterial color="#ced3dc" metalness={1} roughness={.2} /></mesh>
+    {Array.from({ length: 16 }, (_, i) => <mesh key={i} position={[-.65 + i * .085, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[.119, .008, 4, 12]} /><meshStandardMaterial color="#57616d" metalness={.9} roughness={.35} /></mesh>)}
+    {[-1, 1].map(side => <group key={side} position={[side * 1.1, 0, 0]}>
+      <RoundedBox args={[.63, 1.23, 1.23]} radius={.12} smoothness={3}><meshStandardMaterial color="#171c24" metalness={.65} roughness={.28} /></RoundedBox>
+      <mesh position={[side * .33, 0, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[.36, .36, .035, 32]} /><meshStandardMaterial color="#d31a36" metalness={.65} roughness={.3} /></mesh>
+      <mesh position={[side * .36, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[.27, .014, 6, 32]} /><meshStandardMaterial color="#ff8a97" metalness={.85} roughness={.2} /></mesh>
     </group>)}
   </group>;
 }
-
-function Treadmill({ at }: { at: V3 }) {
-  return <group position={at} rotation={[0, -.16, 0]} name="treadmill">
-    <RoundedBox args={[1.35, .24, 2.8]} radius={.08} smoothness={2} position={[0, .18, 0]}><meshStandardMaterial color="#242a32" metalness={.6} roughness={.4} /></RoundedBox>
-    <Beam at={[0, .315, 0]} size={[.98, .025, 2.5]} color="#101216" />
-    {[-.62, .62].map(x => <group key={x}>
-      <Beam at={[x, .33, 0]} size={[.045, .03, 2.6]} color={red} />
-      <group position={[x, 1.12, -.84]} rotation={[-.2, 0, 0]}><Beam at={[0, 0, 0]} size={[.095, 1.8, .095]} color={steel} /></group>
-      <Beam at={[x, 1.66, -.25]} size={[.085, .085, .9]} />
-    </group>)}
-    <group position={[0, 1.97, -1.02]} rotation={[-.3, 0, 0]}>
-      <Beam at={[0, 0, 0]} size={[1.18, .55, .12]} />
-      <Beam at={[0, .025, .068]} size={[.62, .31, .015]} color="#4d9eac" glow />
-    </group>
-    {Array.from({ length: 8 }, (_, i) => <Beam key={i} at={[0, .332, -.95 + i * .27]} size={[.94, .004, .009]} color="#45494f" />)}
-  </group>;
-}
-
-function HangingBag({ reduced }: { reduced: boolean }) {
-  const ref = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => { if (ref.current) ref.current.rotation.z = reduced ? 0 : Math.sin(clock.elapsedTime * .65) * .025; });
-  return <group position={[-3.65, 4.5, -3.5]} ref={ref} name="punching-bag">
-    {[-.25, .25].map(x => <group key={x} position={[x, -.45, 0]} rotation={[0, 0, -x * .5]}><Beam at={[0, 0, 0]} size={[.025, .9, .025]} color={steel} /></group>)}
-    <mesh position={[0, -1.95, 0]}><cylinderGeometry args={[.43, .43, 2.2, 32]} /><meshStandardMaterial color="#42121e" roughness={.66} metalness={.12} /></mesh>
-    {[-1.05, -2.85].map(y => <mesh key={y} position={[0, y, 0]}><cylinderGeometry args={[.442, .442, .13, 32]} /><meshStandardMaterial color={red} roughness={.5} /></mesh>)}
-    <Beam at={[0, -1.8, .433]} size={[.12, .6, .015]} color="#e7ddd7" />
-  </group>;
-}
-
-function WallMark() {
-  const texture = useMemo(() => {
-    const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 256;
-    const ctx = canvas.getContext('2d')!;
-    ctx.textAlign = 'center'; ctx.fillStyle = '#e4e7eb'; ctx.font = '900 italic 160px Arial'; ctx.fillText('NEXUS', 512, 170);
-    ctx.fillStyle = '#ff354b'; ctx.font = '22px Arial'; ctx.fillText('T H E   I R O N   W O R L D', 512, 222);
-    const result = new THREE.CanvasTexture(canvas); result.colorSpace = THREE.SRGBColorSpace; return result;
+function Bell() {
+  const geometry = useMemo(() => {
+    const curve = new THREE.SplineCurve([[0,-.85],[.5,-.85],[.8,-.68],[.95,-.2],[.8,.4],[.4,.68],[0,.68]].map(([x,y])=>new THREE.Vector2(x,y)));
+    const body = new THREE.LatheGeometry(curve.getPoints(48), 64);
+    const path = new THREE.CatmullRomCurve3([[-.55,.5,0],[-.66,1,0],[-.45,1.6,0],[.45,1.6,0],[.66,1,0],[.55,.5,0]].map(p=>new THREE.Vector3(...p as V3)));
+    return { body, handle: new THREE.TubeGeometry(path, 64, .12, 12, false) };
   }, []);
-  useEffect(() => () => texture.dispose(), [texture]);
-  return <mesh position={[0, 3.4, -4.77]}><planeGeometry args={[4.9, 1.23]} /><meshBasicMaterial map={texture} transparent toneMapped={false} /></mesh>;
+  useEffect(() => () => { geometry.body.dispose(); geometry.handle.dispose(); }, [geometry]);
+  return <group rotation={[.2, -.3, .24]}>
+    <mesh geometry={geometry.body} dispose={null}><meshStandardMaterial color="#a30f29" metalness={.65} roughness={.28} /></mesh>
+    <mesh geometry={geometry.handle} dispose={null}><meshStandardMaterial color="#b0b9c7" metalness={1} roughness={.18} /></mesh>
+    <mesh position={[0,-.79,0]}><cylinderGeometry args={[.59,.57,.06,48]} /><meshStandardMaterial color="#151922" metalness={.8} roughness={.25} /></mesh>
+    <mesh position={[0,-.02,.94]}><circleGeometry args={[.23,32]} /><meshStandardMaterial color="#171b22" metalness={.6} roughness={.3} /></mesh>
+    <mesh position={[0,-.02,.949]}><torusGeometry args={[.16,.015,8,32]} /><meshStandardMaterial color="#ffabb6" metalness={.9} roughness={.2} /></mesh>
+  </group>;
 }
-
-function Gym({ reduced, onStatus, pointer }: Pick<Props, 'reduced' | 'onStatus' | 'pointer'>) {
-  const { camera, size } = useThree();
+function Floating({ children, at, rotation = [0,0,0], scale = 1, phase, reduced }: { children: React.ReactNode; at: V3; rotation?: V3; scale?: number; phase: number; reduced: boolean }) {
+  const ref = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (!ref.current) return;
+    const t = clock.elapsedTime;
+    ref.current.position.y = at[1] + (reduced ? 0 : Math.sin(t * .48 + phase) * .12);
+    ref.current.rotation.y = rotation[1] + (reduced ? 0 : Math.sin(t * .3 + phase) * .11);
+    ref.current.rotation.z = rotation[2] + (reduced ? 0 : Math.cos(t * .3 + phase) * .035);
+  });
+  return <group ref={ref} position={at} rotation={rotation} scale={scale}>{children}</group>;
+}
+function Equipment({ reduced, pointer, onStatus }: Pick<Props, 'reduced' | 'pointer' | 'onStatus'>) {
+  const { camera, viewport, size } = useThree();
   const mobile = size.width < 760;
-  const started = useRef<number | null>(null);
-  const target = useMemo(() => new THREE.Vector3(), []);
-  useEffect(() => {
-    const perspective = camera as THREE.PerspectiveCamera;
-    perspective.fov = mobile ? 48 : 43;
-    perspective.updateProjectionMatrix();
-  }, [camera, mobile]);
-  useFrame(({ clock }, delta) => {
-    if (started.current === null) { started.current = clock.elapsedTime; onStatus('ready'); }
-    const t = reduced ? 1 : Math.min(1, (clock.elapsedTime - started.current) / 2.3);
-    const ease = 1 - Math.pow(1 - t, 3);
-    const scroll = reduced ? 0 : Math.min(1, window.scrollY / Math.max(window.innerHeight, 1));
-    const px = reduced || mobile ? 0 : pointer.current.x * .6;
-    const py = reduced || mobile ? 0 : pointer.current.y * .25;
-    target.set(mobile ? 10.6 : 10.5 + px, mobile ? 7.4 : 6.5 + py, (mobile ? 15.6 : 14) + (1 - ease) * 3 - scroll * 1.2);
-    camera.position.lerp(target, reduced ? 1 : 1 - Math.exp(-3 * Math.min(delta, .05)));
-    camera.lookAt(mobile ? 0 : -3.2, mobile ? .7 : 1.1, 0);
+  const half = viewport.width / 2;
+  const ready = useRef(false);
+  useFrame((_, delta) => {
+    if (!ready.current) { ready.current = true; onStatus('ready'); }
+    const amount = reduced || mobile ? 0 : 1;
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, pointer.current.x * .25 * amount, 3, Math.min(delta, .05));
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, pointer.current.y * .18 * amount, 3, Math.min(delta, .05));
+    camera.lookAt(0, 0, 0);
   });
   return <>
-    <color attach="background" args={['#080b10']} />
-    <fog attach="fog" args={['#080b10', 20, 43]} />
-    <ambientLight intensity={.85} color="#a8b5cd" />
-    <hemisphereLight args={['#c5d9ff', '#15101a', 1.5]} />
-    <directionalLight position={[2, 9, 7]} intensity={3.2} color="#d9e7ff" />
-    <pointLight position={[-4, 3, -2]} intensity={32} distance={12} color="#ff173c" />
-    <pointLight position={[4, 4, 1]} intensity={28} distance={13} color="#9ecaff" />
-    <group position={[0, -.3, 0]}>
-      <mesh position={[0, -.14, 0]}><boxGeometry args={[12.8, .26, 11]} /><meshStandardMaterial color="#141922" roughness={.48} metalness={.5} /></mesh>
-      {Array.from({ length: 13 }, (_, i) => <Beam key={`x${i}`} at={[-6 + i, .002, 0]} size={[.012, .008, 10.8]} color="#303843" />)}
-      {Array.from({ length: 11 }, (_, i) => <Beam key={`z${i}`} at={[0, .003, -5 + i]} size={[12.6, .008, .012]} color="#303843" />)}
-      <Beam at={[0, .02, 5.25]} size={[12.65, .035, .035]} color="#ff173c" glow />
-      <Beam at={[6.25, .02, 0]} size={[.035, .035, 10.5]} color="#ff173c" glow />
-      <Beam at={[0, 2.5, -4.9]} size={[12.5, 5, .12]} color="#151a23" />
-      {[-5.9, -3, 3, 5.9].map(x => <Beam key={x} at={[x, 2.5, -4.8]} size={[.045, 4.8, .045]} color="#454f60" />)}
-      {[-4.6, -.8, 3.6].map(z => <group key={z} name="ceiling-portal">
-        {[-6, 6].map(x => <Beam key={x} at={[x, 2.7, z]} size={[.13, 5.4, .13]} />)}
-        <Beam at={[0, 5.36, z]} size={[12.1, .15, .15]} />
-        <Beam at={[0, 5.25, z + .02]} size={[11.8, .035, .045]} color="#ff1637" glow />
-      </group>)}
-      {[-3.4, 2.8].map(x => <Beam key={x} at={[x, 5.18, -.6]} size={[.045, .035, 7.7]} color="#bfdaff" glow />)}
-      <WallMark />
-      <Rack />
-      <DumbbellRack />
-      <Treadmill at={[3.9, 0, -2.4]} />
-      <Treadmill at={[5.5, 0, -2.4]} />
-      <HangingBag reduced={reduced} />
-      <group position={[-2.9, .5, 3.7]} rotation={[0, -.4, .15]}><Barbell scale={.8} /></group>
-      <Dumbbell at={[3.5, .22, 3.8]} />
-      <Dumbbell at={[4.2, .22, 3.5]} />
-    </group>
+    <ambientLight intensity={.4} />
+    <directionalLight position={[-4, 7, 8]} intensity={3.4} color="#f5eee2" />
+    <pointLight position={[5,-1,3]} intensity={42} distance={15} color="#ff183e" />
+    <pointLight position={[-5,1,2]} intensity={22} distance={12} color="#b5c9ee" />
+    <Environment resolution={64} frames={1}>
+      <Lightformer position={[-4, 3, 5]} scale={[3, 7, 1]} intensity={4} />
+      <Lightformer position={[5, 0, 3]} scale={[2, 8, 1]} intensity={4} color="#ff2945" />
+      <Lightformer position={[0, 5, 2]} rotation={[Math.PI / 2,0,0]} scale={[8, 3, 1]} intensity={3} />
+    </Environment>
+    <Floating at={[mobile ? -half * .62 : -half * .67, mobile ? 2.9 : 2.1, -.5]} rotation={[.4,.1,-.16]} scale={mobile ? .48 : .9} phase={0} reduced={reduced}><Dumbbell /></Floating>
+    <Floating at={[mobile ? half * .77 : half * .69, mobile ? 2.2 : 1.7, -1]} rotation={[.25,-.45,.3]} scale={mobile ? .72 : 1.4} phase={1} reduced={reduced}><Plate red /></Floating>
+    <Floating at={[mobile ? -half * .83 : -half * .77, mobile ? -1.3 : -1.75, 1]} rotation={[.2,.4,-.3]} scale={mobile ? .8 : 1.35} phase={2} reduced={reduced}><Plate /></Floating>
+    <Floating at={[mobile ? half * .77 : half * .72, mobile ? -1.45 : -1.9, .6]} scale={mobile ? .55 : .93} phase={3} reduced={reduced}><Bell /></Floating>
+    <Floating at={[mobile ? half * .1 : half * .18, mobile ? 3.8 : 4.5, -3]} rotation={[.8,.3,-.4]} scale={mobile ? .38 : .5} phase={4} reduced={reduced}><Plate /></Floating>
+    <Floating at={[-half * .35, mobile ? -3.55 : -3.75, -2]} rotation={[.8,.2,.2]} scale={mobile ? .28 : .42} phase={5} reduced={reduced}><Dumbbell /></Floating>
   </>;
 }
-
 export default function IronWorldScene({ active, reduced, onStatus, pointer }: Props) {
   const host = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(true);
-  const [failed, setFailed] = useState(false);
+  const [visible, setVisible] = useState(true), [failed, setFailed] = useState(false);
   const fail = () => { setFailed(true); onStatus('error'); };
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
@@ -180,15 +110,11 @@ export default function IronWorldScene({ active, reduced, onStatus, pointer }: P
     if (node) { observer.observe(node); node.addEventListener('webglcontextlost', lost, true); }
     return () => { observer.disconnect(); node?.removeEventListener('webglcontextlost', lost, true); };
   }, [onStatus]);
-  return <div ref={host} className={`persistent-scene iron-world-scene${failed ? ' is-fallback' : ''}`} role="img" aria-label="Three dimensional concept gym with a loaded squat rack, red bench, dumbbell rack, treadmills and a hanging punching bag">
+  return <div ref={host} className={`persistent-scene iron-world-scene${failed ? ' is-fallback' : ''}`} role="img" aria-label="A kinetic sculpture of floating three dimensional dumbbells, crimson weight plates and a polished kettlebell">
     <div className="iron-world-fallback" aria-hidden />
-    {!failed && <SceneBoundary onError={fail}>
-      <Canvas dpr={[1, 1.5]} performance={{ min: .6 }} frameloop={visible && active && !reduced ? 'always' : 'demand'} camera={{ position: [10.5, 6.5, 17], fov: 43, near: .1, far: 70 }} gl={{ alpha: false, antialias: true, powerPreference: 'high-performance' }} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.2; }} fallback={<span>Step into your next chapter.</span>}>
-        <Gym reduced={reduced} onStatus={onStatus} pointer={pointer} />
-      </Canvas>
-    </SceneBoundary>}
+    {!failed && <SceneBoundary onError={fail}><Canvas dpr={[1,1.5]} frameloop={visible && active && !reduced ? 'always' : 'demand'} camera={{ position:[0,0,14], fov:40 }} gl={{ alpha:true, antialias:true }} onCreated={({ gl }) => { gl.toneMapping=THREE.ACESFilmicToneMapping; gl.toneMappingExposure=1.1; }} fallback={<span>Beyond limits. Nexus Fitness Club.</span>}>
+      <Suspense fallback={null}><Equipment reduced={reduced} pointer={pointer} onStatus={onStatus} /></Suspense>
+    </Canvas></SceneBoundary>}
     <div className="iron-world-shade" aria-hidden />
-    <div className="iron-world-tag" aria-hidden><span className="iron-live-dot" /> THE IRON WORLD <span>01 / NEXUS</span></div>
-    <div className="iron-world-caption" aria-hidden><span>STRENGTH. ENDURANCE. <b>YOU.</b></span><span>3D CONCEPT SPACE <i>↗</i></span></div>
   </div>;
 }

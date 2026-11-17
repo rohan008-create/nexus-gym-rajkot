@@ -175,10 +175,10 @@ Run `npm run pack:evolution` after extracting/rebuilding frames; it creates opti
 
 # nexus-gym-rajkot
 
-## Iron World hero
+## Beyond Limits hero
 
-The hero now presents a procedural Three.js concept gym: a loaded power rack and bench, two-tier dumbbell rack, two treadmills, hanging punching bag and loose foreground weights. Ceiling portals, illuminated floor edges and a tiled platform create depth across the section. No remote models or textures are needed. The existing punching-bag entrance reveals this scene.
+The hero uses a full-width kinetic equipment composition around a centered BEYOND LIMITS headline. Six objects occupy different depths: beveled weight plates with open steel hubs, detailed dumbbells and a crimson kettlebell. Procedural geometry and local studio light panels create metallic highlights without remote models, HDR maps or textures. This replaces the earlier miniature gym interior. The punching-bag entrance still reveals the hero.
 
-Desktop uses a wide architectural camera with subtle pointer parallax and a short scroll dolly. Mobile places the copy and trial button above a separately framed gym view; touch scrolling remains native. Reduced motion uses a still camera and bag, and rendering pauses outside the viewport. A local concept photograph remains available if WebGL fails. This is an illustrative space, not a representation of verified club inventory.
+Desktop uses subtle pointer parallax and independent slow floating motion. Mobile rearranges and scales the objects around a central reading area, keeping the same full-width canvas. Reduced motion freezes equipment and camera movement; rendering pauses outside the viewport. A local concept photograph remains available if WebGL fails. Equipment is illustrative, not verified club inventory.
 
 Run `npm run check:hero` against a local server on port 3000, or set `IRON_WORLD_TEST_URL`. It checks desktop, tablet, 390px and 320px layouts, trial dialog, Programs navigation, reduced motion, WebGL fallback and the homepage entrance. Screenshots and results are saved under ignored `qa/iron-world-*`. Run `npm run build` for production validation.

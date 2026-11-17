@@ -14,18 +14,16 @@ const fs = require('node:fs');
       await page.goto(`${base}/hero`, { timeout: 120000 });
       await page.waitForSelector('[data-rope-status="ready"]', { timeout: 90000 });
       await page.waitForTimeout(3200);
-      assert.match((await page.locator('h1').innerText()).replace(/\s/g, ''), /BUILDYOURNEXT\./);
+      assert.match((await page.locator('h1').innerText()).replace(/\s/g, ''), /BEYONDLIMITS\./);
       assert.equal(await page.locator('.iron-world-scene canvas').count(), 1);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${name}: no horizontal overflow`);
-      const copy = await page.locator('.hero-copy').boundingBox();
+      const heading = await page.locator('h1').boundingBox();
+      assert.ok(heading.x >= 0 && heading.x + heading.width <= width + 1, 'headline fits screen');
       const scene = await page.locator('.iron-world-scene').boundingBox();
-      if (width < 760) {
-        const tag = await page.locator('.iron-world-tag').boundingBox();
-        assert.ok(copy.y + copy.height + 8 < tag.y, 'mobile text and scene label have separate space');
-      }
+      assert.equal(Math.round(scene.width), width, '3D scene spans the hero');
       await page.screenshot({ path: `qa/iron-world-${name}.png` });
       if (width < 760) {
-        await page.evaluate(() => scrollTo(0, 340));
+        await page.evaluate(() => scrollTo(0, 150));
         await page.waitForTimeout(600);
         await page.screenshot({ path: `qa/iron-world-${name}-scene.png` });
         await page.evaluate(() => scrollTo(0, 0));

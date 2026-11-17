@@ -50,13 +50,13 @@ export default function HeroSection({ onReplayIntro, entranceEnabled = true, int
       <section className="hero-section iron-world-hero" id="home" aria-labelledby="hero-title">
         <IronWorldScene reduced={reduced} onStatus={setStatus} active={interactive} pointer={pointer} />
         <div className="hero-copy">
-          <p className="eyebrow" data-reveal><span aria-hidden />NEXUS FITNESS CLUB / RAJKOT</p>
-          <p className="iron-world-kicker">YOUR NEXT CHAPTER STARTS HERE</p>
-          <h1 id="hero-title" tabIndex={-1}><span className="headline-line"><span>BUILD</span></span><span className="headline-line"><span>YOUR</span></span><span className="headline-line accent"><span>NEXT.</span></span></h1>
-          <p className="hero-description" data-reveal>More strength. More confidence. More you.<br />Step into a space built for your next level.</p>
+          <p className="eyebrow" data-reveal><span aria-hidden />RAJKOT. THIS IS YOUR NEXT LEVEL.<span aria-hidden /></p>
+          <p className="iron-world-kicker">NEXUS FITNESS CLUB</p>
+          <h1 id="hero-title" tabIndex={-1}><span className="headline-line"><span>BEYOND</span></span><span className="headline-line accent"><span>LIMITS.</span></span></h1>
+          <p className="hero-description" data-reveal>Built by effort. Defined by you.<br />Find your strength at Nexus.</p>
           <div className="hero-actions" data-reveal><button className="primary-cta" onClick={() => setTrial(true)}><Zap size={17} fill="currentColor" aria-hidden /><span>Book a Trial</span><ArrowRight size={21} aria-hidden /></button><button className="secondary-cta" onClick={() => navigate('Programs')}>Explore Programs<ArrowUpRight size={17} aria-hidden /></button></div>
-          <div className="iron-world-disciplines"><span>STRENGTH</span><i /><span>CONDITIONING</span><i /><span>PERSONAL TRAINING</span></div>
         </div>
+        <div className="kinetic-footer"><span>01 / THE MINDSET</span><span>STRENGTH <i /> CONDITIONING <i /> COMMUNITY</span><span>RAJKOT, GUJARAT ↗</span></div>
         {status === 'error' && <p className="scene-notice" role="status">Explore Nexus. Your next chapter starts here.</p>}
         <button className="scroll-indicator" onClick={() => navigate('About')}>SCROLL TO EXPLORE<span aria-hidden><ChevronDown size={23} /><ChevronDown size={23} /></span></button>
       </section>
