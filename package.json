@@ -9,7 +9,7 @@
     "copy:cesium": "node scripts/copy-cesium.cjs",
     "start": "next start",
     "lint": "next lint",
-    "check:hero": "node scripts/test-hero.cjs",
+    "check:hero": "node scripts/test-iron-world.cjs",
     "check:armory": "node scripts/test-armory.cjs",
     "check:rope": "node --experimental-strip-types scripts/test-rope-geometry.mjs",
     "assets:optimize": "node scripts/prepare-photography.cjs",

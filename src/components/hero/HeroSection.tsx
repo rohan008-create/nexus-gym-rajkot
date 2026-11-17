@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, ArrowUpRight, ChevronDown, Zap } from 'lucide-react';
 import Navbar, { Destination } from '../layout/Navbar';
-import KettlebellScene, { KettlebellStatus } from './KettlebellScene';
+import IronWorldScene, { GymStatus } from './IronWorldScene';
 import TrialDialog from './TrialDialog';
 import { useReducedMotion } from '../../hooks/useBagAnimation';
 import { useHeroTransition } from './RopeScrollController';
@@ -20,6 +20,7 @@ import NexusVoices from '../voices/NexusVoices';
 import RoadToNexus from '../location/RoadToNexus';
 import SmoothScroll from '../layout/SmoothScroll';
 import NexusFooter from '../footer/NexusFooter';
+import './iron-world.css';
 
 export type HeroSectionProps = { onReplayIntro?: () => void; entranceEnabled?: boolean; interactive?: boolean; onPrepared?: () => void };
 export default function HeroSection({ onReplayIntro, entranceEnabled = true, interactive = true, onPrepared }: HeroSectionProps) {
@@ -27,7 +28,7 @@ export default function HeroSection({ onReplayIntro, entranceEnabled = true, int
   const velocity = useRef(0);
   const layout = useRef<RopeLayout>({ unit: .00715, viewHeight: 6.43, heroHeight: 900, rootTop: 0, aboutStart: 1020, aboutEnd: 1500, headingPageY: 1120, version: 0 });
   const reduced = useReducedMotion();
-  const [status, setStatus] = useState<KettlebellStatus>('loading');
+  const [status, setStatus] = useState<GymStatus>('loading');
   const [active, setActive] = useState<Destination>('Home'), [panel, setPanel] = useState<AboutPanel>('About');
   const [trial, setTrial] = useState(false);
   const [membershipPlan, setMembershipPlan] = useState<string | undefined>();
@@ -46,15 +47,17 @@ export default function HeroSection({ onReplayIntro, entranceEnabled = true, int
   const content = useMemo(() => <main ref={root} className="site-shell rope-experience" data-rope-status={status} onPointerMove={event => { pointer.current.x = event.clientX / window.innerWidth * 2 - 1; pointer.current.y = 1 - event.clientY / window.innerHeight * 2; }} onPointerLeave={() => { pointer.current.x = 0; pointer.current.y = 0; }}>
     <Navbar active={active} onNavigate={navigate} onTrial={() => setTrial(true)} />
     <div className="hero-experience">
-      <section className="hero-section" id="home" aria-labelledby="hero-title">
-        <KettlebellScene reduced={reduced} onStatus={setStatus} active={interactive} />
+      <section className="hero-section iron-world-hero" id="home" aria-labelledby="hero-title">
+        <IronWorldScene reduced={reduced} onStatus={setStatus} active={interactive} pointer={pointer} />
         <div className="hero-copy">
-          <p className="eyebrow" data-reveal><span aria-hidden />RAJKOT&apos;S PREMIUM FITNESS CLUB</p>
-          <h1 id="hero-title" tabIndex={-1}><span className="headline-line"><span>TRANSFORM</span></span><span className="headline-line"><span>YOUR</span></span><span className="headline-line accent"><span>POTENTIAL.</span></span></h1>
-          <p className="hero-description" data-reveal>Push beyond limits. Build strength, endurance, and confidence at Nexus Fitness Club.</p>
-          <div className="hero-actions" data-reveal><button className="primary-cta" onClick={() => setTrial(true)}><Zap size={17} fill="currentColor" aria-hidden /><span>Start Your Journey</span><ArrowRight size={21} aria-hidden /></button><button className="secondary-cta" onClick={() => navigate('Programs')}>Explore Programs<ArrowUpRight size={17} aria-hidden /></button></div>
+          <p className="eyebrow" data-reveal><span aria-hidden />NEXUS FITNESS CLUB / RAJKOT</p>
+          <p className="iron-world-kicker">YOUR NEXT CHAPTER STARTS HERE</p>
+          <h1 id="hero-title" tabIndex={-1}><span className="headline-line"><span>BUILD</span></span><span className="headline-line"><span>YOUR</span></span><span className="headline-line accent"><span>NEXT.</span></span></h1>
+          <p className="hero-description" data-reveal>More strength. More confidence. More you.<br />Step into a space built for your next level.</p>
+          <div className="hero-actions" data-reveal><button className="primary-cta" onClick={() => setTrial(true)}><Zap size={17} fill="currentColor" aria-hidden /><span>Book a Trial</span><ArrowRight size={21} aria-hidden /></button><button className="secondary-cta" onClick={() => navigate('Programs')}>Explore Programs<ArrowUpRight size={17} aria-hidden /></button></div>
+          <div className="iron-world-disciplines"><span>STRENGTH</span><i /><span>CONDITIONING</span><i /><span>PERSONAL TRAINING</span></div>
         </div>
-        {status === 'error' && <p className="scene-notice" role="status">The 3D preview is unavailable on this device. You can still explore the club.</p>}
+        {status === 'error' && <p className="scene-notice" role="status">Explore Nexus. Your next chapter starts here.</p>}
         <button className="scroll-indicator" onClick={() => navigate('About')}>SCROLL TO EXPLORE<span aria-hidden><ChevronDown size={23} /><ChevronDown size={23} /></span></button>
       </section>
       <section className="continuation-section about-section" id="about" aria-labelledby="about-title">

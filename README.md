@@ -174,3 +174,11 @@ Run `npm run pack:evolution` after extracting/rebuilding frames; it creates opti
 `npm run check:evolution-smoothness` simulates 6 Mbps / 70ms latency with a cold browser cache and 10 seconds near the section (browsing the preceding trainers/membership content), followed by a five-second continuous scroll. The measured run recorded 150 blended pose changes and an 83ms longest integer-frame hold; this is a controlled browser result, not a claim about every phone. `EVOLUTION_WARMUP_MS=2200` tests a much more abrupt cold jump: on that path network loading can still be visible. The section begins warming 3600px before entry to cover normal browsing.
 
 # nexus-gym-rajkot
+
+## Iron World hero
+
+The hero now presents a procedural Three.js concept gym: a loaded power rack and bench, two-tier dumbbell rack, two treadmills, hanging punching bag and loose foreground weights. Ceiling portals, illuminated floor edges and a tiled platform create depth across the section. No remote models or textures are needed. The existing punching-bag entrance reveals this scene.
+
+Desktop uses a wide architectural camera with subtle pointer parallax and a short scroll dolly. Mobile places the copy and trial button above a separately framed gym view; touch scrolling remains native. Reduced motion uses a still camera and bag, and rendering pauses outside the viewport. A local concept photograph remains available if WebGL fails. This is an illustrative space, not a representation of verified club inventory.
+
+Run `npm run check:hero` against a local server on port 3000, or set `IRON_WORLD_TEST_URL`. It checks desktop, tablet, 390px and 320px layouts, trial dialog, Programs navigation, reduced motion, WebGL fallback and the homepage entrance. Screenshots and results are saved under ignored `qa/iron-world-*`. Run `npm run build` for production validation.

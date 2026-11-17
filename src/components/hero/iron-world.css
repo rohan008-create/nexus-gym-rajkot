@@ -1,0 +1,57 @@
+/* Architectural gym scene with an independent reading layer. */
+.rope-experience .iron-world-hero { min-height: 790px; height: 100dvh; max-height: 1200px; padding: 145px 6.5% 125px; overflow: hidden; background: #080b10; }
+.rope-experience .iron-world-hero::before { display: none; }
+.rope-experience .iron-world-scene { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.iron-world-scene canvas { position: relative; z-index: 1; touch-action: pan-y; }
+.iron-world-fallback { position: absolute; inset: 0; background: #080b10 url('/assets/photography/about-gym.webp') center / cover; }
+.iron-world-shade { position: absolute; z-index: 2; inset: 0; background: linear-gradient(90deg, #080b10 0%, #080b10f5 19%, #080b10ba 34%, #080b1030 53%, transparent 70%), linear-gradient(0deg, #080b10 0%, transparent 18%, transparent 83%, #080b10c9 100%); }
+.iron-world-hero .hero-copy { width: 43%; max-width: 620px; }
+.iron-world-hero .eyebrow { color: #b8bdc8; font-size: 9px; letter-spacing: .2em; margin-bottom: 32px; gap: 12px; }
+.iron-world-hero .eyebrow span { width: 25px; height: 2px; }
+.iron-world-kicker { color: #7e8799; font-size: 8px; font-weight: 600; letter-spacing: .22em; margin: 0 0 14px; }
+.rope-experience .iron-world-hero h1 { font-size: clamp(76px, 8.2vw, 142px); line-height: .87; font-style: normal; letter-spacing: -.075em; margin-bottom: 25px; }
+.iron-world-hero .headline-line { padding-bottom: .08em; }
+.iron-world-hero .headline-line > span { background-image: linear-gradient(165deg, #fff 20%, #c8cdd7 100%); }
+.iron-world-hero .headline-line.accent > span { background-image: linear-gradient(160deg, #ff3d50 10%, #ed1635 70%); }
+.rope-experience .iron-world-hero .hero-description { max-width: 355px; color: #a4adbc; font-size: 14px; line-height: 1.8; margin-bottom: 27px; }
+.iron-world-hero .hero-actions { gap: 10px; }
+.iron-world-hero .primary-cta { min-height: 52px; border-radius: 3px; padding-inline: 22px; background: #ef1b37; border-color: #ff445b; box-shadow: 0 6px 30px #ed16352b; }
+.iron-world-hero .secondary-cta { border-radius: 3px; padding-inline: 16px; border-color: #75829940; background: #10151e8c; }
+.iron-world-disciplines { display: flex; align-items: center; gap: 10px; font-size: 7px; letter-spacing: .13em; color: #8a94a5; margin-top: 28px; }
+.iron-world-disciplines i { width: 3px; height: 3px; border-radius: 50%; background: #ec2941; }
+.iron-world-tag { position: absolute; right: 6.5%; top: 133px; z-index: 3; display: flex; align-items: center; gap: 10px; color: #c3cad6; font-size: 8px; letter-spacing: .19em; }
+.iron-world-tag > span:last-child { color: #6b7689; margin-left: 25px; }
+.iron-live-dot { width: 5px; height: 5px; background: #ff2945; border-radius: 50%; box-shadow: 0 0 12px #ff2945; }
+.iron-world-caption { position: absolute; z-index: 3; right: 6.5%; left: 49%; bottom: 92px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #a0b3d02b; padding-top: 18px; gap: 15px; color: #778398; font-size: 8px; letter-spacing: .14em; }
+.iron-world-caption b { color: #dce2eb; font-weight: 500; }
+.iron-world-caption i { color: #ff2846; font-style: normal; font-size: 18px; margin-left: 10px; }
+.iron-world-hero .scroll-indicator { left: 6.5%; transform: none; bottom: 24px; padding-left: 0; font-size: 8px; color: #929bad; display: flex; align-items: center; gap: 18px; }
+.iron-world-hero .scroll-indicator > span { margin-top: 0; }
+.iron-world-hero .scene-notice { z-index: 4; bottom: 125px; right: 6.5%; }
+.iron-world-unavailable { padding: 40%; color: #a4adbc; }
+@media (min-width: 1700px) { .rope-experience .iron-world-hero { padding-inline: max(6.5%, calc((100vw - 1550px) / 2)); } }
+@media (min-width: 761px) and (max-height: 800px) { .rope-experience .iron-world-hero { min-height: 720px; padding-top: 135px; } .rope-experience .iron-world-hero h1 { font-size: clamp(70px, 7.2vw, 108px); } .iron-world-hero .eyebrow { margin-bottom: 20px; } }
+@media (min-width: 761px) and (max-width: 1100px) { .rope-experience .iron-world-hero { padding-inline: 5%; } .iron-world-hero .hero-copy { width: 48%; } .rope-experience .iron-world-hero h1 { font-size: 88px; } .iron-world-hero .hero-actions { max-width: 330px; } .iron-world-caption { left: 53%; } .iron-world-caption > span:first-child { display: none; } }
+@media (max-width: 760px) {
+  .rope-experience .iron-world-hero { min-height: 920px; height: auto; max-height: none; padding: 119px 25px 515px; align-items: flex-start; }
+  .iron-world-hero .hero-copy { width: 100%; max-width: 540px; }
+  .iron-world-hero .eyebrow { font-size: 8px; letter-spacing: .16em; margin-bottom: 21px; }
+  .iron-world-kicker { font-size: 7px; letter-spacing: .18em; margin-bottom: 12px; }
+  .rope-experience .iron-world-hero h1 { font-size: clamp(44px, 13.6vw, 86px); line-height: .94; margin-bottom: 17px; }
+  .iron-world-hero .headline-line { display: inline; margin-right: 0; padding-right: .12em; }
+  .iron-world-hero .headline-line:first-child { display: block; }
+  .rope-experience .iron-world-hero .hero-description { font-size: 12px; line-height: 1.8; margin-bottom: 20px; max-width: 335px; }
+  .iron-world-hero .hero-actions { flex-wrap: nowrap; gap: 8px; }
+  .iron-world-hero .primary-cta, .iron-world-hero .secondary-cta { min-height: 48px; padding-inline: 14px; gap: 8px; }
+  .rope-experience .iron-world-hero .hero-actions button { font-size: 9px; }
+  .iron-world-disciplines { margin-top: 20px; font-size: 6px; gap: 9px; }
+  .rope-experience .iron-world-scene { inset: auto 0 48px; height: 500px; width: 100%; }
+  .iron-world-shade { background: linear-gradient(180deg, #080b10 0%, #080b1050 13%, transparent 28%, transparent 75%, #080b10 100%), linear-gradient(90deg, #080b1020, transparent 45%); }
+  .iron-world-tag { top: 60px; left: 25px; right: 25px; font-size: 7px; justify-content: flex-start; }
+  .iron-world-tag > span:last-child { margin-left: auto; }
+  .iron-world-caption { left: 25px; right: 25px; bottom: 9px; font-size: 6px; padding-top: 13px; }
+  .iron-world-hero .scroll-indicator { left: 25px; bottom: 8px; font-size: 7px; }
+  .iron-world-hero .scene-notice { bottom: 105px; font-size: 9px; }
+}
+@media (max-width: 360px) { .rope-experience .iron-world-hero { padding-inline: 19px; } .iron-world-hero .primary-cta, .iron-world-hero .secondary-cta { padding-inline: 10px; } }
+@media (prefers-reduced-motion: reduce) { .iron-world-hero .scroll-indicator > span { animation: none; } }
