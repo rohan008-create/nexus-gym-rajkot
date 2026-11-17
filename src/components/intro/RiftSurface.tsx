@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
+import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { useBagSurface } from './BagSurface';
 import { createRiftSheet } from './riftGeometry';
 import { createRiftTextures } from './riftTexture';
+import { ENTRANCE_ASSETS } from './entranceArtwork';
 
 const vertexShader = `
   attribute float edgeDistance;
@@ -55,12 +57,13 @@ export default function RiftSurface({ elapsed, active, reduced }: {
 }) {
   const { camera, size } = useThree();
   const { logoMaterial } = useBagSurface();
+  const artwork = useTexture(ENTRANCE_ASSETS);
   const root = useRef<THREE.Group>(null);
   const aspect = size.width / size.height;
   const resources = useMemo(() => {
     const height = 2 * Math.tan(THREE.MathUtils.degToRad((camera as THREE.PerspectiveCamera).fov / 2)) * 19 * 1.015;
     const width = height * aspect;
-    const textures = createRiftTextures(aspect, logoMaterial.map?.image as CanvasImageSource);
+    const textures = createRiftTextures(aspect, logoMaterial.map?.image as CanvasImageSource, artwork.map(texture => texture.image as CanvasImageSource));
     const sheets = ([-1, 1] as const).map(side => {
       const geometry = createRiftSheet(width, height, side, size.width < 700);
       const material = new THREE.ShaderMaterial({ vertexShader, fragmentShader, side: THREE.DoubleSide,
@@ -70,7 +73,7 @@ export default function RiftSurface({ elapsed, active, reduced }: {
       return { side, geometry, material };
     });
     return { textures, sheets };
-  }, [camera, aspect, size.width, logoMaterial]);
+  }, [camera, aspect, size.width, logoMaterial, artwork]);
   useEffect(() => () => {
     resources.textures.page.dispose(); resources.textures.cracks.dispose();
     resources.sheets.forEach(sheet => { sheet.geometry.dispose(); sheet.material.dispose(); });

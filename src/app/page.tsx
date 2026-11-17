@@ -15,6 +15,7 @@ export default function Page() {
   const [heroEntering, setHeroEntering] = useState(false);
   const [run, setRun] = useState(0);
   const reduced = useReducedMotion();
+  const welcomeAudio = useRef<HTMLAudioElement>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const clearTimers = useCallback(() => { timers.current.forEach(clearTimeout); timers.current = []; }, []);
   const ready = useCallback(() => setPrepared(true), []);
@@ -53,6 +54,11 @@ export default function Page() {
   }, [clearTimers]);
   const start = useCallback(() => {
     if (stage !== 'waiting') return;
+    if (welcomeAudio.current) {
+      welcomeAudio.current.currentTime = 0;
+      welcomeAudio.current.volume = .9;
+      void welcomeAudio.current.play().catch(() => {});
+    }
     setStage('breaking');
     timers.current.push(setTimeout(() => setHeroEntering(true), reduced ? 150 : 720));
     if (!reduced) timers.current.push(setTimeout(() => navigator.vibrate?.([30, 35, 15]), 250));
@@ -60,10 +66,12 @@ export default function Page() {
     timers.current.push(setTimeout(finish, reduced ? 1000 : 2500));
   }, [stage, reduced, finish]);
   const replay = useCallback(() => {
+    welcomeAudio.current?.pause();
     clearTimers(); window.scrollTo(0, 0); setHeroEntering(false);
     setStage('waiting'); setRun(value => value + 1);
   }, [clearTimers]);
   return <div className="nexus-entrance" data-entrance={stage}>
+    <audio ref={welcomeAudio} src="/audio/welcome-nexus-natural.mp3" preload="auto" />
     {mountHero && <div className="entrance-landing" aria-hidden={stage !== 'revealed'} ref={node => { if (node) node.inert = stage !== 'revealed'; }}>
       <Hero entranceEnabled={heroEntering} interactive={stage === 'revealed'} onPrepared={ready} onReplayIntro={replay} />
     </div>}

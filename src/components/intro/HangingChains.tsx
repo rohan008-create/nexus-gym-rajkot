@@ -6,7 +6,7 @@ const LINK_RADIUS = .058;
 const STRAIGHT_HALF = .052;
 // Taut spacing: perpendicular links bear against each other's round wire.
 const LINK_PITCH = 2 * (STRAIGHT_HALF + LINK_RADIUS - WIRE_RADIUS);
-const JUNCTION_Y = .5; // Raises the original sling junction by ~31% of its rise.
+const JUNCTION_Y = -.55; // Lower the swivel and shorten the four bag slings.
 
 /** Stadium centerline: elongated links with constant, circular wire thickness. */
 class OvalLink extends THREE.Curve<THREE.Vector3> {
@@ -43,18 +43,18 @@ function createSteelGrain() {
   return texture;
 }
 
-type ChainProps = { start: THREE.Vector3; end: THREE.Vector3; geometry: THREE.BufferGeometry; material: THREE.Material; twist?: number };
-function Chain({ start, end, geometry, material, twist = 0 }: ChainProps) {
+type ChainProps = { start: THREE.Vector3; end: THREE.Vector3; geometry: THREE.BufferGeometry; material: THREE.Material; twist?: number; scale?: number };
+function Chain({ start, end, geometry, material, twist = 0, scale = 1 }: ChainProps) {
   const matrices = useMemo(() => {
     const direction = end.clone().sub(start);
-    const count = Math.ceil(direction.length() / LINK_PITCH) + 1;
+    const count = Math.ceil(direction.length() / (LINK_PITCH * scale)) + 1;
     const align = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
     return Array.from({ length: count }, (_, i) => {
       const roll = twist + (i % 2 ? Math.PI / 2 : 0) + Math.sin(i * 2.17) * .018;
       const rotation = align.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), roll));
-      return new THREE.Matrix4().compose(start.clone().lerp(end, i / (count - 1)), rotation, new THREE.Vector3(1, 1, 1));
+      return new THREE.Matrix4().compose(start.clone().lerp(end, i / (count - 1)), rotation, new THREE.Vector3(scale, scale, scale));
     });
-  }, [start, end, twist]);
+  }, [start, end, twist, scale]);
   return <instancedMesh geometry={geometry} material={material} args={[geometry, material, matrices.length]} dispose={null}
     ref={mesh => { if (mesh) { matrices.forEach((matrix, i) => mesh.setMatrixAt(i, matrix)); mesh.instanceMatrix.needsUpdate = true; mesh.computeBoundingSphere(); } }} />;
 }
@@ -93,7 +93,7 @@ export default function HangingChains() {
         <mesh position={[.0375, .0425, 0]} rotation={[0, 0, .214]} geometry={assets.gate} material={assets.material} dispose={null} />
       </group>
     </group>)}
-    <Chain start={assets.stemStart} end={assets.stemEnd} geometry={assets.link} material={assets.material} twist={Math.PI / 2} />
+    <Chain start={assets.stemStart} end={assets.stemEnd} geometry={assets.link} material={assets.material} twist={Math.PI / 2} scale={1.5} />
     {/* Machined swivel: a hexagonal load hub, red retaining collars and a steel eye. */}
     <group position={[0, JUNCTION_Y + .27, 0]}>
       <mesh material={assets.dark} dispose={null}>

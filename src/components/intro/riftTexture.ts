@@ -1,17 +1,21 @@
 import * as THREE from 'three';
 import { riftSeam } from './riftGeometry';
 import { seededRandom } from './fractureGeometry';
+import { drawEntranceArtwork } from './entranceArtwork';
 
 function trackedText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, tracking: number) {
   for (const character of text) { ctx.fillText(character, x, y); x += ctx.measureText(character).width + tracking; }
 }
 
 /** The entire designed intro is printed on the surface, so its graphics tear too. */
-export function createRiftTextures(aspect: number, logo?: CanvasImageSource) {
+export function createRiftTextures(aspect: number, logo?: CanvasImageSource, artwork?: CanvasImageSource[]) {
   const width = aspect < 1 ? 1024 : 2048, height = Math.round(width / aspect);
   const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
   const ctx = canvas.getContext('2d')!;
   const scale = width / (aspect < 1 ? 390 : 1440);
+  if (artwork?.length === 3) {
+    drawEntranceArtwork(ctx, width, height, artwork);
+  } else {
   ctx.fillStyle = '#050506'; ctx.fillRect(0, 0, width, height);
   const light = ctx.createRadialGradient(width * .5, height * .5, 0, width * .5, height * .5, Math.max(width, height) * .65);
   light.addColorStop(0, '#141113'); light.addColorStop(.48, '#080809'); light.addColorStop(1, '#030304');
@@ -52,6 +56,7 @@ export function createRiftTextures(aspect: number, logo?: CanvasImageSource) {
   if (aspect >= 1) {
     ctx.fillStyle = '#71696d'; ctx.font = `${9 * scale}px Arial, sans-serif`;
     trackedText(ctx, 'RAJKOT, GUJARAT', width - 210 * scale, 94 * scale, 1.8 * scale);
+  }
   }
   const page = new THREE.CanvasTexture(canvas); page.colorSpace = THREE.SRGBColorSpace;
 

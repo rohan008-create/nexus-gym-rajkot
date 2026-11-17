@@ -1,7 +1,14 @@
 .nexus-entrance { min-height: 100dvh; background: #000; }
 .entrance-overlay { position: fixed; inset: 0; z-index: 10000; overflow: hidden; }
-.intro.intro-breakthrough { background: transparent; animation: none; }
-.entrance-skip { position: absolute; bottom: 76px; right: 30px; border: 1px solid #ffffff24; padding: 12px 17px; color: #c9c3c4; background: #080808b3; font-size: 10px; letter-spacing: .18em; transition: color .2s, border-color .2s; }
+.intro.intro-breakthrough { background: #030102; animation: none; }
+.entrance-campaign-ui { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 1; transition: opacity .25s; }
+.entrance-campaign-ui.is-breaking { opacity: 0; }
+.entrance-brand { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: clamp(160px, 15vw, 260px); height: auto; filter: drop-shadow(0 2px 8px #000) drop-shadow(0 0 20px #000); }
+.entrance-location { position: absolute; top: 34px; right: 5%; display: flex; align-items: center; gap: 9px; margin: 0; color: #d8d2d3; font-size: 10px; letter-spacing: .24em; }
+.entrance-campaign-footer { position: absolute; bottom: 28px; left: 3%; right: 3%; display: flex; justify-content: space-between; gap: 12px; color: #9e9296; font-size: 8px; letter-spacing: .18em; }
+.intro-breakthrough .hint { bottom: 27px; color: #dad1d3; font-size: 9px; letter-spacing: .18em; text-shadow: 0 1px 5px black; }
+.nexus-entrance[data-entrance="breaking"] .intro-breakthrough { background: transparent; }
+.entrance-skip { position: absolute; z-index: 3; bottom: 58px; right: 3%; border: 1px solid #ed183866; padding: 12px 17px; color: #eee5e7; background: #170508b3; font-size: 10px; letter-spacing: .18em; transition: color .2s, border-color .2s; cursor: pointer; }
 .entrance-skip:hover { color: white; border-color: #e50914; }
 .entrance-skip:focus-visible { outline: 2px solid #e50914; outline-offset: 5px; }
 .entrance-skip:disabled { opacity: .4; cursor: wait; }
@@ -17,5 +24,14 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .nexus-entrance[data-entrance="breaking"] .hero-copy { animation: none; }
+  .entrance-campaign-ui { transition: none; }
 }
-@media (max-width: 700px) { .entrance-skip { right: 18px; bottom: 86px; padding: 10px 13px; } }
+@media (max-width: 700px) {
+  .entrance-brand { top: 20px; width: 160px; }
+  .entrance-location { top: 86px; left: 0; right: 0; justify-content: center; font-size: 8px; letter-spacing: .2em; }
+  .entrance-location svg { width: 12px; height: 12px; }
+  .entrance-campaign-footer { left: 20px; right: 20px; bottom: max(18px, env(safe-area-inset-bottom)); font-size: 6px; letter-spacing: .1em; }
+  .entrance-campaign-footer span:last-child { display: none; }
+  .intro-breakthrough .hint { bottom: max(50px, calc(env(safe-area-inset-bottom) + 28px)); padding-inline: 18px; font-size: 7px; letter-spacing: .11em; }
+  .entrance-skip { right: 18px; bottom: max(12px, env(safe-area-inset-bottom)); padding: 10px 13px; font-size: 8px; }
+}
