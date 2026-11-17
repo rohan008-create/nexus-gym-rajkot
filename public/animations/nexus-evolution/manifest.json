@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "frameCount": 239,
+  "namingPattern": "frame-%04d.webp",
+  "frameRate": 24,
+  "originalDuration": 9.963,
+  "videoDuration": 9.958984,
+  "sequenceDuration": 9.958333333333334,
+  "source": {
+    "width": 1920,
+    "height": 1080,
+    "frameRate": 24,
+    "frameCount": 239,
+    "pixelFormat": "yuv420p",
+    "hasAlpha": false,
+    "colorSpace": "smpte170m",
+    "colorPrimaries": "bt709",
+    "colorTransfer": "iec61966-2-1",
+    "colorRange": "tv"
+  },
+  "desktop": {
+    "width": 1280,
+    "height": 720,
+    "quality": 84,
+    "bytes": 12988758
+  },
+  "mobile": {
+    "width": 768,
+    "height": 432,
+    "quality": 80,
+    "bytes": 6051398
+  },
+  "totalBytes": 19040156,
+  "subjectBounds": {
+    "x": 0.28541666666666665,
+    "y": 0.016666666666666666,
+    "width": 0.43333333333333335,
+    "height": 0.9833333333333333
+  },
+  "sourceOverlays": [
+    {
+      "id": "frame-rate-label",
+      "x": 0,
+      "y": 0,
+      "width": 0.14,
+      "height": 0.1
+    },
+    {
+      "id": "source-watermark",
+      "x": 0.859375,
+      "y": 0.75,
+      "width": 0.109375,
+      "height": 0.19444444444444445
+    }
+  ],
+  "notes": [
+    "Original framing ends at the thighs; feet are absent in the supplied export.",
+    "The source sparkle watermark and burned-in 24 FPS label remain in every frame. They are also drawn visibly in the web composition.",
+    "The generated anatomy is illustrative, not a clinical model or a guarantee of results.",
+    "No source audio is used. Frames have an independent alpha channel; no website background is baked in."
+  ],
+  "packs": {
+    "framesPerPack": 4,
+    "format": "LE uint32 first-frame, count; repeated uint32 byte-length plus unchanged WebP bytes",
+    "pattern": "{variant}-packs/pack-%03d.bin"
+  }
+}

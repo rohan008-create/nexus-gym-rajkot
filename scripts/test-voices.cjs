@@ -1,0 +1,106 @@
+const { chromium } = require('playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const ts = require('typescript');
+const Module = require('node:module');
+const source = 'src/components/voices/testimonials.ts';
+const compiled = ts.transpileModule(fs.readFileSync(source, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+const configModule = new Module(source); configModule._compile(compiled, source);
+const { getVoicesContent } = configModule.exports;
+const fixture = { id: 'test-only', name: 'Test fixture', review: 'Test fixture only.', verified: true, permissionToDisplay: true };
+assert.equal(getVoicesContent([], false).mode, 'empty', 'demo can be turned off for production');
+assert.equal(getVoicesContent([], true).mode, 'demo');
+assert.ok(getVoicesContent([], true).items.every(item => !item.verified && !item.permissionToDisplay && item.id.startsWith('demo-')));
+assert.equal(getVoicesContent([{ ...fixture, verified: false }], false).items.length, 0);
+assert.equal(getVoicesContent([{ ...fixture, permissionToDisplay: false }], false).items.length, 0);
+assert.equal(getVoicesContent([{ ...fixture, review: '  ' }], false).items.length, 0);
+assert.deepEqual(getVoicesContent([fixture], true).items, [fixture], 'approved reviews replace all demo content');
+const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3001';
+(async () => {
+  const browser = await chromium.launch({ executablePath: process.env.BROWSER_EXECUTABLE || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true, args: ['--enable-webgl', '--use-angle=d3d11'] });
+  const errors = [];
+  const open = async viewport => {
+    const page = await browser.newPage({ viewport, isMobile: viewport.width < 760, hasTouch: viewport.width < 760 });
+    page.on('pageerror', error => errors.push(error.message));
+    page.on('response', response => { if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`); });
+    await page.goto(`${base}/hero`);
+    await page.waitForSelector('[data-rope-status=ready]', { timeout: 90000 });
+    await page.locator('#voices').evaluate(el => scrollTo(0, el.getBoundingClientRect().top + scrollY - 95));
+    await page.waitForTimeout(1800);
+    return page;
+  };
+  try {
+    fs.mkdirSync('qa', { recursive: true });
+    const p = await open({ width: 1440, height: 1000 });
+    assert.ok(await p.evaluate(() => document.querySelector('#booking').nextElementSibling.id === 'voices'));
+    assert.equal(await p.locator('#voices').getAttribute('data-mode'), 'demo');
+    assert.ok(await p.getByText('AI-GENERATED DEMO TESTIMONIALS', { exact: true }).isVisible());
+    assert.equal(await p.locator('.voices-stage .voices-card:not(:has(.voices-preview-label))').count(), 0, 'every demo card is labeled');
+    assert.equal(await p.locator('.voices-readable .voices-card').count(), 8, 'one accessible copy per sample');
+    assert.ok(await p.locator('.voices-stage img').evaluateAll(elements => elements.every(el => el.loading === 'lazy' && el.getAttribute('width') && el.getAttribute('height'))));
+    const columns = p.locator('.voices-column'); assert.equal(await columns.count(), 4);
+    const tracks = await p.locator('.voices-track').evaluateAll(elements => elements.map(el => ({ direction: getComputedStyle(el).animationDirection, play: getComputedStyle(el).animationPlayState, duration: parseFloat(getComputedStyle(el).animationDuration) })));
+    assert.deepEqual(tracks.map(track => track.direction), ['reverse', 'normal', 'reverse', 'normal']);
+    tracks.forEach(track => { assert.equal(track.play, 'running'); assert.ok(track.duration >= 35 && track.duration <= 50); });
+    assert.notEqual(await p.locator('.voices-plane').evaluate(el => getComputedStyle(el).transform), 'none');
+    assert.ok(await p.locator('.voices-stage').evaluate(el => parseFloat(getComputedStyle(el).perspective) > 0));
+    // Each half has equal height and exceeds its clipping column; no uncovered loop gap.
+    assert.ok(await columns.evaluateAll(elements => elements.every(el => { const copies = el.querySelectorAll('.voices-copy'); return copies[0].offsetHeight === copies[1].offsetHeight && copies[0].offsetHeight >= el.clientHeight; })));
+    // Check the actual end/start visual seam with the browser's CSS animation clock.
+    const seam = await p.locator('.voices-column[data-direction=up]').first().evaluate(el => {
+      const animation = el.querySelector('.voices-track').getAnimations()[0]; animation.pause();
+      const duration = animation.effect.getTiming().duration;
+      animation.currentTime = duration - 1;
+      const before = el.querySelectorAll('.voices-copy')[1].firstElementChild.getBoundingClientRect();
+      animation.currentTime = duration + 1;
+      const after = el.querySelector('.voices-copy').firstElementChild.getBoundingClientRect();
+      const distance = Math.hypot(before.x - after.x, before.y - after.y); animation.play(); return distance;
+    });
+    assert.ok(seam < 2, `loop seam ${seam}px`);
+    const hover = await p.locator('.voices-card').evaluateAll(cards => {
+      for (const card of cards) { const rect = card.getBoundingClientRect(), x = rect.x + rect.width / 2, y = rect.y + rect.height / 2;
+        if (x > 0 && x < innerWidth && y > 100 && y < innerHeight - 50 && document.elementFromPoint(x, y)?.closest('.voices-column') === card.closest('.voices-column')) return { x, y }; }
+    });
+    assert.ok(hover); await p.mouse.move(hover.x, hover.y); await p.waitForTimeout(150);
+    assert.ok(await p.locator('.voices-column:hover .voices-track').evaluate(el => getComputedStyle(el).animationPlayState === 'paused'));
+    await p.mouse.move(10, 100);
+    await p.getByRole('button', { name: 'Pause motion', exact: true }).focus(); await p.keyboard.press('Enter');
+    assert.equal(await p.getByRole('button', { name: 'Resume motion', exact: true }).getAttribute('aria-pressed'), 'true');
+    assert.ok(await p.locator('.voices-track').evaluateAll(elements => elements.every(el => getComputedStyle(el).animationPlayState === 'paused')));
+    await p.keyboard.press('Enter'); await p.mouse.move(10, 100);
+    assert.ok(await p.locator('.voices-fade').evaluateAll(elements => elements.every(el => getComputedStyle(el).pointerEvents === 'none')));
+    assert.ok(await p.locator('.voices-copy').evaluateAll(elements => elements.every(el => el.getAttribute('aria-hidden') === 'true')));
+    await p.screenshot({ path: 'qa/voices-desktop.png' });
+    await p.getByRole('button', { name: 'Read all stories', exact: true }).click();
+    assert.ok(await p.locator('.voices-readable').isVisible());
+    assert.equal(await p.getByRole('button', { name: 'Close stories', exact: true }).getAttribute('aria-expanded'), 'true');
+    await p.locator('.voices-readable').scrollIntoViewIfNeeded();
+    await p.screenshot({ path: 'qa/voices-readable.png' });
+    await p.getByRole('button', { name: 'Close stories', exact: true }).click();
+    await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(500);
+    assert.equal(await p.locator('#voices').getAttribute('data-running'), 'false');
+    await p.close();
+    const m = await open({ width: 390, height: 844 });
+    assert.equal(await m.locator('.voices-column').evaluateAll(elements => elements.filter(el => getComputedStyle(el).display !== 'none').length), 1);
+    assert.ok(await m.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await m.screenshot({ path: 'qa/voices-mobile.png' });
+    await m.getByRole('button', { name: 'Pause motion', exact: true }).tap();
+    assert.equal(await m.getByRole('button', { name: 'Resume motion', exact: true }).getAttribute('aria-pressed'), 'true');
+    await m.getByRole('button', { name: 'Resume motion', exact: true }).tap();
+    await m.locator('.voices-stage').evaluate(el => scrollTo(0, el.getBoundingClientRect().top + scrollY - 95)); await m.waitForTimeout(300);
+    await m.screenshot({ path: 'qa/voices-mobile-marquee.png' });
+    await m.setViewportSize({ width: 320, height: 667 });
+    assert.ok(await m.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await m.locator('#voices').evaluate(el => scrollTo(0, el.getBoundingClientRect().top + scrollY - 95)); await m.waitForTimeout(400);
+    await m.screenshot({ path: 'qa/voices-small-mobile.png' });
+    await m.emulateMedia({ reducedMotion: 'reduce' }); await m.waitForTimeout(400);
+    assert.ok(await m.locator('.voices-track').evaluateAll(elements => elements.every(el => getComputedStyle(el).animationName === 'none')));
+    assert.equal(await m.locator('.voices-plane').evaluate(el => getComputedStyle(el).transform), 'none');
+    assert.ok(await m.locator('.voices-readable').isVisible(), 'reduced motion exposes all stories without a control');
+    assert.equal(await m.locator('.voices-readable').evaluate(el => getComputedStyle(el).position), 'static');
+    await m.screenshot({ path: 'qa/voices-reduced-motion.png' }); await m.close();
+    assert.deepEqual(errors, []);
+    fs.writeFileSync('qa/voices-result.json', JSON.stringify({ passed: true, checks: ['approved data permission gate', 'clearly labeled AI demo samples', 'approved content replaces demos', 'empty fallback', 'section order', 'four desktop columns', 'alternating directions', 'duration', '3D perspective', 'loop seam and coverage', 'hover pause', 'keyboard pause/resume', 'four edge masks', 'hidden duplicates', 'unique accessible list', 'read stories toggle', 'lazy placeholder avatars', 'offscreen pause', 'mobile readable column', '320px overflow', 'reduced motion', 'no browser errors'], errors }, null, 2));
+    console.log('Voices data and browser checks passed.');
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });

@@ -1,0 +1,28 @@
+.nexus-footer { position: relative; z-index: 1; overflow: hidden; padding: 64px 7.1% 0; background: radial-gradient(ellipse at 80% 0%, #36090e66, transparent 52%), #080808; border-top: 1px solid #ffffff16; }
+.nexus-footer-invite { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; padding-bottom: 40px; border-bottom: 1px solid #ffffff19; }
+.nexus-footer-label { display: flex; align-items: center; gap: 12px; font-size: 10px; letter-spacing: .22em; color: #aaa; margin: 0 0 24px; }
+.nexus-footer-label > span { width: 25px; height: 2px; background: #e50914; }
+.nexus-footer h2 { font-family: 'Arial Black', Arial, sans-serif; font-size: clamp(52px, 7vw, 108px); font-style: italic; line-height: .98; letter-spacing: -.065em; margin: 0; }
+.nexus-footer h2 em { color: #ed1725; }
+.nexus-footer-action { padding-bottom: 6px; }
+.nexus-footer-action p { color: #a1a1aa; font-size: 15px; line-height: 1.8; margin: 0 0 25px; }
+.nexus-footer-grid { display: grid; grid-template-columns: 1.2fr .8fr 1fr; gap: 65px; padding: 40px 0; }
+.nexus-footer-brand img { width: 190px; height: auto; display: block; }
+.nexus-footer-brand p { color: #939398; font-size: 14px; line-height: 1.8; margin: 24px 0; }
+.nexus-footer-brand > span { font-size: 9px; letter-spacing: .16em; color: #66666d; }
+.nexus-footer h3 { margin: 0 0 24px; font-size: 10px; font-weight: 600; letter-spacing: .16em; color: #e2e2e5; }
+.nexus-footer nav a { display: flex; justify-content: space-between; align-items: center; max-width: 195px; padding: 9px 0; color: #99999f; font-size: 13px; }
+.nexus-footer nav svg { color: #5b5b63; }
+.nexus-footer-contact > a { display: flex; align-items: flex-start; gap: 12px; color: #99999f; font-size: 13px; line-height: 1.8; margin-bottom: 19px; }
+.nexus-footer-contact svg { flex-shrink: 0; margin-top: 3px; color: #e62a36; }
+.nexus-footer address { font-style: normal; max-width: 310px; }
+.nexus-footer-contact .nexus-footer-directions { color: #eee; gap: 8px; width: fit-content; padding-bottom: 5px; border-bottom: 1px solid #b71926; }
+.nexus-footer a, .nexus-footer-bottom button { transition: color .2s; }
+.nexus-footer a:hover, .nexus-footer-bottom button:hover { color: #ff3540; }
+.nexus-footer-bottom { border-top: 1px solid #ffffff16; padding: 18px 0; display: flex; justify-content: space-between; align-items: center; gap: 20px; color: #75757d; font-size: 10px; }
+.nexus-footer-bottom p { margin: 0; line-height: 1.7; }
+.nexus-footer-bottom > div { display: flex; gap: 27px; }
+.nexus-footer-bottom button { display: inline-flex; align-items: center; gap: 8px; padding: 8px 0; border: 0; background: transparent; color: #a1a1aa; font-size: 11px; }
+@media (max-width: 760px) { .nexus-footer { padding: 60px 6% 0; } .nexus-footer-invite { align-items: flex-start; flex-direction: column; gap: 30px; padding-bottom: 40px; } .nexus-footer-grid { grid-template-columns: 1fr 1fr; gap: 40px 25px; padding: 40px 0; } .nexus-footer-brand { grid-column: 1 / -1; } .nexus-footer-brand img { width: 170px; } .nexus-footer-bottom { align-items: flex-start; flex-direction: column; gap: 10px; } }
+@media (max-width: 420px) { .nexus-footer-grid { grid-template-columns: 1fr; } .nexus-footer-brand { grid-column: auto; } .nexus-footer nav a { max-width: none; } }
+@media (prefers-reduced-motion: reduce) { .nexus-footer a, .nexus-footer button { transition: none; } }

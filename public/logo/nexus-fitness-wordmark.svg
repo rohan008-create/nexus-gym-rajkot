@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 240" width="100%" height="100%">
+  <defs>
+    <!-- Red 3D Gradient -->
+    <linearGradient id="wmRed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF3A3A"/>
+      <stop offset="45%" stop-color="#E50914"/>
+      <stop offset="85%" stop-color="#BA0610"/>
+      <stop offset="100%" stop-color="#7A0006"/>
+    </linearGradient>
+
+    <!-- Red Bevel Shadow -->
+    <linearGradient id="wmShadow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#800004"/>
+      <stop offset="100%" stop-color="#3D0002"/>
+    </linearGradient>
+
+    <!-- Chrome Silver Gradient for X Blade -->
+    <linearGradient id="wmSlash" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="25%" stop-color="#E2E8F0"/>
+      <stop offset="50%" stop-color="#94A3B8"/>
+      <stop offset="75%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#64748B"/>
+    </linearGradient>
+
+    <filter id="wmGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.8"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#E50914" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <g transform="translate(10, 20)" filter="url(#wmGlow)">
+    <!-- 3D Extrusion Shadows -->
+    <g fill="url(#wmShadow)" opacity="0.95" transform="translate(4, 6)">
+      <!-- N -->
+      <path d="M 20 140 L 20 20 L 52 20 L 98 94 L 98 20 L 130 20 L 130 140 L 98 140 L 52 66 L 52 140 Z"/>
+      <!-- E -->
+      <path d="M 155 140 L 155 20 L 245 20 L 245 48 L 190 48 L 190 66 L 238 66 L 238 94 L 190 94 L 190 112 L 248 112 L 248 140 Z"/>
+      <!-- X (Red Slash) -->
+      <path d="M 360 20 L 398 20 L 298 140 L 260 140 Z"/>
+      <!-- U -->
+      <path d="M 405 20 L 437 20 L 437 95 C 437 110, 446 118, 460 118 C 474 118, 483 110, 483 95 L 483 20 L 515 20 L 515 95 C 515 125, 492 142, 460 142 C 428 142, 405 125, 405 95 Z"/>
+      <!-- S -->
+      <path d="M 535 110 L 565 106 C 568 116, 576 121, 590 121 C 603 121, 612 115, 612 106 C 612 96, 600 92, 576 86 C 545 78, 535 68, 535 48 C 535 28, 555 18, 588 18 C 620 18, 638 30, 642 50 L 612 54 C 610 44, 601 40, 588 40 C 576 40, 568 45, 568 53 C 568 61, 578 65, 602 71 C 632 78, 645 90, 645 109 C 645 131, 624 143, 589 143 C 555 143, 537 130, 535 110 Z"/>
+    </g>
+
+    <!-- Main Letter Face -->
+    <!-- N -->
+    <path d="M 20 140 L 20 20 L 52 20 L 98 94 L 98 20 L 130 20 L 130 140 L 98 140 L 52 66 L 52 140 Z"
+          fill="url(#wmRed)" stroke="#FF6B6B" stroke-width="1.2"/>
+
+    <!-- E -->
+    <path d="M 155 140 L 155 20 L 245 20 L 245 48 L 190 48 L 190 66 L 238 66 L 238 94 L 190 94 L 190 112 L 248 112 L 248 140 Z"
+          fill="url(#wmRed)" stroke="#FF6B6B" stroke-width="1.2"/>
+
+    <!-- X (Red Slash) -->
+    <path d="M 360 20 L 398 20 L 298 140 L 260 140 Z"
+          fill="url(#wmRed)" stroke="#FF6B6B" stroke-width="1.2"/>
+
+    <!-- X (Extended Silver Blade) -->
+    <g>
+      <path d="M 266 -14 L 308 -14 L 388 174 L 346 174 Z" fill="#000000" opacity="0.6"/>
+      <path d="M 264 -16 L 306 -16 L 386 172 L 344 172 Z"
+            fill="url(#wmSlash)" stroke="#FFFFFF" stroke-width="1.8"/>
+      <path d="M 288 -12 L 294 -12 L 366 168 L 360 168 Z"
+            fill="#0F172A" opacity="0.85"/>
+      <path d="M 268 -14 L 273 -14 L 349 170 L 346 170 Z"
+            fill="#FFFFFF" opacity="0.9"/>
+    </g>
+
+    <!-- U -->
+    <path d="M 405 20 L 437 20 L 437 95 C 437 110, 446 118, 460 118 C 474 118, 483 110, 483 95 L 483 20 L 515 20 L 515 95 C 515 125, 492 142, 460 142 C 428 142, 405 125, 405 95 Z"
+          fill="url(#wmRed)" stroke="#FF6B6B" stroke-width="1.2"/>
+
+    <!-- S -->
+    <path d="M 535 110 L 565 106 C 568 116, 576 121, 590 121 C 603 121, 612 115, 612 106 C 612 96, 600 92, 576 86 C 545 78, 535 68, 535 48 C 535 28, 555 18, 588 18 C 620 18, 638 30, 642 50 L 612 54 C 610 44, 601 40, 588 40 C 576 40, 568 45, 568 53 C 568 61, 578 65, 602 71 C 632 78, 645 90, 645 109 C 645 131, 624 143, 589 143 C 555 143, 537 130, 535 110 Z"
+          fill="url(#wmRed)" stroke="#FF6B6B" stroke-width="1.2"/>
+
+    <!-- TM Badge -->
+    <g transform="translate(650, 16)">
+      <rect x="0" y="0" width="22" height="15" rx="3" fill="#1E293B" stroke="#64748B" stroke-width="1"/>
+      <text x="11" y="11" fill="#FFFFFF" font-family="'Montserrat', 'Arial Black', sans-serif" font-size="9" font-weight="900" text-anchor="middle">TM</text>
+    </g>
+
+    <!-- Sub-Text -->
+    <g transform="translate(30, 192)">
+      <text x="0" y="0"
+            fill="#FFFFFF"
+            font-family="'Montserrat', 'Inter', 'Oswald', sans-serif"
+            font-size="34"
+            font-weight="900"
+            letter-spacing="14px">FITNESS CLUB</text>
+    </g>
+  </g>
+</svg>

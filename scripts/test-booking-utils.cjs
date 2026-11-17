@@ -1,0 +1,38 @@
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const ts = require('typescript');
+process.env.TZ = 'Asia/Kolkata';
+// Test the real pure TypeScript utilities without adding a test framework.
+require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, filename);
+const { localDateKey, parseLocalDate, formatBookingDate, shiftMonth, validMobile, normalizeRecipient, validateBooking, bookingMessage, bookingWhatsAppUrl } = require('../src/components/booking/bookingUtils.ts');
+const today = new Date(2026, 10, 10, 12);
+const values = { experience: 'trial', date: '2026-12-31', time: '07:00 AM', name: 'નિલ પટેલ', mobile: '+91 98765 43210', goal: 'Strength Training' };
+assert.deepEqual(validateBooking(values, 3, today), {});
+assert.equal(localDateKey(new Date('2026-11-10T18:30:00Z')), '2026-11-11', 'local midnight must not use a UTC date key');
+assert.equal(localDateKey(shiftMonth(new Date(2026, 11, 31, 12), 1)), '2027-01-31');
+assert.equal(localDateKey(shiftMonth(new Date(2027, 0, 31, 12), 1)), '2027-02-28');
+assert.equal(localDateKey(shiftMonth(new Date(2028, 0, 31, 12), 1)), '2028-02-29');
+assert.equal(localDateKey(shiftMonth(new Date(2026, 0, 31, 12), -1)), '2025-12-31');
+assert.ok(parseLocalDate('2028-02-29')); assert.equal(parseLocalDate('2026-02-29'), null); assert.equal(parseLocalDate('2026-11-31'), null); assert.equal(parseLocalDate('2026-2-1'), null);
+assert.ok(formatBookingDate('2026-12-31').includes('31 December 2026'));
+assert.ok(validateBooking({ ...values, date: '2026-11-09' }, 3, today).date);
+assert.equal(validateBooking({ ...values, date: '2026-11-10' }, 3, today).date, undefined);
+assert.ok(validateBooking({ ...values, experience: 'unknown' }, 3, today).experience);
+assert.ok(validateBooking({ ...values, time: '11:30 PM' }, 3, today).time);
+for (const mobile of ['9876543210', '09876543210', '+91 (98765) 43210', '919876543210', '+1 202-555-0100', '+44 7700 900123']) assert.ok(validMobile(mobile), mobile);
+for (const mobile of ['123', '0000000000', 'hello', '+00 123456789', '98+76543210']) assert.equal(validMobile(mobile), false, mobile);
+for (const name of ['', '12345', '💪💪', '   ']) assert.ok(validateBooking({ ...values, name }, 3, today).name);
+assert.equal(validateBooking({ ...values, name: 'Ana María O’Neil' }, 3, today).name, undefined);
+assert.ok(validateBooking({ ...values, goal: 'unlisted' }, 3, today).goal);
+assert.equal(normalizeRecipient(''), null); assert.equal(normalizeRecipient('9876543210'), null); assert.equal(normalizeRecipient('abc123'), null);
+assert.equal(normalizeRecipient('+1 (202) 555-0100'), '12025550100');
+assert.equal(bookingWhatsAppUrl(values, '', today), null);
+assert.equal(bookingWhatsAppUrl({ ...values, date: '' }, '+12025550100', today), null);
+const url = new URL(bookingWhatsAppUrl(values, '+12025550100', today)); // Reserved test number, never configured or contacted.
+assert.equal(url.origin, 'https://wa.me'); assert.equal(url.pathname, '/12025550100');
+assert.equal(url.searchParams.get('text'), bookingMessage(values));
+assert.ok(url.searchParams.get('text').includes('નિલ પટેલ')); assert.ok(url.searchParams.get('text').includes('31 December 2026'));
+assert.ok(bookingMessage({ ...values, goal: '' }).includes('Fitness Goal: Not specified'));
+assert.ok(!bookingMessage(values).includes('undefined')); assert.ok(!bookingMessage(values).includes('null'));
+assert.ok(!bookingMessage(values).includes('confirmed'));
+console.log('Booking validation, local dates, month boundaries and WhatsApp URL/message checks passed.');

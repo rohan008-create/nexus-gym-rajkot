@@ -1,0 +1,15 @@
+{
+  "provider": "Yandex Maps",
+  "businessId": "153622330949",
+  "url": "https://yandex.com/maps/org/nexus_fitness_club_best_gym_in_rajkot/153622330949/",
+  "extractedAttribute": "data-coordinates",
+  "longitude": 70.800109,
+  "latitude": 22.27965,
+  "corroboratingSource": "https://yappe.in/gujarat/rajkot/nexus-fitness-club/1979777",
+  "corroboratingCoordinates": [
+    70.8000517,
+    22.2796878
+  ],
+  "retrievedAt": "2026-11-10T16:40:44.915Z",
+  "accuracy": "Provider business POI, not a surveyed entrance or confirmed building outline."
+}
