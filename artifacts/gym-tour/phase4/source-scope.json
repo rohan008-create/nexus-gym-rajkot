@@ -1,0 +1,48 @@
+{
+  "taskEditedExistingApplicationFiles": [
+    "src/components/hero/gym-tour/GymTourCanvas.tsx"
+  ],
+  "newRuntimeComponent": "src/components/hero/gym-tour/DetailedInterior.tsx",
+  "changedExistingSourceObserved": [
+    "src/app/globals.css",
+    "src/components/evolution/HumanEvolution.tsx",
+    "src/components/evolution/humanEvolution.css",
+    "src/components/evolution/EvolutionCanvas.tsx",
+    "src/components/evolution/SequenceCache.ts",
+    "src/components/evolution/evolutionChapters.ts",
+    "src/components/social/social.css",
+    "src/components/booking/whatsAppBooking.css",
+    "src/components/voices/nexusVoices.css",
+    "src/components/footer/footer.css",
+    "src/components/membership/membership-printer.css",
+    "src/components/membership/NexusMembershipPrinter.tsx",
+    "src/components/hero/HeroSection.tsx",
+    "src/components/hero/TrialDialog.tsx",
+    "src/components/location/nexusGlobe.css",
+    "src/components/hero/gym-tour/GymTourCanvas.tsx",
+    "src/components/hero/gym-tour/gym-tour.css"
+  ],
+  "concurrentChangesObserved": [
+    "src/app/globals.css",
+    "src/components/evolution/HumanEvolution.tsx",
+    "src/components/evolution/humanEvolution.css",
+    "src/components/evolution/EvolutionCanvas.tsx",
+    "src/components/evolution/SequenceCache.ts",
+    "src/components/evolution/evolutionChapters.ts",
+    "src/components/social/social.css",
+    "src/components/booking/whatsAppBooking.css",
+    "src/components/voices/nexusVoices.css",
+    "src/components/footer/footer.css",
+    "src/components/membership/membership-printer.css",
+    "src/components/membership/NexusMembershipPrinter.tsx",
+    "src/components/hero/HeroSection.tsx",
+    "src/components/hero/TrialDialog.tsx",
+    "src/components/location/nexusGlobe.css",
+    "src/components/hero/gym-tour/gym-tour.css"
+  ],
+  "exteriorAssetUnchanged": true,
+  "exteriorLoaderUnchanged": true,
+  "fallbackGeometryUnchanged": true,
+  "cameraConfigurationUnchanged": true,
+  "note": "Other source changes were concurrent work and were not overwritten or attributed to this task."
+}

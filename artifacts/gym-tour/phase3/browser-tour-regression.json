@@ -1,0 +1,62 @@
+{
+  "capturedAt": "2026-11-18T08:43:26.398Z",
+  "base": "http://localhost:3000",
+  "checks": [
+    "desktop: no horizontal overflow",
+    "desktop: one hero canvas",
+    "desktop: four stops and reverse scroll",
+    "native desktop wheel scroll drives tour",
+    "tour renderer settles without continuous idle draw calls",
+    "desktop: natural pointer trial CTA and Escape close",
+    "desktop: Programs navigation bypasses tour",
+    "desktop: Programs reveal retained",
+    "desktop: About reveal retained",
+    "no uncaught browser errors"
+  ],
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "beats": [
+        {
+          "beat": "exterior",
+          "progress": 0
+        },
+        {
+          "beat": "entry",
+          "progress": 0.2737
+        },
+        {
+          "beat": "strength",
+          "progress": 0.6267
+        },
+        {
+          "beat": "cardio",
+          "progress": 0.983
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "limitations": [
+    "Viewport tests use desktop Chrome; true touch emulation is a separate check. No physical-phone or guaranteed-FPS claim."
+  ],
+  "browserErrors": {
+    "errors": [],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "passed": true
+}

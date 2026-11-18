@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "building-reference",
+      "source": "user-supplied exterior photo",
+      "localCandidates": [
+        "public/assets/photography/nexus-real-building.webp",
+        "public/assets/photography/nexus-complex.webp"
+      ],
+      "status": "visually inspected nexus-real-building.webp: matching Nexus frontage/building from a different street angle; dimensions still approximate",
+      "rights": "user-provided reference; no redistribution assumption",
+      "primaryLocalReference": "public/assets/photography/nexus-real-building.webp"
+    },
+    {
+      "id": "branding",
+      "source": "public/assets/nexus-logo.png",
+      "status": "available",
+      "rights": "existing project brand asset; retain existing usage"
+    },
+    {
+      "id": "architecture",
+      "source": "original Blender Python geometry",
+      "status": "planned",
+      "rights": "project-authored"
+    },
+    {
+      "id": "equipment",
+      "items": [
+        "rack",
+        "adjustable-bench",
+        "dumbbell-rack",
+        "plates",
+        "treadmill",
+        "exercise-bike"
+      ],
+      "source": "original prototype geometry, then selected detailed reusable assets",
+      "status": "not selected or downloaded",
+      "rights": "record exact source URL, author, license and attribution before importing any third-party asset"
+    },
+    {
+      "id": "materials",
+      "items": [
+        "rubber floor",
+        "painted metal",
+        "glass",
+        "wall",
+        "upholstery"
+      ],
+      "source": "original procedural materials or verified licensed textures",
+      "status": "planned",
+      "rights": "record each external texture license"
+    },
+    {
+      "id": "tour-reference",
+      "source": "https://github.com/mattoznav/templates-bnb-website",
+      "status": "inspected; no source copied in Phase 1",
+      "rights": "MIT; retain Matteo Vanzini copyright and license notice with substantial reused source; audit asset licenses separately"
+    }
+  ],
+  "futureExports": {
+    "desktop": "public/models/nexus-gym/gym-desktop.glb",
+    "mobile": "public/models/nexus-gym/gym-mobile.glb",
+    "poster": "public/models/nexus-gym/poster.webp"
+  },
+  "budgets": {
+    "status": "provisional-not-achieved",
+    "deliveredModelAndTexturesMiB": {
+      "desktop": 10,
+      "mobile": 5
+    },
+    "targetDesktopFrameMs": 16.7,
+    "measurement": "record p50/p95/p99, long tasks, device/browser/renderer and loading conditions; mobile target after actual-device baseline"
+  }
+}

@@ -71,7 +71,7 @@ export default function RisingHorizon() {
     };
     const resize = () => {
       width = element.clientWidth; height = element.clientHeight; horizon = height * .91;
-      const ratio = Math.min(devicePixelRatio || 1, coarse.matches ? 1.25 : 1.5);
+      const ratio = Math.min(devicePixelRatio || 1, coarse.matches ? 1 : 1.25);
       canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0); paint(0);
     };

@@ -1,0 +1,73 @@
+{
+  "capturedAt": "2026-11-18T06:32:37.624Z",
+  "base": "http://localhost:3000",
+  "checks": [
+    "desktop: no horizontal overflow",
+    "desktop: one hero canvas",
+    "desktop: four stops and reverse scroll",
+    "tour renderer settles without continuous idle draw calls",
+    "desktop: natural pointer trial CTA and Escape close",
+    "desktop: Programs navigation bypasses tour",
+    "desktop: Programs reveal retained",
+    "desktop: About reveal retained",
+    "wide-desktop: no horizontal overflow",
+    "wide-desktop: one hero canvas",
+    "wide-desktop: four stops and reverse scroll",
+    "wide-desktop: natural pointer trial CTA and Escape close",
+    "wide-desktop: Programs navigation bypasses tour",
+    "wide-desktop: Programs reveal retained",
+    "wide-desktop: About reveal retained"
+  ],
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "beats": [
+        {
+          "beat": "exterior",
+          "progress": 0
+        },
+        {
+          "beat": "entry",
+          "progress": 0.32
+        },
+        {
+          "beat": "strength",
+          "progress": 0.68
+        },
+        {
+          "beat": "cardio",
+          "progress": 0.99
+        }
+      ]
+    },
+    {
+      "name": "wide-desktop",
+      "width": 1920,
+      "height": 1080,
+      "beats": [
+        {
+          "beat": "exterior",
+          "progress": 0
+        },
+        {
+          "beat": "entry",
+          "progress": 0.2605
+        },
+        {
+          "beat": "strength",
+          "progress": 0.6117
+        },
+        {
+          "beat": "cardio",
+          "progress": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "limitations": [
+    "Viewport tests use desktop Chrome; true touch emulation is a separate check. No physical-phone or guaranteed-FPS claim."
+  ]
+}

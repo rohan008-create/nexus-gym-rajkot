@@ -112,7 +112,7 @@ export default function IronWorldScene({ active, reduced, onStatus, pointer }: P
   }, [onStatus]);
   return <div ref={host} className={`persistent-scene iron-world-scene${failed ? ' is-fallback' : ''}`} role="img" aria-label="A kinetic sculpture of floating three dimensional dumbbells, crimson weight plates and a polished kettlebell">
     <div className="iron-world-fallback" aria-hidden />
-    {!failed && <SceneBoundary onError={fail}><Canvas dpr={[1,1.5]} frameloop={visible && active && !reduced ? 'always' : 'demand'} camera={{ position:[0,0,14], fov:40 }} gl={{ alpha:true, antialias:true }} onCreated={({ gl }) => { gl.toneMapping=THREE.ACESFilmicToneMapping; gl.toneMappingExposure=1.1; }} fallback={<span>Beyond limits. Nexus Fitness Club.</span>}>
+    {!failed && <SceneBoundary onError={fail}><Canvas dpr={[1,1.25]} frameloop={visible && active && !reduced ? 'always' : 'demand'} camera={{ position:[0,0,14], fov:40 }} gl={{ alpha:true, antialias:true }} onCreated={({ gl }) => { gl.toneMapping=THREE.ACESFilmicToneMapping; gl.toneMappingExposure=1.1; }} fallback={<span>Beyond limits. Nexus Fitness Club.</span>}>
       <Suspense fallback={null}><Equipment reduced={reduced} pointer={pointer} onStatus={onStatus} /></Suspense>
     </Canvas></SceneBoundary>}
     <div className="iron-world-shade" aria-hidden />

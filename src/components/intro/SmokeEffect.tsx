@@ -23,12 +23,16 @@ float fbm(vec3 p) {
   for(int i=0;i<3;i++){n+=noise(p)*amplitude;p=p*2.07+vec3(8.1,3.7,5.2);amplitude*=.48;}
   return n;
 }
+// Curl and billow are low-frequency fields; their first one/two octaves are
+// visually identical here and avoid two thirds of the noise work per step.
+float fbm1(vec3 p) { return noise(p)*.57; }
+float fbm2(vec3 p) { return noise(p)*.57 + noise(p*2.07+vec3(8.1,3.7,5.2))*.2736; }
 float density(vec3 p) {
   vec3 drift=vec3(time*.17,-time*.23,time*.075);
-  float curl=fbm(p*.73+drift*.55);
+  float curl=fbm1(p*.73+drift*.55);
   vec3 q=p+vec3(curl*2.,sin(p.x*1.3+time*.22)*.34,curl*1.3);
   float cloud=fbm(q*1.85+drift);
-  float billow=fbm(q*.88-drift*.6);
+  float billow=fbm2(q*.88-drift*.6);
   float roof=.45+billow*2.7;
   float heightMask=smoothstep(-.3,.1,p.y)*(1.-smoothstep(roof*.48,roof,p.y));
   float bank=exp(-p.x*p.x*.018)*exp(-p.z*p.z*.17);
@@ -84,6 +88,8 @@ export default function SmokeEffect({ animate }: { animate: boolean }) {
   const displayUniforms = useMemo(() => ({ smoke: { value: buffer.texture } }), [buffer]);
   const target = useMemo(() => new THREE.Vector3(), []);
   const offset = useMemo(() => new THREE.Vector3(), []);
+  const lastTime = useRef(-1), lastAspect = useRef(-1), dirty = useRef(true);
+  useEffect(() => { dirty.current = true; }, [buffer, pass]);
   useFrame((_, delta) => {
     if (animate) uniforms.time.value += Math.min(delta, .08);
     if (!mesh.current) return;
@@ -94,12 +100,17 @@ export default function SmokeEffect({ animate }: { animate: boolean }) {
     mesh.current.quaternion.copy(camera.quaternion);
     mesh.current.scale.set(view.width, view.height*.65, 1);
     uniforms.aspect.value = view.width/(view.height*.65);
-    const previousTarget = gl.getRenderTarget();
-    try {
-      gl.setRenderTarget(buffer);
-      gl.render(pass.scene, pass.camera);
-    } finally {
-      gl.setRenderTarget(previousTarget);
+    // The buffer only depends on time and aspect. When motion is disabled (or
+    // the tab is paused) those do not change, so avoid re-ray-marching it.
+    if (dirty.current || uniforms.time.value !== lastTime.current || uniforms.aspect.value !== lastAspect.current) {
+      lastTime.current = uniforms.time.value; lastAspect.current = uniforms.aspect.value; dirty.current = false;
+      const previousTarget = gl.getRenderTarget();
+      try {
+        gl.setRenderTarget(buffer);
+        gl.render(pass.scene, pass.camera);
+      } finally {
+        gl.setRenderTarget(previousTarget);
+      }
     }
   }, -1);
   return <mesh ref={mesh} name="ProceduralSmokeVolume" renderOrder={1} userData={{ procedural: true, steps: size.width < 700 ? 12 : 20 }}>

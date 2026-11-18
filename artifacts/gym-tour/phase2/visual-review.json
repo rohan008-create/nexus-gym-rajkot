@@ -1,0 +1,15 @@
+{
+  "verdict": "PASS",
+  "rounds": 2,
+  "mode": "independent agent, software-rendered Chromium inspection",
+  "finalChecks": [
+    "no copy/footer overlap at390x844 and320x740",
+    "44x44 mobile stop targets",
+    "building rendered at first ready state",
+    "landscape usable"
+  ],
+  "limitations": [
+    "No native performance certification",
+    "minor optional landscape spacing refinement remains"
+  ]
+}

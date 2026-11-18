@@ -1,0 +1,34 @@
+{
+  "file": "public/models/nexus-gym/interior.glb",
+  "bytes": 1346856,
+  "meshes": 19,
+  "materials": 19,
+  "images": 4,
+  "primitives": 19,
+  "triangles": 19278,
+  "nodeNames": [
+    "NexusInterior_static_mirror",
+    "NexusInterior_official_Nexus_logo",
+    "NexusInterior_off_white_markings",
+    "NexusInterior_weight_rubber",
+    "NexusInterior_cardio_display",
+    "NexusInterior_rubber_floor",
+    "NexusInterior_tile_joints",
+    "NexusInterior_charcoal_wall",
+    "NexusInterior_wall_panel_edge",
+    "NexusInterior_powder_coated_frame",
+    "NexusInterior_brushed_steel",
+    "NexusInterior_red_accent_light",
+    "NexusInterior_warm_LED",
+    "NexusInterior_Nexus_upholstery",
+    "NexusInterior_machined_silver",
+    "NexusInterior_upholstery_seam",
+    "NexusInterior_warm_reception_timber",
+    "NexusInterior_folded_linen",
+    "NexusInterior_bottle_blue"
+  ],
+  "extensions": [
+    "KHR_materials_emissive_strength"
+  ],
+  "passed": true
+}

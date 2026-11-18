@@ -1,0 +1,17 @@
+{
+  "taskEditedExistingApplicationFiles": [
+    "src/components/hero/HeroSection.tsx",
+    "src/components/hero/RopeScrollController.ts"
+  ],
+  "changedExistingSourceFilesObserved": [
+    "src/components/footer/NexusFooter.tsx",
+    "src/components/footer/footer.css",
+    "src/components/hero/HeroSection.tsx",
+    "src/components/hero/RopeScrollController.ts"
+  ],
+  "otherConcurrentChangesObserved": [
+    "src/components/footer/NexusFooter.tsx",
+    "src/components/footer/footer.css"
+  ],
+  "note": "The task wrote only the listed hero integration files and new hero components. Concurrent footer edits were observed but not touched or reverted; this is not a whole-workspace immutability assertion."
+}

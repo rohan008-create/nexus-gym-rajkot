@@ -1,0 +1,50 @@
+{
+  "capturedAt": "2026-11-18T06:41:33.919Z",
+  "base": "http://localhost:3000",
+  "checks": [
+    "intro entry unlocks landing and focuses hero title",
+    "reduced motion uses short readable hero",
+    "no uncaught errors before context-loss case",
+    "WebGL loss leaves a short usable fallback",
+    "fallback CTA remains usable",
+    "no uncaught browser errors"
+  ],
+  "viewports": [],
+  "errors": [],
+  "limitations": [
+    "Viewport tests use desktop Chrome; true touch emulation is a separate check. No physical-phone or guaranteed-FPS claim."
+  ],
+  "preContextLossBrowserErrors": {
+    "errors": [],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "browserErrors": {
+    "errors": [],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "passed": true
+}

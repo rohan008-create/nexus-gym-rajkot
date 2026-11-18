@@ -1,0 +1,80 @@
+.gym-tour-hero { --tour-progress: 0; --tour-cut: 0; position: relative; height: 400svh; color: #f4f0e7; background: #171b1c; isolation: isolate; }
+.gym-tour-stage { position: sticky; top: 0; height: 100svh; min-height: min(650px, 100svh); overflow: hidden; background: #d4d3c9; }
+.gym-tour-visual { position: absolute; inset: 0; pointer-events: none; }
+.gym-tour-visual > div, .gym-tour-visual canvas { width: 100% !important; height: 100% !important; }
+.gym-tour-visual canvas { display: block; touch-action: pan-y; }
+.gym-tour-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+.gym-tour-poster.is-visible { opacity: 1; }
+.gym-tour-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, #101719e8 0%, #101719bd 20%, #1017192e 55%, transparent 75%), linear-gradient(0deg, #0a1115bd, transparent 28%, transparent 80%, #0a11156b); }
+.gym-tour-cut { position: absolute; inset: 0; z-index: 2; background: #101719; opacity: var(--tour-cut); pointer-events: none; }
+.gym-tour-location { position: absolute; top: 140px; right: var(--page-gutter); display: flex; gap: 8px; align-items: center; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-shadow: 0 1px 8px #000; }
+.gym-tour-location svg { color: #e92942; }
+.gym-tour-copy { position: absolute; z-index: 3; left: var(--page-gutter); top: 48%; transform: translateY(-42%); width: min(440px, 36%); pointer-events: auto; }
+.gym-tour-copy.is-right { left: auto; right: var(--page-gutter); }
+.gym-tour-copy.is-right::before { content: ''; position: absolute; z-index: -1; inset: -45px -50px; background: #101719b8; filter: blur(35px); pointer-events: none; }
+.gym-tour-eyebrow { display: flex; align-items: center; gap: 12px; font-size: 10px; letter-spacing: .23em; font-weight: 700; margin: 0 0 25px; color: #f2eee4; }
+.gym-tour-eyebrow > span { width: 27px; height: 2px; background: #ec2841; }
+.gym-tour-brand { margin: 0 0 16px; font-size: 10px; letter-spacing: .27em; color: #eee8db; }
+.gym-tour-copy h1 { margin: 0; font-family: 'Arial Black', Arial, sans-serif; font-weight: 950; font-size: clamp(52px, 5.5vw, 88px); line-height: .94; letter-spacing: -.065em; font-style: italic; text-wrap: balance; text-shadow: 0 3px 25px #0002; }
+.gym-tour-copy h1 > span, .gym-tour-copy h1 > em { display: block; }
+.gym-tour-copy h1 > em { color: #ff304b; font-style: inherit; }
+.gym-tour-copy h1:focus { outline: none; }
+.gym-tour-description { color: #f1eee5; font-size: 14px; line-height: 1.8; max-width: 325px; margin: 25px 0 27px; text-shadow: 0 1px 8px #0008; }
+.gym-tour-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.gym-tour-actions button { min-height: 48px; padding: 14px 17px; display: inline-flex; align-items: center; justify-content: space-between; gap: 20px; color: white; font-size: 11px; font-weight: 700; border: 1px solid #ffffff65; background: #1017198c; transition: background .2s, border-color .2s; }
+.gym-tour-actions button.gym-tour-trial { background: #e9233e; border-color: #ff5068; }
+.gym-tour-actions button:hover { background: #2d3538; border-color: white; }
+.gym-tour-actions button.gym-tour-trial:hover { background: #ff304b; }
+.gym-tour-footer { position: absolute; bottom: 31px; left: var(--page-gutter); right: var(--page-gutter); z-index: 3; display: flex; justify-content: space-between; align-items: flex-end; gap: 30px; border-top: 1px solid #ffffff48; padding-top: 22px; }
+.gym-tour-caption { display: grid; gap: 10px; font-size: 9px; letter-spacing: .18em; }
+.gym-tour-caption > span { color: #e4e4dd; }
+.gym-tour-caption strong { font-size: 9px; font-weight: 500; color: #f5f0e6; }
+.gym-tour-stops { display: flex; gap: 10px; }
+.gym-tour-stops button { display: grid; gap: 12px; width: 45px; min-width: 44px; min-height: 44px; padding: 7px 0; background: none; border: 0; color: #eee8df; font-size: 10px; text-align: left; }
+.gym-tour-stops i { display: block; height: 2px; background: #ffffff60; }
+.gym-tour-stops button[aria-current] { color: #ff405a; }
+.gym-tour-stops button[aria-current] i { background: #ff304b; }
+.gym-tour-scroll { display: flex; align-items: center; gap: 16px; min-height: 44px; padding: 8px 0; border: 0; color: #f5f0e7; font-size: 9px; font-weight: 700; letter-spacing: .15em; background: none; }
+.gym-tour-scroll svg { color: #ff304b; }
+.gym-tour-loading, .gym-tour-fallback-note { position: absolute; z-index: 3; right: var(--page-gutter); bottom: 115px; color: #f5eee2; font-size: 12px; padding: 8px 12px; background: #101719b3; }
+.gym-tour-hero.is-static { height: 100svh; min-height: 700px; }
+.gym-tour-hero.is-static .gym-tour-stage { position: relative; min-height: 700px; }
+@media (min-width: 1600px) { .gym-tour-copy { width: 480px; } .gym-tour-copy h1 { font-size: 96px; } }
+@media (max-width: 1000px) and (min-width: 761px) { .gym-tour-copy { width: 43%; left: var(--page-gutter); } .gym-tour-copy.is-right { right: var(--page-gutter); } .gym-tour-copy h1 { font-size: 57px; } .gym-tour-actions button { padding: 12px; gap: 10px; } .gym-tour-scroll { font-size: 8px; } }
+@media (max-width: 760px) {
+  .gym-tour-hero { height: 300svh; }
+  .gym-tour-stage { min-height: min(680px, 100svh); }
+  .gym-tour-shade { background: linear-gradient(0deg, #101719 2%, #101719ed 20%, #10171960 48%, transparent 66%, #1017198c 100%); }
+  .gym-tour-location { top: 112px; left: var(--page-gutter); right: auto; font-size: 8px; }
+  .gym-tour-copy, .gym-tour-copy.is-right { top: auto; bottom: 150px; left: var(--page-gutter); right: var(--page-gutter); width: auto; transform: none; }
+  .gym-tour-copy.is-right::before { display: none; }
+  .gym-tour-eyebrow { margin-bottom: 13px; font-size: 8px; letter-spacing: .17em; }
+  .gym-tour-brand { display: none; }
+  .gym-tour-copy h1 { font-size: clamp(40px, 12.5vw, 65px); line-height: .94; max-width: 330px; }
+  .gym-tour-description { font-size: 12px; line-height: 1.65; margin: 15px 0 18px; max-width: 310px; }
+  .gym-tour-actions { gap: 8px; }
+  .gym-tour-actions button { font-size: 10px; padding: 12px 13px; gap: 13px; min-height: 45px; }
+  .gym-tour-footer { bottom: max(19px, env(safe-area-inset-bottom)); left: var(--page-gutter); right: var(--page-gutter); display: grid; grid-template-columns: 176px minmax(0, 1fr); align-items: center; padding-top: 16px; gap: 8px 10px; }
+  .gym-tour-caption { grid-column: 1 / -1; display: flex; justify-content: space-between; flex-wrap: wrap; font-size: 9px; line-height: 1.3; letter-spacing: .045em; gap: 5px 8px; }
+  .gym-tour-caption strong { font-size: 9px; }
+  .gym-tour-stops { grid-column: 1; margin: 0; gap: 0; width: 176px; }
+  .gym-tour-stops button { width: 44px; height: 44px; font-size: 10px; gap: 7px; padding: 7px; }
+  .gym-tour-scroll { grid-column: 2; width: auto; justify-content: space-between; font-size: 9px; letter-spacing: .04em; min-height: 44px; padding: 0; gap: 6px; }
+  .gym-tour-loading, .gym-tour-fallback-note { right: var(--page-gutter); bottom: 124px; font-size: 10px; }
+  .gym-tour-hero.is-static .gym-tour-poster { object-position: 62% center; }
+}
+@media (max-height: 740px) and (min-width: 761px) { .gym-tour-copy { top: 47%; } .gym-tour-copy h1 { font-size: 60px; } .gym-tour-description { margin: 18px 0; } }
+@media (max-width: 360px) { .gym-tour-copy, .gym-tour-copy.is-right { left: 18px; right: 18px; bottom: 145px; } .gym-tour-actions button { font-size: 9px; padding: 10px; gap: 8px; } .gym-tour-footer { left: 18px; right: 18px; } }
+
+@media (max-height: 600px) and (min-width: 761px) {
+  .gym-tour-copy, .gym-tour-copy.is-right { top: 112px; transform: none; width: min(350px, 42%); }
+  .gym-tour-eyebrow { margin-bottom: 9px; font-size: 8px; }
+  .gym-tour-brand { margin-bottom: 7px; font-size: 8px; }
+  .gym-tour-copy h1 { font-size: 40px; }
+  .gym-tour-description { font-size: 12px; line-height: 1.5; margin: 10px 0 12px; }
+  .gym-tour-actions button { min-height: 39px; padding: 10px 12px; font-size: 10px; }
+  .gym-tour-location { top: 112px; font-size: 8px; }
+  .gym-tour-footer { bottom: 12px; padding-top: 11px; }
+  .gym-tour-caption { gap: 5px; }
+  .gym-tour-scroll { font-size: 8px; }
+}

@@ -1,0 +1,27 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "implementation-and-design-evaluation",
+  "reason_codes": [
+    "detailed-interior-asset",
+    "frontend-skill-required-delegation"
+  ],
+  "allowed_write_scope": [
+    "src/components/hero/gym-tour/",
+    "scripts/gym-tour/",
+    "public/models/nexus-gym/interior.glb",
+    "public/models/nexus-gym/interior.json",
+    "docs/gym-tour/",
+    "artifacts/gym-tour/phase4/"
+  ],
+  "acceptance": [
+    "detailed strength/cardio equipment and environment",
+    "desktop/mobile visibility",
+    "exterior unchanged",
+    "bounded self-contained model",
+    "optional interior-load fallback",
+    "touch/tour/entry/context-loss regressions",
+    "typecheck/build and visual review"
+  ]
+}

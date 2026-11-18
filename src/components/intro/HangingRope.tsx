@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { createSuspension, stepSuspension } from './suspensionMotion';
 import { createStrap, updateStrap } from './strapGeometry';
@@ -8,12 +7,13 @@ import { createStrap, updateStrap } from './strapGeometry';
 export default function HangingRope({ pivot, reduced, active, elapsed }: {
   pivot: React.RefObject<THREE.Group>; reduced: boolean; active: boolean; elapsed: React.MutableRefObject<number>;
 }) {
-  const source = useTexture('/assets/trainers/nexus-lanyard-strap.png');
   const assets = useMemo(() => {
     // Reuse the stitched black/red Nexus webbing from the trainer badges.
     const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 1024;
-    const ctx = canvas.getContext('2d')!; ctx.translate(128, 0); ctx.rotate(Math.PI / 2);
-    ctx.drawImage(source.image, 0, 0, 1024, 128);
+    const ctx = canvas.getContext('2d')!;
+    // The webbing remains usable even if its decorative image cannot load.
+    ctx.fillStyle = '#171719'; ctx.fillRect(0, 0, 128, 1024);
+    ctx.fillStyle = '#b51c30'; ctx.fillRect(8, 0, 5, 1024); ctx.fillRect(115, 0, 5, 1024);
     const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapT = THREE.RepeatWrapping; texture.anisotropy = 4;
     const material = new THREE.MeshStandardMaterial({ map: texture, roughness: .8, metalness: .03,
@@ -25,9 +25,24 @@ export default function HangingRope({ pivot, reduced, active, elapsed }: {
       return { ...createStrap(12, .105, 1.32), local: new THREE.Vector3(Math.sin(angle) * .57, -1.65, Math.cos(angle) * .57),
         end: new THREE.Vector3(), curve: new THREE.LineCurve3(new THREE.Vector3(), new THREE.Vector3()) };
     });
-    return { texture, material, sim, main, curve, slings, end: new THREE.Vector3(), local: new THREE.Vector3(0, -.44, 0),
+    return { canvas, texture, material, sim, main, curve, slings, end: new THREE.Vector3(), local: new THREE.Vector3(0, -.44, 0),
       fixedAcross: new THREE.Vector3(1, 0, 0), bagAcross: new THREE.Vector3(), rotation: new THREE.Quaternion() };
-  }, [source]);
+  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    const image = new Image();
+    image.onload = () => {
+      if (cancelled) return;
+      const ctx = assets.canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.save(); ctx.clearRect(0, 0, 128, 1024);
+      ctx.translate(128, 0); ctx.rotate(Math.PI / 2);
+      ctx.drawImage(image, 0, 0, 1024, 128); ctx.restore();
+      assets.texture.needsUpdate = true;
+    };
+    image.src = '/assets/trainers/nexus-lanyard-strap.png';
+    return () => { cancelled = true; image.onload = null; };
+  }, [assets]);
   useEffect(() => () => {
     assets.main.geometry.dispose(); assets.slings.forEach(s => s.geometry.dispose());
     assets.texture.dispose(); assets.material.dispose();

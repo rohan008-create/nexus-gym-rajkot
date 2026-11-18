@@ -1,0 +1,30 @@
+{
+  "file": "public/models/nexus-gym/exterior.glb",
+  "bytes": 2929168,
+  "meshes": 17,
+  "materials": 17,
+  "images": 4,
+  "primitives": 17,
+  "triangles": 45280,
+  "nodeNames": [
+    "NexusExterior_warm_lettering",
+    "NexusExterior_official_Nexus_logo",
+    "NexusExterior_asphalt",
+    "NexusExterior_pavement",
+    "NexusExterior_cut_stone",
+    "NexusExterior_plaster_shade",
+    "NexusExterior_deep_shadow",
+    "NexusExterior_shutters",
+    "NexusExterior_brushed_aluminium",
+    "NexusExterior_black_frames",
+    "NexusExterior_charcoal_ACM",
+    "NexusExterior_plaster",
+    "NexusExterior_Nexus_red",
+    "NexusExterior_gym_glazing",
+    "NexusExterior_upper_glazing",
+    "NexusExterior_paint_white",
+    "NexusExterior_service_pipe"
+  ],
+  "extensions": [],
+  "passed": true
+}

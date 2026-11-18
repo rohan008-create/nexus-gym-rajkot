@@ -27,7 +27,7 @@ export function useRopeScrollMotion({ pointer, layout }: RopeMotion, reduced: bo
     camera.lookAt(camera.position.x * .2, camera.position.y, 0);
   });
 }
-export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: RopeMotion, reduced: boolean, onSection?: (section: 'Home' | 'About' | 'Programs') => void, entranceEnabled = true) {
+export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: RopeMotion, reduced: boolean, onSection?: (section: 'Home' | 'About' | 'Programs') => void, entranceEnabled = true, gymTour = false) {
   const { progress, velocity, layout } = motion;
   const entrance = useRef<gsap.core.Timeline | null>(null);
   const enabled = useRef(entranceEnabled);
@@ -38,6 +38,11 @@ export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: Ro
     const element = root.current; if (!element) return;
     const context = gsap.context(() => {
       if (reduced) { gsap.set('[data-reveal], .persistent-scene, .site-nav', { autoAlpha: 1, clearProps: 'transform' }); return; }
+      if (gymTour) {
+        entrance.current = gsap.timeline({ paused: true }).fromTo('.site-nav', { y: -6, opacity: 0 }, { y: 0, opacity: 1, duration: .55, ease: 'power3.out' });
+        if (enabled.current) entrance.current.play();
+        return;
+      }
       entrance.current = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
         .fromTo('.persistent-scene', { opacity: 0 }, { opacity: 1, duration: .85 })
         .fromTo('.hero-copy .eyebrow', { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: .45 }, .05)
@@ -47,7 +52,7 @@ export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: Ro
       if (enabled.current) entrance.current.play();
     }, element);
     return () => { context.revert(); entrance.current = null; };
-  }, [root, reduced]);
+  }, [root, reduced, gymTour]);
   useLayoutEffect(() => {
     if (entranceEnabled) entrance.current?.play();
     else entrance.current?.pause(0);
@@ -58,7 +63,7 @@ export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: Ro
     const measure = () => {
       const rootTop = element.getBoundingClientRect().top + window.scrollY;
       const height = element.querySelector('.persistent-scene')?.getBoundingClientRect().height || window.innerHeight;
-      const heroHeight = element.querySelector('.hero-section')!.getBoundingClientRect().height;
+      const heroHeight = element.querySelector(gymTour ? '#home' : '.hero-section')!.getBoundingClientRect().height;
       const copy = element.querySelector('.about-copy')!.getBoundingClientRect();
       const heading = element.querySelector('#about-title')!.getBoundingClientRect();
       const worldHeight = 2 * Math.tan(35 * Math.PI / 360) * 10.2;
@@ -71,7 +76,7 @@ export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: Ro
     measure();
     const context = gsap.context(() => {
       const scroll = { value: 0 };
-      const timeline = gsap.timeline({ scrollTrigger: { trigger: element.querySelector('.hero-section'), ...ROPE_SCROLL, scrub: reduced ? true : .35,
+      const timeline = gsap.timeline({ scrollTrigger: { trigger: element.querySelector(gymTour ? '#about' : '.hero-section'), ...(gymTour ? { start: 'top 95%', end: 'top 15%' } : ROPE_SCROLL), scrub: reduced ? true : .35,
         onUpdate: self => { velocity.current = reduced ? 0 : Math.min(1, Math.abs(self.getVelocity()) / 2400); }, onRefresh: measure } });
       timeline.to(scroll, { value: 1, duration: 1, ease: 'none', onUpdate: () => { progress.current = scroll.value; } }, 0)
         .fromTo('.gym-image-reveal', { clipPath: 'inset(12% 0 12% 100%)', opacity: 0 }, { clipPath: 'inset(0% 0 0% 0%)', opacity: 1, duration: .3, ease: 'power2.out' }, .52)
@@ -92,5 +97,5 @@ export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: Ro
     const observer = new ResizeObserver(measure);
     observer.observe(element.querySelector('.about-copy')!);
     return () => { disposed = true; observer.disconnect(); window.removeEventListener('resize', measure); context.revert(); progress.current = 0; velocity.current = 0; };
-  }, [root, progress, velocity, layout, reduced, onSection]);
+  }, [root, progress, velocity, layout, reduced, onSection, gymTour]);
 }

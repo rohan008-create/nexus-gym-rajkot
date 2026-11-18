@@ -1,0 +1,16 @@
+{
+  "verdict": "PASS",
+  "round": 2,
+  "reviewed": [
+    "desktop1440",
+    "tablet768",
+    "mobile390",
+    "exterior return"
+  ],
+  "fix": "near-camera ceiling span removed, perimeter/rear lighting retained",
+  "nonblockingRefinements": [
+    "lighting/reflection polish",
+    "tablet crop"
+  ],
+  "environment": "independent agent software-rendered review; current modal verified separately by functional tests"
+}

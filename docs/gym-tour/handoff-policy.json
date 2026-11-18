@@ -1,0 +1,11 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": [
+    "handoff-documentation",
+    "user-requested-git-push"
+  ],
+  "scope": "Document remaining phases and commit/push the current project snapshot; no Phase 5 implementation in this handoff turn."
+}

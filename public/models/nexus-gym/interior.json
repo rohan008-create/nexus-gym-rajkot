@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/gym-tour/build_interior.py",
+  "blenderVersion": "4.5.9 LTS",
+  "basis": "Original concept interior, not a scan or claim about the actual gym layout.",
+  "coordinateConvention": "metres, glTF Y-up; gym floorY4.2",
+  "model": "interior.glb",
+  "bytes": 1346856,
+  "materials": 19,
+  "meshes": 19,
+  "primitives": 19,
+  "triangles": 19278,
+  "images": 4,
+  "features": [
+    "detailed racks, J hooks, plate storage and barbells",
+    "separate upholstered adjustable benches",
+    "varied hex dumbbells and plate tree",
+    "treadmills with belts,rollers,console and handles",
+    "spin bike with flywheel,cranks,pedals and saddle",
+    "rubber tiles,aisle markings and panel depth",
+    "static mirror treatment",
+    "actual official logo,LED fixtures and reception amenities"
+  ],
+  "limits": [
+    "Concept layout, not measured actual interior",
+    "Static mirror treatment, no realtime reflections",
+    "Final lighting bake/compression remains later phase"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "checks": [
+    "desktop: detailed model and responsive layout",
+    "desktop: entrance shot uses detailed model",
+    "mobile: detailed model and responsive layout",
+    "mobile: entrance shot uses detailed model",
+    "failed optional model preserves ready procedural scene",
+    "asset failure leaves trial CTA usable",
+    "detailed asset recovers after network restoration and reload",
+    "no uncaught browser errors"
+  ],
+  "errors": [],
+  "mode": "headed Chromium viewport checks; physical-mobile performance not certified",
+  "browserErrors": {
+    "errors": [],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "passed": true
+}

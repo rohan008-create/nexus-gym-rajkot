@@ -1,0 +1,28 @@
+{
+  "mode": "Chromium touch emulation with software WebGL; not physical iOS Safari",
+  "checks": [
+    "touch context, coarse pointer and no horizontal overflow",
+    "all four stop targets are at least44x44 CSS pixels",
+    "all four tour stops reached through touch controls",
+    "trial CTA opens and closes by touch",
+    "mobile menu bypasses tour to Programs",
+    "native touch gesture scrolls the hero",
+    "interior reached on mobile"
+  ],
+  "errors": [],
+  "environment": {
+    "width": 390,
+    "height": 844,
+    "dpr": 3,
+    "touch": 1,
+    "coarse": true
+  },
+  "scrollDiagnostic": {
+    "scroll": 185,
+    "bodyOverflow": "clip visible",
+    "htmlOverflow": "clip visible",
+    "classes": "dark lenis lenis-scrolling",
+    "target": ""
+  },
+  "passed": true
+}

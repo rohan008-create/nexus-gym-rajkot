@@ -1,0 +1,40 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": [
+    "hero-only-preparation",
+    "blender-export-pipeline",
+    "baseline-evidence"
+  ],
+  "allowed_write_scope": [
+    "docs/gym-tour/",
+    "scripts/gym-tour/",
+    "artifacts/gym-tour/phase1/",
+    "qa/gym-tour-phase1/"
+  ],
+  "acceptance": [
+    "baseline recorded",
+    "headless render and GLB browser load verified",
+    "layout and camera manifest validated",
+    "existing tracked application files unchanged"
+  ],
+  "tooling_scope": [
+    "/tmp/nexus-blender-tooling/",
+    "/tmp/nexus-phase1-site/",
+    "~/.cache/nexus-gym/tooling/"
+  ],
+  "decisions": [
+    {
+      "action": "create isolated source snapshot and temporary test server",
+      "reason": "concurrent unrelated optimization/builds change source and repeatedly terminate development servers",
+      "risk": "low; separate cache and port; production source untouched"
+    },
+    {
+      "action": "install pinned official Blender portable build",
+      "reason": "Blender absent from PATH; Phase 1 requires headless render/export verification",
+      "risk": "low; verified official archive checksum, no sudo or PATH changes"
+    }
+  ]
+}

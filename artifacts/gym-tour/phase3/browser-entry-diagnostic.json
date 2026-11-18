@@ -1,0 +1,29 @@
+{
+  "capturedAt": "2026-11-18T08:49:40.426Z",
+  "base": "http://localhost:3000",
+  "checks": [],
+  "viewports": [],
+  "errors": [
+    "Command failed: agent-browser --session nexus-phase3-entry-diagnostic --headed --json wait --fn document.activeElement?.id==='hero-title'&&!document.querySelector('.entrance-landing').inert&&document.body.style.overflow!=='hidden'\n{\"success\":false,\"data\":null,\"error\":\"Wait timed out after 15000ms\"}\n"
+  ],
+  "limitations": [
+    "Viewport tests use desktop Chrome; true touch emulation is a separate check. No physical-phone or guaranteed-FPS claim."
+  ],
+  "entryFocusBeforeWait": {
+    "active": "BODY",
+    "activeId": "",
+    "heading": true,
+    "inert": false,
+    "overflow": "",
+    "stage": "revealed"
+  },
+  "entryFocusAfterWait": {
+    "active": "BODY",
+    "activeId": "",
+    "heading": true,
+    "inert": false,
+    "overflow": "",
+    "stage": "revealed"
+  },
+  "passed": false
+}

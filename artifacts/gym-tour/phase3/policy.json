@@ -1,0 +1,34 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "implementation-and-design-evaluation",
+  "reason_codes": [
+    "detailed-model-asset-pipeline",
+    "frontend-skill-required-delegation"
+  ],
+  "allowed_write_scope": [
+    "src/components/hero/gym-tour/",
+    "scripts/gym-tour/",
+    "public/models/nexus-gym/",
+    "docs/gym-tour/",
+    "artifacts/gym-tour/phase3/"
+  ],
+  "acceptance": [
+    "recognizable detailed exterior",
+    "official branding",
+    "desktop/mobile framing",
+    "bounded model size and draw calls",
+    "optional-asset failure fallback",
+    "existing tour and interior retained",
+    "typecheck/build/browser validation"
+  ],
+  "decisions": [
+    {
+      "action": "add minimal post-commit entry focus handoff inside GymTourHero",
+      "reason": "Browser diagnostics show heading present, landing revealed and non-inert, but focus remains BODY after15s; existing Page RAF can precede React commit. Preserve required intro-to-hero keyboard focus without editing intro/Page/nav.",
+      "evidence": "artifacts/gym-tour/phase3/browser-entry-diagnostic.json",
+      "risk": "low; once per active entry, only when focus is body/heading, never standalone preview or existing dialog/control focus"
+    }
+  ]
+}

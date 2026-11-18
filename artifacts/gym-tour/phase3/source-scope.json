@@ -1,0 +1,10 @@
+{
+  "changedExistingSourceFiles": [
+    "src/components/hero/gym-tour/GymTourCanvas.tsx",
+    "src/components/hero/gym-tour/GymTourHero.tsx"
+  ],
+  "newRuntimeComponent": "src/components/hero/gym-tour/DetailedExterior.tsx",
+  "interiorGeometryUnchanged": true,
+  "cameraConfigurationUnchanged": true,
+  "otherExistingSourceUnchanged": true
+}

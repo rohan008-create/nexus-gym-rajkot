@@ -1,0 +1,512 @@
+{
+  "capturedAt": "2026-11-18T05:32:42.331Z",
+  "base": "http://localhost:3002",
+  "environment": "development server; browser viewport emulation, not physical mobile hardware",
+  "conditions": "fresh navigation per viewport, shared browser cache; no controlled network/CPU throttling; not a cold-cache benchmark; concurrent unrelated workspace builds/setup occurred during this task",
+  "viewports": [
+    {
+      "name": "desktop",
+      "coarsePointer": false,
+      "dpr": 1,
+      "heading": {
+        "bottom": 610.734375,
+        "height": 353.6875,
+        "left": 162.5,
+        "right": 1262.5,
+        "top": 257.046875,
+        "width": 1100,
+        "x": 162.5,
+        "y": 257.046875
+      },
+      "height": 900,
+      "nav": {
+        "bottom": 104,
+        "height": 104,
+        "left": 0,
+        "right": 1425,
+        "top": 0,
+        "width": 1425,
+        "x": 0,
+        "y": 0
+      },
+      "navigation": [
+        {
+          "domContentLoaded": 243,
+          "duration": 1665.7000000001865
+        }
+      ],
+      "overflow": false,
+      "sectionIds": [
+        "home",
+        "about",
+        "programs",
+        "armory",
+        "advantage",
+        "trainers",
+        "membership",
+        "human-evolution",
+        "booking",
+        "voices",
+        "location",
+        "social"
+      ],
+      "status": "ready",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "width": 1440,
+      "performanceSample": {
+        "documentHidden": false,
+        "frameCount": 142,
+        "framesOver50Ms": 0,
+        "longTasks": [],
+        "p50Ms": 16.699999999999818,
+        "p95Ms": 33.29999999999927,
+        "p99Ms": 33.399999999999636,
+        "renderer": "ANGLE (Intel, Mesa Intel(R) HD Graphics 530 (SKL GT2), OpenGL ES 3.2)",
+        "sampleMs": 2551.9000000003725
+      },
+      "destinations": [
+        {
+          "label": "About",
+          "target": "about",
+          "active": "About",
+          "top": 14
+        },
+        {
+          "label": "Programs",
+          "target": "programs",
+          "active": "Programs",
+          "top": 90
+        },
+        {
+          "label": "Plans",
+          "target": "membership",
+          "active": "Plans",
+          "top": 89.421875
+        },
+        {
+          "label": "Location",
+          "target": "about",
+          "active": "About",
+          "top": -50
+        },
+        {
+          "label": "Home",
+          "target": "home",
+          "active": "Home",
+          "top": -69
+        }
+      ]
+    },
+    {
+      "name": "wide-desktop",
+      "coarsePointer": false,
+      "dpr": 1,
+      "heading": {
+        "bottom": 716.109375,
+        "height": 384.4375,
+        "left": 402.5,
+        "right": 1502.5,
+        "top": 331.671875,
+        "width": 1100,
+        "x": 402.5,
+        "y": 331.671875
+      },
+      "height": 1080,
+      "nav": {
+        "bottom": 104,
+        "height": 104,
+        "left": 0,
+        "right": 1905,
+        "top": 0,
+        "width": 1905,
+        "x": 0,
+        "y": 0
+      },
+      "navigation": [
+        {
+          "domContentLoaded": 255.5,
+          "duration": 1099.3999999999069
+        }
+      ],
+      "overflow": false,
+      "sectionIds": [
+        "home",
+        "about",
+        "programs",
+        "armory",
+        "advantage",
+        "trainers",
+        "membership",
+        "human-evolution",
+        "booking",
+        "voices",
+        "location",
+        "social"
+      ],
+      "status": "ready",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "width": 1920,
+      "performanceSample": {
+        "documentHidden": false,
+        "frameCount": 139,
+        "framesOver50Ms": 0,
+        "longTasks": [],
+        "p50Ms": 16.699999999999818,
+        "p95Ms": 33.400000000000546,
+        "p99Ms": 41,
+        "renderer": "ANGLE (Intel, Mesa Intel(R) HD Graphics 530 (SKL GT2), OpenGL ES 3.2)",
+        "sampleMs": 2511.2000000001863
+      },
+      "destinations": [
+        {
+          "label": "About",
+          "target": "about",
+          "active": "About",
+          "top": -31
+        },
+        {
+          "label": "Programs",
+          "target": "programs",
+          "active": "Programs",
+          "top": 88.1875
+        },
+        {
+          "label": "Plans",
+          "target": "membership",
+          "active": "Plans",
+          "top": 88
+        },
+        {
+          "label": "Location",
+          "target": "about",
+          "active": "About",
+          "top": -87
+        },
+        {
+          "label": "Home",
+          "target": "home",
+          "active": "Home",
+          "top": -84
+        }
+      ]
+    },
+    {
+      "name": "tablet",
+      "coarsePointer": false,
+      "dpr": 1,
+      "heading": {
+        "bottom": 598.40625,
+        "height": 205.03125,
+        "left": 59.25,
+        "right": 693.75,
+        "top": 393.375,
+        "width": 634.5,
+        "x": 59.25,
+        "y": 393.375
+      },
+      "height": 1024,
+      "nav": {
+        "bottom": 104,
+        "height": 104,
+        "left": 0,
+        "right": 753,
+        "top": 0,
+        "width": 753,
+        "x": 0,
+        "y": 0
+      },
+      "navigation": [
+        {
+          "domContentLoaded": 281,
+          "duration": 1157.3999999999069
+        }
+      ],
+      "overflow": false,
+      "sectionIds": [
+        "home",
+        "about",
+        "programs",
+        "armory",
+        "advantage",
+        "trainers",
+        "membership",
+        "human-evolution",
+        "booking",
+        "voices",
+        "location",
+        "social"
+      ],
+      "status": "ready",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "width": 768,
+      "performanceSample": {
+        "documentHidden": false,
+        "frameCount": 142,
+        "framesOver50Ms": 0,
+        "longTasks": [],
+        "p50Ms": 16.699999999999818,
+        "p95Ms": 33.29999999999927,
+        "p99Ms": 33.400000000000546,
+        "renderer": "ANGLE (Intel, Mesa Intel(R) HD Graphics 530 (SKL GT2), OpenGL ES 3.2)",
+        "sampleMs": 2503.5999999996275
+      },
+      "destinations": [
+        {
+          "label": "About",
+          "target": "about",
+          "active": "About",
+          "top": 44
+        },
+        {
+          "label": "Programs",
+          "target": "programs",
+          "active": "Programs",
+          "top": 89.15625
+        },
+        {
+          "label": "Plans",
+          "target": "membership",
+          "active": "Plans",
+          "top": 20.40625
+        },
+        {
+          "label": "Location",
+          "target": "about",
+          "active": "About",
+          "top": -6
+        },
+        {
+          "label": "Home",
+          "target": "home",
+          "active": "Home",
+          "top": -67
+        }
+      ]
+    },
+    {
+      "name": "mobile",
+      "coarsePointer": false,
+      "dpr": 1,
+      "heading": {
+        "bottom": 476.78125,
+        "height": 145.0625,
+        "left": 23,
+        "right": 352,
+        "top": 331.71875,
+        "width": 329,
+        "x": 23,
+        "y": 331.71875
+      },
+      "height": 844,
+      "nav": {
+        "bottom": 80,
+        "height": 80,
+        "left": 0,
+        "right": 375,
+        "top": 0,
+        "width": 375,
+        "x": 0,
+        "y": 0
+      },
+      "navigation": [
+        {
+          "domContentLoaded": 437.20000000018626,
+          "duration": 1679.5
+        }
+      ],
+      "overflow": false,
+      "sectionIds": [
+        "home",
+        "about",
+        "programs",
+        "armory",
+        "advantage",
+        "trainers",
+        "membership",
+        "human-evolution",
+        "booking",
+        "voices",
+        "location",
+        "social"
+      ],
+      "status": "ready",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+      "width": 390,
+      "performanceSample": {
+        "documentHidden": false,
+        "frameCount": 126,
+        "framesOver50Ms": 0,
+        "longTasks": [],
+        "p50Ms": 16.699999999999818,
+        "p95Ms": 33.400000000000546,
+        "p99Ms": 49.89999999999963,
+        "renderer": "ANGLE (Intel, Mesa Intel(R) HD Graphics 530 (SKL GT2), OpenGL ES 3.2)",
+        "sampleMs": 2511.7000000001863
+      },
+      "destinations": [
+        {
+          "label": "About",
+          "target": "about",
+          "active": "About",
+          "top": 109
+        },
+        {
+          "label": "Programs",
+          "target": "programs",
+          "active": "Programs",
+          "top": 88
+        },
+        {
+          "label": "Plans",
+          "target": "membership",
+          "active": "Plans",
+          "top": 40.28125
+        },
+        {
+          "label": "Location",
+          "target": "about",
+          "active": "About",
+          "top": -87
+        },
+        {
+          "label": "Home",
+          "target": "home",
+          "active": "Home",
+          "top": -76
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "desktop: no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "desktop: hero scene ready",
+      "passed": true
+    },
+    {
+      "name": "desktop: trial dialog opens",
+      "passed": true
+    },
+    {
+      "name": "desktop: trial dialog closes",
+      "passed": true
+    },
+    {
+      "name": "desktop: navigation links land at existing destinations",
+      "passed": true
+    },
+    {
+      "name": "wide-desktop: no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "wide-desktop: hero scene ready",
+      "passed": true
+    },
+    {
+      "name": "wide-desktop: trial dialog opens",
+      "passed": false
+    },
+    {
+      "name": "wide-desktop: trial dialog closes",
+      "passed": true
+    },
+    {
+      "name": "wide-desktop: navigation links land at existing destinations",
+      "passed": true
+    },
+    {
+      "name": "tablet: no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "tablet: hero scene ready",
+      "passed": true
+    },
+    {
+      "name": "tablet: trial dialog opens",
+      "passed": true
+    },
+    {
+      "name": "tablet: trial dialog closes",
+      "passed": true
+    },
+    {
+      "name": "tablet: navigation links land at existing destinations",
+      "passed": true
+    },
+    {
+      "name": "mobile: no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "mobile: hero scene ready",
+      "passed": true
+    },
+    {
+      "name": "mobile: trial dialog opens",
+      "passed": true
+    },
+    {
+      "name": "mobile: trial dialog closes",
+      "passed": true
+    },
+    {
+      "name": "mobile: navigation links land at existing destinations",
+      "passed": true
+    }
+  ],
+  "limitations": [
+    "Intro capture skipped in this responsive sweep; see the separately retained intro observation.",
+    "wide-desktop: trial dialog did not open within timeout.",
+    "Per-frame draw calls/triangles and actual-device mobile performance were not instrumented; no application instrumentation was added.",
+    "Mobile entry is a 390x844 viewport baseline: observed DPR=1 and coarsePointer=false; physical touch, iOS Safari and real-phone GPU behavior were not verified."
+  ],
+  "errors": [],
+  "browserErrors": {
+    "errors": [],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "functionalChecksPassed": false,
+  "introObservation": {
+    "capturedAt": "2026-11-18T05:30:09.784Z",
+    "intro": {
+      "error": null,
+      "ready": "false"
+    },
+    "checks": [
+      {
+        "name": "intro skip releases landing and scroll lock",
+        "passed": true
+      },
+      {
+        "name": "intro skip focuses hero-title",
+        "passed": true
+      }
+    ],
+    "limitations": [
+      "Intro readiness timed out; capture its current state and test skip independently.",
+      "Intro was not confirmed ready at baseline; normal punching/explosion cannot be certified from this run."
+    ],
+    "note": "Separate earlier navigation observation; its later responsive sweep timed out. Final four-viewport sweep is reported independently."
+  },
+  "trace": {
+    "path": "qa/gym-tour-phase1/baseline/desktop.trace.json",
+    "scope": "earlier snapshot recording; not the same interval as the final responsive idle samples"
+  }
+}

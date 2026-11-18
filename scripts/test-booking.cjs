@@ -21,7 +21,7 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3001';
   try {
     fs.mkdirSync('qa', { recursive: true });
     const p = await open(false);
-    assert.equal(await p.locator('#booking').evaluate(el => el.previousElementSibling.id), 'human-evolution');
+    assert.equal(await p.locator('#booking').evaluate(el => el.previousElementSibling.id), 'membership');
     await p.screenshot({ path: 'qa/booking-desktop.png' });
     for (const title of ['Trial session', 'Membership enquiry', 'Gym visit']) { await p.locator('.booking-experience').filter({ hasText: title }).click(); assert.ok(await p.getByRole('radio', { name: new RegExp(title) }).isChecked()); }
     await p.locator('.booking-experience').filter({ hasText: 'Trial session' }).click(); await next(p); await step(p, 2);

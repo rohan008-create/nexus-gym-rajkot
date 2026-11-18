@@ -1,0 +1,41 @@
+{
+  "capturedAt": "2026-11-18T06:37:22.092Z",
+  "base": "http://localhost:3000",
+  "checks": [
+    "intro entry unlocks landing and focuses hero title",
+    "reduced motion uses short readable hero",
+    "WebGL loss leaves a short usable fallback",
+    "fallback CTA remains usable"
+  ],
+  "viewports": [],
+  "errors": [
+    "no uncaught browser errors"
+  ],
+  "limitations": [
+    "Viewport tests use desktop Chrome; true touch emulation is a separate check. No physical-phone or guaranteed-FPS claim."
+  ],
+  "browserErrors": {
+    "errors": [
+      {
+        "column": 53,
+        "line": 20667,
+        "text": "TypeError: Cannot read properties of null (reading 'trim')\n    at onFirstUse (webpack-internal:///(app-pages-browser)/./node_modules/three/build/three.module.js:20668:54)\n    at WebGLProgram.getUniforms (webpack-internal:///(app-pages-browser)/./node_modules/three/build/three.module.js:20763:4)\n    at setProgram (webpack-internal:///(app-pages-browser)/./node_modules/three/build/three.module.js:31101:31)\n    at WebGLRenderer.renderBufferDirect (webpack-internal:///(app-pages-browser)/./node_modules/three/build/three.module.js:29891:20)\n    at renderObject (webpack-internal:///(app-pages-browser)/./node_modules/three/build/three.module.js:30768:11)\n    at renderObjects (webpack-internal:///(app-pages-browser)/./node_modules/three/build/three.module.js:30737:6)\n    at renderScene (webpack-internal:///(app-pages-browser)/./node_modules/three/build/three.module.js:30586:36)\n    at WebGLRenderer.render (webpack-internal:///(app-pages-browser)/./node_modules/three/build/three.module.js:30404:5)\n    at render$1 (webpack-internal:///(app-pages-browser)/./node_modules/@react-three/fiber/dist/events-776716bd.esm.js:1594:61)\n    at loop (webpack-internal:///(app-pages-browser)/./node_modules/@react-three/fiber/dist/events-776716bd.esm.js:1620:19)",
+        "url": null
+      }
+    ],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "passed": false
+}

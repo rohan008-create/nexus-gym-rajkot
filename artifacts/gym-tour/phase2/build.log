@@ -1,0 +1,36 @@
+  ▲ Next.js 14.2.15
+  - Experiments (use with caution):
+    · cpus
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+   We detected TypeScript in your project and reconfigured your tsconfig.json file for you. Strict-mode is set to false by default.
+   The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+   	- include was updated to add '.next-phase2-build/types/**/*.ts'
+
+   Collecting page data ...
+   Generating static pages (0/7) ...
+   Generating static pages (1/7) 
+   Generating static pages (3/7) 
+   Generating static pages (5/7) 
+ ✓ Generating static pages (7/7)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    8.49 kB        96.5 kB
+├ ○ /_not-found                          870 B          88.8 kB
+├ ○ /footer-preview                      4.76 kB        92.7 kB
+├ ○ /hero                                1.24 kB        89.2 kB
+└ ○ /intro                               1.21 kB        89.2 kB
++ First Load JS shared by all            88 kB
+  ├ chunks/505-266fd771b8904c76.js       31.6 kB
+  ├ chunks/8cc7474c-fcaa3670de4e6d69.js  53.6 kB
+  └ other shared chunks (total)          2.75 kB
+
+
+○  (Static)  prerendered as static content
+

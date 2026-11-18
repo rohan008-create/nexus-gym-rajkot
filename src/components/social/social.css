@@ -1,0 +1,124 @@
+.social-section {
+  position: relative;
+  isolation: isolate;
+  z-index: 5;
+  overflow: hidden;
+  background: #050505;
+  padding: 110px var(--page-gutter) 90px;
+  border-top: 1px solid #ffffff0d;
+  scroll-margin-top: 84px;
+  color: #fff;
+}
+.social-section::before {
+  content: '';
+  position: absolute;
+  inset: -18% 34% auto;
+  height: 480px;
+  background: radial-gradient(circle, #e5091422, transparent 70%);
+  filter: blur(22px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ── Heading ─────────────────────────────────────────────────────────────── */
+.social-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+.social-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #b9b9c0;
+  margin: 0 0 16px;
+}
+.social-eyebrow > span {
+  width: 36px;
+  height: 1px;
+  background: #e50914;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.social-heading h2 {
+  font-family: 'Arial Black', 'Arial', sans-serif;
+  font-style: italic;
+  font-weight: 950;
+  text-transform: uppercase;
+  font-size: clamp(38px, 4.6vw, 74px);
+  line-height: 1;
+  letter-spacing: -.05em;
+  margin: 0;
+}
+.social-heading h2 em {
+  display: block;
+  color: #e50914;
+  font-style: italic;
+}
+.social-sub {
+  max-width: 370px;
+  color: #a1a1aa;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── Grid of animated tiles cards ───────────────────────────────────────── */
+.social-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  justify-items: center;
+}
+.social-card-slot { position: relative; width: 100%; min-width: 0; }
+.social-card-slot > div {
+  width: 100%;
+  max-width: 100%;
+  border-color: #ffffff1f !important;
+  background: #0b0b0d !important;
+  transition: border-color .28s ease, transform .28s ease, box-shadow .28s ease;
+  min-height: 232px;
+  justify-content: space-between;
+}
+.social-card-slot > div:hover {
+  border-color: #e5091470 !important;
+  transform: translateY(-5px);
+  box-shadow: 0 18px 46px rgba(0,0,0,.6), 0 0 30px rgba(229,9,20,.14);
+}
+/* Let the animated tiles read clearly on the dark surface */
+.social-card-slot [class*="bg-fuchsia"] {
+  background-color: rgba(229, 9, 20, .18) !important;
+}
+.social-platform-icon {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 30;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  border: 1px solid;
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 1180px) {
+  .social-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 26px; }
+}
+@media (max-width: 620px) {
+  .social-section { padding: 84px var(--page-gutter) 70px; }
+  .social-heading { margin-bottom: 34px; gap: 20px; }
+  .social-grid { grid-template-columns: 1fr; gap: 22px; justify-items: center; }
+  .social-sub { max-width: 100%; }
+}

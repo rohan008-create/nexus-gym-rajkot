@@ -9,11 +9,11 @@
   color: #ffffff;
   min-height: 850px;
   height: 100vh;
-  width: calc(100% - 32px);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   overflow: hidden;
-  border: 1px solid #1a1a20;
-  border-radius: 24px;
+  border-block: 1px solid #1a1a20;
+  border-radius: 0;
   isolation: isolate;
 }
 
@@ -48,7 +48,7 @@
 .globe-header {
   position: absolute;
   top: 105px;
-  left: 6.5%;
+  left: var(--page-gutter);
   z-index: 10;
   pointer-events: none;
   max-width: 520px;
@@ -101,7 +101,7 @@
 .globe-coords-hud {
   position: absolute;
   top: 110px;
-  right: 6.5%;
+  right: var(--page-gutter);
   z-index: 10;
   pointer-events: none;
   display: flex;
@@ -123,7 +123,7 @@
 /* Floating Navigation Controls (Zoom In, Zoom Out, Reset) */
 .globe-controls {
   position: absolute;
-  right: 6.5%;
+  right: var(--page-gutter);
   top: 50%;
   transform: translateY(-50%);
   z-index: 20;
@@ -167,7 +167,7 @@
 .globe-action-shelf {
   position: absolute;
   bottom: 80px;
-  left: 6.5%;
+  left: var(--page-gutter);
   z-index: 20;
 }
 
@@ -225,7 +225,7 @@
 .globe-info-card {
   position: absolute;
   bottom: 60px;
-  left: 6.5%;
+  left: var(--page-gutter);
   z-index: 25;
   width: min(420px, calc(100vw - 48px));
   background: rgba(8, 8, 12, 0.92);
@@ -497,7 +497,7 @@
 .globe-credit-container {
   position: absolute;
   bottom: 12px;
-  right: 6.5%;
+  right: var(--page-gutter);
   z-index: 10;
   font-size: 9px;
   color: #71717a;
@@ -514,7 +514,7 @@
 .globe-imagery-badge {
   position: absolute;
   bottom: 12px;
-  left: 6.5%;
+  left: var(--page-gutter);
   z-index: 10;
   font-family: ui-monospace, monospace;
   font-size: 8px;
@@ -533,7 +533,7 @@
   padding: 40px 24px;
   text-align: center;
   background: radial-gradient(circle at 50% 50%, #101018 0%, #050505 100%);
-  border-radius: 24px;
+  border-radius: 0;
   z-index: 20;
 }
 
@@ -551,14 +551,14 @@
   .nexus-globe-section {
     min-height: 720px;
     height: 100svh;
-    width: calc(100% - 16px);
-    border-radius: 16px;
+    width: 100%;
+    border-radius: 0;
   }
 
   .globe-header {
     top: 80px;
-    left: 20px;
-    right: 20px;
+    left: var(--page-gutter);
+    right: var(--page-gutter);
     max-width: none;
   }
 
@@ -571,7 +571,7 @@
   }
 
   .globe-controls {
-    right: 16px;
+    right: var(--page-gutter);
     top: 45%;
   }
 
@@ -583,8 +583,8 @@
 
   .globe-action-shelf {
     bottom: 30px;
-    left: 20px;
-    right: 20px;
+    left: var(--page-gutter);
+    right: var(--page-gutter);
   }
 
   .globe-explore-btn {
@@ -594,8 +594,8 @@
   }
 
   .globe-info-card {
-    left: 16px;
-    right: 16px;
+    left: var(--page-gutter);
+    right: var(--page-gutter);
     bottom: 20px;
     width: auto;
     padding: 20px 16px;

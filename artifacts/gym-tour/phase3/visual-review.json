@@ -1,0 +1,22 @@
+{
+  "verdict": "PASS",
+  "scope": [
+    "desktop",
+    "tablet",
+    "mobile",
+    "entrance",
+    "retained strength interior"
+  ],
+  "improvements": [
+    "facade depth",
+    "official branding",
+    "recessed frames",
+    "services",
+    "stair continuity"
+  ],
+  "nonblockingRefinements": [
+    "final glass/contact-lighting realism",
+    "wider tablet establishing crop"
+  ],
+  "environment": "SwiftShader visual review, not native performance certification"
+}

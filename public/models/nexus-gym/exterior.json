@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/gym-tour/build_exterior.py",
+  "blenderVersion": "4.5.9 LTS",
+  "basis": "Original geometry inferred from one Nexus building photograph; approximate dimensions, not a survey.",
+  "coordinateConvention": "metres, glTF Y-up; +Z street",
+  "model": "exterior.glb",
+  "bytes": 2929168,
+  "meshes": 17,
+  "materials": 17,
+  "triangles": 45280,
+  "textures": "Original generated plaster/paving/soft sky reflection; existing official project Nexus logo. No third-party assets.",
+  "features": [
+    "recessed upper glazing",
+    "central vertical bay",
+    "panel seams",
+    "official wordmark and entry emblem",
+    "continuous stair rails and stringers",
+    "AC grilles/brackets",
+    "drainage services",
+    "roof coping/housing",
+    "tiled forecourt and curb"
+  ],
+  "limits": [
+    "Not a measured scan",
+    "Static reflected-sky texture; no realtime mirror",
+    "Final lighting bake is a later phase"
+  ]
+}

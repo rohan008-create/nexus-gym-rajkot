@@ -1,0 +1,34 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "implementation-and-design-evaluation",
+  "reason_codes": [
+    "frontend-skill-required-delegation",
+    "hero-scroll-integration"
+  ],
+  "allowed_write_scope": [
+    "src/components/hero/gym-tour/",
+    "src/components/hero/HeroSection.tsx",
+    "src/components/hero/RopeScrollController.ts",
+    "scripts/gym-tour/",
+    "docs/gym-tour/",
+    "artifacts/gym-tour/phase2/",
+    "scripts/test-iron-world.cjs"
+  ],
+  "acceptance": [
+    "working four-stop tour",
+    "responsive composition",
+    "intro and navigation work",
+    "downstream sections retained",
+    "reduced-motion and WebGL fallback",
+    "typecheck and browser checks"
+  ],
+  "decisions": [
+    {
+      "action": "update legacy check:hero test entry to current gym tour checks",
+      "reason": "floating-equipment hero assertions no longer describe the replaced hero",
+      "risk": "low; test entry only, no package manifest edits"
+    }
+  ]
+}

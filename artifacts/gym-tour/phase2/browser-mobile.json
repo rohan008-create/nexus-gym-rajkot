@@ -1,0 +1,47 @@
+{
+  "capturedAt": "2026-11-18T06:35:14.443Z",
+  "base": "http://localhost:3000",
+  "checks": [
+    "mobile: no horizontal overflow",
+    "mobile: one hero canvas",
+    "mobile: four stops and reverse scroll",
+    "mobile: natural pointer trial CTA and Escape close",
+    "mobile: Programs navigation bypasses tour",
+    "mobile: Programs reveal retained",
+    "mobile: About reveal retained",
+    "intro entry unlocks landing and focuses hero title",
+    "reduced motion uses short readable hero"
+  ],
+  "viewports": [
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "beats": [
+        {
+          "beat": "exterior",
+          "progress": 0
+        },
+        {
+          "beat": "entry",
+          "progress": 0.3199
+        },
+        {
+          "beat": "strength",
+          "progress": 0.6801
+        },
+        {
+          "beat": "cardio",
+          "progress": 0.9899
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Command failed: agent-browser --session nexus-tour-mobile-qa --headed --json open http://localhost:3000/hero\n{\"error\":\"Failed to connect: No such file or directory (os error 2)\",\"success\":false}\n"
+  ],
+  "limitations": [
+    "Viewport tests use desktop Chrome; true touch emulation is a separate check. No physical-phone or guaranteed-FPS claim."
+  ],
+  "passed": false
+}

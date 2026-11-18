@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "status": "concept-for-prototype",
+  "accuracy": "Exterior inferred from one user photo; all dimensions and interior are design assumptions, not surveyed facts.",
+  "coordinates": {"units": "metres", "up": "+Y", "right": "+X", "street": "+Z", "interior": "-Z", "frontFacadeZ": 0, "gymFloorY": 4.2},
+  "shell": {"width": 18, "depth": 12, "gymClearHeight": 3.6, "xBounds": [-9, 9], "zBounds": [-12, 0]},
+  "zones": [
+    {"id": "reception", "label": "Reception and entry", "center": [5.5, 4.2, -2], "footprint": [5, 3], "equipment": ["reception-desk", "brand-wall"]},
+    {"id": "strength", "label": "Strength zone", "center": [-4, 4.2, -7], "footprint": [8, 8], "equipment": ["rack", "adjustable-bench", "dumbbell-rack", "plates"]},
+    {"id": "cardio", "label": "Cardio zone", "center": [5, 4.2, -7], "footprint": [6, 6], "equipment": ["treadmill", "exercise-bike"]}
+  ],
+  "circulation": {"minimumClearWidth": 1.4, "centerAisleX": 1.25, "note": "Concept only; inspect all equipment footprints and camera paths in Phase 2."},
+  "exterior": {"stairsSide": "right", "stairsCenterX": 10.2, "entranceCenter": [7, 4.2, 0], "features": ["dark facade", "first-floor glass", "Nexus signage", "external right-side stair"], "simplify": ["street traffic", "utility wires", "neighbor shop detail"]},
+  "rendering": {"lighting": "bake static lighting after layout approval", "mirrors": "baked/limited reflections, no full-scene realtime mirror by default", "exteriorInteriorTransition": "short controlled crossfade if camera path through doorway is not visually clean"}
+}

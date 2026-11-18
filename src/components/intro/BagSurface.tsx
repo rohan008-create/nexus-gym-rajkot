@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo } from 'react';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import { createLeather } from './leather';
+import { useLeather, type Leather } from './leather';
 
 export function createBagGeometry() {
   const profile = [new THREE.Vector2(0, -1.58), new THREE.Vector2(.35, -1.57), new THREE.Vector2(.54, -1.5), new THREE.Vector2(.61, -1.38)];
@@ -15,17 +15,19 @@ export function createLogoGeometry() {
   const g = new THREE.PlaneGeometry(1.04, 1.04 / 3, 64, 8); const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) { const angle = p.getX(i) / .635; p.setXYZ(i, Math.sin(angle) * .64, p.getY(i), Math.cos(angle) * .64); } g.computeVertexNormals(); return g;
 }
-type Surface = { leather: ReturnType<typeof createLeather>; body: THREE.BufferGeometry; logoGeometry: THREE.BufferGeometry; material: THREE.MeshStandardMaterial; logoMaterial: THREE.MeshStandardMaterial };
+type Surface = { leather: Leather; body: THREE.BufferGeometry; logoGeometry: THREE.BufferGeometry; material: THREE.MeshStandardMaterial; logoMaterial: THREE.MeshStandardMaterial };
 const Context = createContext<Surface>(null!);
 export function useBagSurface() { return useContext(Context); }
 export function BagSurface({ children, logoUrl = '/assets/nexus-logo.png' }: { children: React.ReactNode; logoUrl?: string }) {
   const logo = useTexture(logoUrl); logo.colorSpace = THREE.SRGBColorSpace;
+  const leather = useLeather();
   const value = useMemo(() => {
-    const leather = createLeather();
     const material = new THREE.MeshStandardMaterial({ map: leather.map, normalMap: leather.normal, normalScale: new THREE.Vector2(.16, .16), roughnessMap: leather.bump, roughness: .83, metalness: .02 });
     const logoMaterial = new THREE.MeshStandardMaterial({ map: logo, transparent: true, alphaTest: .04, roughness: .65, polygonOffset: true, polygonOffsetFactor: -2, side: THREE.DoubleSide });
     return { leather, material, logoMaterial, body: createBagGeometry(), logoGeometry: createLogoGeometry() };
-  }, [logo]);
-  useEffect(() => () => { value.body.dispose(); value.logoGeometry.dispose(); value.material.dispose(); value.logoMaterial.dispose(); value.leather.dispose(); }, [value]);
+  }, [logo, leather]);
+  // Textures are owned by drei's shared loader cache and reused on replay;
+  // only the per-mount geometries and materials belong to this surface.
+  useEffect(() => () => { value.body.dispose(); value.logoGeometry.dispose(); value.material.dispose(); value.logoMaterial.dispose(); }, [value]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }

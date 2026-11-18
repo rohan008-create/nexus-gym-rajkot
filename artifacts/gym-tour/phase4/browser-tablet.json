@@ -1,0 +1,91 @@
+{
+  "capturedAt": "2026-11-18T13:45:08.863Z",
+  "base": "http://localhost:3000",
+  "checks": [
+    "tablet: no horizontal overflow",
+    "tablet: one hero canvas",
+    "tablet: four stops and reverse scroll",
+    "tablet: natural pointer trial CTA and Escape close",
+    "tablet: Programs navigation bypasses tour",
+    "tablet: Programs reveal retained",
+    "tablet: About reveal retained",
+    "no uncaught browser errors"
+  ],
+  "viewports": [
+    {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024,
+      "beats": [
+        {
+          "beat": "exterior",
+          "progress": 0
+        },
+        {
+          "beat": "entry",
+          "progress": 0.2601
+        },
+        {
+          "beat": "strength",
+          "progress": 0.625
+        },
+        {
+          "beat": "cardio",
+          "progress": 0.9668
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "limitations": [
+    "Viewport tests use desktop Chrome; true touch emulation is a separate check. No physical-phone or guaranteed-FPS claim."
+  ],
+  "browserErrors": {
+    "errors": [],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "browserConsole": {
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    },
+    "messages": [
+      {
+        "args": [
+          {
+            "type": "string",
+            "value": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools"
+          },
+          {
+            "type": "string",
+            "value": "font-weight:bold"
+          }
+        ],
+        "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "type": "info"
+      }
+    ]
+  },
+  "passed": true
+}

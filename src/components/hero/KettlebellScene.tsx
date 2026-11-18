@@ -80,7 +80,7 @@ export default function KettlebellScene({ active, reduced, onStatus }: Props) {
     <div className="kettlebell-halo" aria-hidden />
     <span className="kettlebell-edition" aria-hidden>THE STRENGTH COLLECTION <i /> 01 / NEXUS</span>
     <Boundary onError={() => onStatus('error')}>
-      <Canvas dpr={[1, 1.5]} frameloop={visible && active && !reduced ? 'always' : 'demand'} camera={{ position: [0, .7, 7.8], fov: 36 }} gl={{ alpha: true, antialias: true }} onCreated={({ gl }) => {
+      <Canvas dpr={[1, 1.25]} frameloop={visible && active && !reduced ? 'always' : 'demand'} camera={{ position: [0, .7, 7.8], fov: 36 }} gl={{ alpha: true, antialias: true }} onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1.15;
       }} fallback={<span>Strength, by Nexus.</span>}>
         <ambientLight intensity={.35} />

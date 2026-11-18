@@ -1,0 +1,114 @@
+{
+  "capturedAt": "2026-11-18T13:46:52.440Z",
+  "base": "http://localhost:3000",
+  "checks": [
+    "interior asset stays deferred behind noninteractive intro",
+    "intro entry unlocks landing and focuses hero title",
+    "reduced motion uses short readable hero",
+    "no uncaught errors before context-loss case",
+    "WebGL loss leaves a short usable fallback",
+    "fallback CTA remains usable",
+    "no uncaught browser errors"
+  ],
+  "viewports": [],
+  "errors": [],
+  "limitations": [
+    "Viewport tests use desktop Chrome; true touch emulation is a separate check. No physical-phone or guaranteed-FPS claim."
+  ],
+  "interiorBeforeEntry": {
+    "requested": false,
+    "source": null
+  },
+  "entryFocusBeforeWait": {
+    "active": "H1",
+    "activeId": "hero-title",
+    "heading": true,
+    "inert": false,
+    "overflow": "",
+    "stage": "revealed"
+  },
+  "preContextLossBrowserErrors": {
+    "errors": [],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "browserErrors": {
+    "errors": [],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "browserConsole": {
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    },
+    "messages": [
+      {
+        "args": [
+          {
+            "type": "string",
+            "value": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools"
+          },
+          {
+            "type": "string",
+            "value": "font-weight:bold"
+          }
+        ],
+        "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "type": "info"
+      },
+      {
+        "args": [
+          {
+            "type": "string",
+            "value": "THREE.WebGLRenderer: Context Lost."
+          }
+        ],
+        "text": "THREE.WebGLRenderer: Context Lost.",
+        "type": "log"
+      },
+      {
+        "args": [
+          {
+            "type": "string",
+            "value": "THREE.WebGLRenderer: WEBGL_lose_context extension not supported."
+          }
+        ],
+        "text": "THREE.WebGLRenderer: WEBGL_lose_context extension not supported.",
+        "type": "warning"
+      }
+    ]
+  },
+  "passed": true
+}

@@ -1,0 +1,21 @@
+{
+  "blenderVersion": "4.5.9 LTS",
+  "engine": "CYCLES",
+  "renderDevice": "CPU",
+  "samples": 8,
+  "resolution": [
+    480,
+    320
+  ],
+  "capabilities": {
+    "enumerationScope": "default Cycles backend only; other GPU backends not exhaustively probed",
+    "cyclesDevices": [
+      {
+        "name": "Intel Core i5-6500 CPU @ 3.20GHz",
+        "type": "CPU"
+      }
+    ]
+  },
+  "glbBytes": 14264,
+  "scope": "pipeline smoke test, not final gym, lighting bake or compression validation"
+}

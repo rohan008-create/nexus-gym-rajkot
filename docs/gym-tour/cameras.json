@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "status": "draft-not-visually-validated",
+  "coordinates": "Same world coordinates as layout.json: metres, Y up, street +Z.",
+  "scroll": {"driver": "existing Lenis + hero-local ScrollTrigger", "wrapperViewportHeights": {"desktop": 4, "mobile": 3}, "stickyViewportHeights": 1, "note": "Draft wrapper heights; usable scroll range is wrapper minus sticky viewport. No wheel interception; preserve reverse scroll and nav bypass."},
+  "tracks": {
+    "desktop": [
+      {"id": "exterior", "progress": 0, "position": [23, 12, 28], "target": [0, 5, -1], "fov": 42, "copy": "BEYOND LIMITS.", "copySide": "left"},
+      {"id": "entry", "progress": 0.3, "position": [13, 7, 9], "target": [6, 5.6, 0], "fov": 42, "copy": "STEP INSIDE NEXUS.", "copySide": "left"},
+      {"id": "strength", "progress": 0.65, "position": [5.5, 6.3, -2], "target": [-3, 5.4, -7], "fov": 48, "copy": "BUILT FOR YOUR NEXT LEVEL.", "copySide": "right"},
+      {"id": "cardio", "progress": 1, "position": [-3, 6.3, -2], "target": [5, 5.2, -7], "fov": 48, "copy": "FIND YOUR STRENGTH.", "copySide": "left", "cta": "existing trial dialog"}
+    ],
+    "mobile": [
+      {"id": "exterior", "progress": 0, "position": [17, 12, 33], "target": [1.5, 5.5, -1], "fov": 60, "copy": "BEYOND LIMITS.", "copySide": "bottom"},
+      {"id": "entry", "progress": 0.3, "position": [12, 8, 15], "target": [6.5, 5.7, 0], "fov": 58, "copy": "STEP INSIDE.", "copySide": "bottom"},
+      {"id": "strength", "progress": 0.65, "position": [3, 6.7, -1], "target": [-3, 5.1, -7], "fov": 62, "copy": "BUILD YOUR STRENGTH.", "copySide": "bottom"},
+      {"id": "cardio", "progress": 1, "position": [-1.5, 6.6, -1], "target": [5, 5, -7], "fov": 62, "copy": "YOUR NEXT LEVEL.", "copySide": "bottom", "cta": "existing trial dialog"}
+    ]
+  },
+  "transition": {"interval": [0.4, 0.48], "mode": "doorway traversal if clear; otherwise brief exterior/interior crossfade"},
+  "motion": {"deltaClampSeconds": 0.05, "smoothing": "frame-rate-independent damping; avoid stacking long smoothing on existing Lenis", "pointerDrift": "subtle desktop-only, disabled for touch and reduced motion"},
+  "accessibility": {"reducedMotion": "static overview and normal-height readable hero with working CTA; no long scroll tunnel", "webglFailure": "poster and HTML copy/CTA remain usable", "focusTarget": "hero-title", "mobileSafeAreas": true}
+}

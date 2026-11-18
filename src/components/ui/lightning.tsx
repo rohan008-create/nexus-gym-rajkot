@@ -511,6 +511,16 @@ export const Lightning: React.FC<LightningProps> = ({
     resizeObserver.observe(container);
     syncSize();
 
+    // Lightning colors are static props; parse them once instead of allocating
+    // arrays and re-running regular expressions on every 30 fps draw.
+    const colorCache = new Map<string, [number, number, number]>();
+    const parseColor = (value: string, dark: boolean) => {
+      const key = value + '|' + dark;
+      let parsed = colorCache.get(key);
+      if (!parsed) { parsed = parseCssColorToRgb(value, dark); colorCache.set(key, parsed); }
+      return parsed;
+    };
+
     let animId = 0;
     let lastNow = performance.now();
     let simTime = 0.09;
@@ -535,8 +545,8 @@ export const Lightning: React.FC<LightningProps> = ({
       gl.bindVertexArray(vao);
 
       const isDark = p.surfaceMode !== 'light';
-      const [cr, cg, cb] = parseCssColorToRgb(p.color, isDark);
-      const [ccr, ccg, ccb] = parseCssColorToRgb(p.cloudColor, isDark);
+      const [cr, cg, cb] = parseColor(p.color, isDark);
+      const [ccr, ccg, ccb] = parseColor(p.cloudColor, isDark);
       const manual = manualStrikeRef.current;
       const manualAge = manual.triggeredAtMs >= 0 ? (now - manual.triggeredAtMs) / 1000 : -1;
 

@@ -1,0 +1,7 @@
+{
+  "command": "node node_modules/next/dist/bin/next build /tmp/nexus-phase2-build",
+  "result": "passed",
+  "isolatedOutput": true,
+  "workerLimit": 2,
+  "sourceMatchesCurrentHero": true
+}

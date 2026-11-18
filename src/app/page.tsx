@@ -11,6 +11,8 @@ type Stage = 'waiting' | 'breaking' | 'revealed';
 
 export default function Page() {
   const [stage, setStage] = useState<Stage>('waiting');
+  const [sceneFailed, setSceneFailed] = useState(false);
+  const sceneFailure = useCallback(() => setSceneFailed(true), []);
   const [prepared, setPrepared] = useState(false);
   const [mountHero, setMountHero] = useState(false);
   const [heroEntering, setHeroEntering] = useState(false);
@@ -69,7 +71,7 @@ export default function Page() {
   const replay = useCallback(() => {
     welcomeAudio.current?.pause();
     clearTimers(); window.scrollTo(0, 0); setHeroEntering(false);
-    setStage('waiting'); setRun(value => value + 1);
+    setSceneFailed(false); setStage('waiting'); setRun(value => value + 1);
   }, [clearTimers]);
   return <div className="nexus-entrance" data-entrance={stage}>
     <audio ref={welcomeAudio} src="/audio/welcome-nexus-natural.mp3" preload="auto" />
@@ -77,11 +79,11 @@ export default function Page() {
       <Hero entranceEnabled={heroEntering} interactive={stage === 'revealed'} onPrepared={ready} onReplayIntro={replay} />
     </div>}
     {stage !== 'revealed' && <div className="entrance-overlay" role="region" aria-label="Break through to Nexus">
-      <Intro key={run} breakthrough canStart={prepared} onExplosionStart={start} onExplosionComplete={finish} />
-      {stage === 'waiting' && prepared && !reduced && <div className="entrance-thunder" aria-hidden="true">
+      <Intro key={run} breakthrough canStart={prepared} onExplosionStart={start} onExplosionComplete={finish} onSceneFailure={sceneFailure} />
+      {stage === 'waiting' && prepared && !sceneFailed && !reduced && <div className="entrance-thunder" aria-hidden="true">
         <Lightning className="entrance-lightning" interactive={false} placement="sides" color="#ff2945" cloudColor="#5c1222" clouds={.32} branches={3} amplitude={.85} reach={.88} frequency={.65} speed={.8} glow={.8} intensity={1.05} thickness={1.6} quality={.65} fade="bottom" opacity={.8} seed={7} />
       </div>}
-      {stage === 'waiting' && <button className="entrance-skip" disabled={!prepared} onClick={finish}>{prepared ? 'ENTER NEXUS ↗' : 'PREPARING NEXUS'}</button>}
+      {stage === 'waiting' && <button className="entrance-skip" disabled={!prepared && !sceneFailed} onClick={finish}>{prepared || sceneFailed ? 'ENTER NEXUS ↗' : 'PREPARING NEXUS'}</button>}
     </div>}
   </div>;
 }

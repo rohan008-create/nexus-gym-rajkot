@@ -1,0 +1,60 @@
+{
+  "checks": [
+    "failed interior download preserves ready fallback",
+    "interior request was attempted under interception",
+    "fallback trial CTA stays usable",
+    "interior asset recovers after restoration and reload",
+    "no uncaught browser errors"
+  ],
+  "errors": [],
+  "mode": "headed Chromium viewport checks; not physical-phone performance",
+  "blockedModelRequests": {
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    },
+    "requests": [
+      {
+        "headers": {
+          "Accept-Language": "en-US,en;q=0.9",
+          "Referer": "http://localhost:3000/hero",
+          "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Linux\""
+        },
+        "method": "GET",
+        "requestId": "2730043.182",
+        "resourceType": "Fetch",
+        "timestamp": 1795009336549,
+        "url": "http://localhost:3000/models/nexus-gym/interior.glb"
+      }
+    ]
+  },
+  "browserErrors": {
+    "errors": [],
+    "lifecycle": {
+      "effectiveLaunch": {
+        "browserLaunched": true,
+        "engine": "chrome",
+        "launchHash": 16930349757571590000
+      },
+      "launched": false,
+      "relaunchedBrowser": false,
+      "restartedBackground": false,
+      "restoreStatus": "not_configured",
+      "reused": true,
+      "saveStatus": "not_attempted"
+    }
+  },
+  "passed": true
+}
