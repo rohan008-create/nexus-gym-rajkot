@@ -813,6 +813,10 @@ const Lanyard = ({
     const grain = buildGrainTexture();
     const weave = buildWeaveTexture();
     const foilUniforms = {
+      beamTime: { value: 0 },
+      beamAspect: { value: 1 },
+      beamInset: { value: 0 },
+      beamRadius: { value: 0 },
       foilStrength: { value: 0 },
       foilAspect: { value: 1.4 },
       foilKey: { value: new THREE.Vector3() },
@@ -822,11 +826,25 @@ const Lanyard = ({
     const injectFoil = shader => {
       Object.assign(shader.uniforms, foilUniforms);
       shader.vertexShader = shader.vertexShader
-        .replace('#include <common>', `#include <common>\n${FOIL_VERTEX_HEAD}`)
+        .replace('#include <common>', `#include <common>\nvarying vec2 vBeamUv;\n${FOIL_VERTEX_HEAD}`)
+        .replace('#include <uv_vertex>', '#include <uv_vertex>\nvBeamUv = uv;')
         .replace('#include <project_vertex>', `#include <project_vertex>\n${FOIL_VERTEX_BODY}`);
       shader.fragmentShader = shader.fragmentShader
-        .replace('#include <common>', `#include <common>\n${FOIL_FRAGMENT_HEAD}`)
-        .replace('#include <opaque_fragment>', `${FOIL_FRAGMENT_BODY}\n#include <opaque_fragment>`);
+        .replace('#include <common>', `#include <common>\nvarying vec2 vBeamUv;\nuniform float beamTime;\nuniform float beamAspect;\nuniform float beamInset;\nuniform float beamRadius;\n${FOIL_FRAGMENT_HEAD}`)
+        .replace('#include <opaque_fragment>', `${FOIL_FRAGMENT_BODY}
+          // Match the face geometry's perimeter and rounded corners exactly.
+          vec2 beamPoint = (vBeamUv - 0.5) * vec2(beamAspect, 1.0);
+          vec2 beamHalf = vec2(beamAspect, 1.0) * 0.5 - beamInset;
+          vec2 beamQ = abs(beamPoint) - beamHalf + beamRadius;
+          float beamDistance = length(max(beamQ, 0.0)) + min(max(beamQ.x, beamQ.y), 0.0) - beamRadius;
+          float beamLine = 1.0 - smoothstep(0.002, 0.006, abs(beamDistance));
+          float beamGlow = exp(-abs(beamDistance) * 100.0);
+          float beamPosition = atan(beamPoint.y, beamPoint.x) / 6.2831853 + 0.5;
+          float beamTrail = mod(beamTime / 8.0 - beamPosition + 1.0, 1.0);
+          float beamHead = pow(max(0.0, 1.0 - beamTrail / 0.22), 2.0);
+          vec3 beamColor = mix(vec3(1.0, 0.025, 0.07), vec3(1.0, 0.65, 0.22), beamHead);
+          outgoingLight += beamColor * beamHead * (beamLine * 2.5 + beamGlow * 0.45);
+          #include <opaque_fragment>`);
     };
 
     const frontMaterial = new THREE.MeshPhysicalMaterial({
@@ -956,6 +974,9 @@ const Lanyard = ({
       const layoutKey = `${s.orientation}|${s.cornerRadius}`;
       if (layoutKey !== applied.layoutKey) {
         layout = cardLayout(s.orientation, s.cornerRadius);
+        foilUniforms.beamAspect.value = layout.width / layout.height;
+        foilUniforms.beamInset.value = BEVEL / layout.height;
+        foilUniforms.beamRadius.value = Math.max(layout.radius - BEVEL, 0.005) / layout.height;
         const geometry = buildCardGeometry(layout);
         bodyMesh.geometry.dispose();
         frontMesh.geometry.dispose();
@@ -1153,6 +1174,7 @@ const Lanyard = ({
       const dt = Math.min(1 / 30, Math.max(1 / 240, (now - last) / 1000));
       last = now;
       time += dt;
+      foilUniforms.beamTime.value = reducedMotion ? 0 : time;
       const current = physics();
       if (reducedMotion || time >= introDelay) stepSimulation(sim, dt, current, time);
       const body = sim.body;
