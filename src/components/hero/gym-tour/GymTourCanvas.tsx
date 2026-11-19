@@ -3,6 +3,7 @@ import { Component, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { buildGymGeometry } from './buildGymGeometry';
+import StreetExterior from './StreetExterior';
 import DetailedExterior from './DetailedExterior';
 import DetailedInterior from './DetailedInterior';
 import { InteriorContactShading, TourReflections } from './TourLighting';
@@ -100,12 +101,13 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     // Independently frame width and height without moving the camera closer.
     // Keep the whole building visible, easing back before the stair shot.
     const opening = 1 - THREE.MathUtils.smoothstep(motion.progress, 0, .12);
-    const widthBoost = 1 + (mobile ? .05 : .35) * opening;
-    const heightBoost = 1 + (mobile ? .12 : .08) * opening;
+    const widthBoost = 1 + (mobile ? .02 : .13) * opening;
+    const heightBoost = 1 - (mobile ? .03 : .11) * opening;
     perspective.fov = fov;
     perspective.updateProjectionMatrix();
     perspective.projectionMatrix.elements[0] *= widthBoost;
     perspective.projectionMatrix.elements[5] *= heightBoost;
+    perspective.projectionMatrix.elements[9] -= opening * .05;
     perspective.projectionMatrixInverse.copy(perspective.projectionMatrix).invert();
     // Bring the room into view before the camera turns towards the doorway.
     // Keep the exterior shell inside the gym since it supplies the ceiling.
@@ -137,7 +139,7 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     }
   }, 1);
   return <>
-    <color attach="background" args={['#d4d3c9']} />
+    <color attach="background" args={['#94c5e7']} />
     <TourReflections />
     <hemisphereLight ref={sky} args={['#f3eee0', '#676f6d', 2.2]} />
     <directionalLight ref={sun} position={[8, 18, 14]} intensity={3.2} color="#fff1d9" />
@@ -150,6 +152,7 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
         <Sign text="RESULTS MATTER" position={[3.8, 7.7, .36]} width={5} color="#f3eee0" />
       </>} />
     </group>
+    <StreetExterior motion={motion} />
     <EntranceArchitecture motion={motion} />
     <RyanTourGuide motion={motion} active={active} />
     <group ref={interior} position={[0, .31, 0]} dispose={null}>

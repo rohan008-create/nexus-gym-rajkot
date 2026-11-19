@@ -7,6 +7,35 @@ import { openEntrance } from './EntranceArchitecture';
 import { raiseGymBand } from './raiseGymBand';
 
 const EXTERIOR_URL = '/models/nexus-gym/exterior.glb';
+// Calibrated for the tour's daylight rig. Colors here are material albedos;
+// the photograph already includes sun and skylight.
+const exteriorFinish: Record<string, string> = {
+  'charcoal ACM': '#202226',
+  'black frames': '#17191c',
+  'deep shadow': '#121112',
+  shutters: '#514842',
+  'brushed aluminium': '#a1988d',
+  'plaster shade': '#ae9e92',
+  'cut stone': '#e8d3c6',
+  plaster: '#ffe4d4',
+  pavement: '#c9aa95',
+  asphalt: '#a08883',
+  'gym glazing': '#a6c8d4',
+  'upper glazing': '#a6c8d4',
+  'Nexus red': '#e0121a',
+};
+
+function prepareExteriorMaterial(source: THREE.Material) {
+  const copy = source.clone();
+  if (copy instanceof THREE.MeshStandardMaterial && exteriorFinish[source.name]) {
+    copy.color.set(exteriorFinish[source.name]);
+    // Keep an edge highlight on the stair nosing without whitening the fascia.
+    if (source.name === 'charcoal ACM') copy.envMapIntensity = .35;
+    if (source.name === 'brushed aluminium') copy.roughness = .48;
+  }
+  openEntrance(copy);
+  return copy;
+}
 // One fixed optional asset, shared across route changes/replay. Clones below
 // preserve the cached source; the height-adjusted geometry/materials are owned.
 let cachedExterior: Promise<GLTF> | undefined;
@@ -32,7 +61,7 @@ export default function DetailedExterior({ fallback }: { fallback: React.ReactNo
       raiseGymBand(node.geometry, node.matrixWorld, node.name.includes('official_Nexus_logo') ? 'logo' : node.name.includes('warm_lettering') ? 'lettering' : null);
       geometries.push(node.geometry);
       const prepare = (source: THREE.Material) => {
-        if (!materials.has(source)) { const copy = source.clone(); openEntrance(copy); materials.set(source, copy); }
+        if (!materials.has(source)) materials.set(source, prepareExteriorMaterial(source));
         return materials.get(source)!;
       };
       node.material = Array.isArray(node.material) ? node.material.map(prepare) : prepare(node.material);
