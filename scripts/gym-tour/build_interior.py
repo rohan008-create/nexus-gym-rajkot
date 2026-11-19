@@ -207,12 +207,7 @@ for dx in [-.39,.39]:rod('Bike angled grip',[x+dx,F+1.43,z-.52],[x+dx,F+1.55,z-.
 for sign in [-1,1]:
     rod('Bike crank',[x+sign*.11,F+.48,z+.08],[x+sign*.13,F+.32,z+.22],.02,'machined silver',8)
     box('Bike pedal',[x+sign*.25,F+.31,z+.22],[.23,.055,.14],'powder coated frame',.01)
-# Reception slatted front, worktop, screen and folded towels/water station.
-box('Reception desk carcass',[6.2,F+.62,-1.55],[3.4,1.24,1.15],'powder coated frame',.04)
-for x in [4.65+i*.14 for i in range(23)]:box('Reception timber slat',[x,F+.65,-.955],[.075,1.1,.035],'warm reception timber',.008)
-box('Reception countertop',[6.2,F+1.28,-1.55],[3.6,.11,1.28],'brushed steel',.025)
-box('Reception monitor',[6.2,F+1.57,-1.7],[.65,.39,.06],'powder coated frame',.025)
-plane('Reception monitor face',[6.2,F+1.57,-1.66],.55,.29,'cardio display')
+# The compact reception desk is furnished by ReceptionOffice.
 box('Towel and bottle cabinet',[8,F+.53,-2.9],[1.1,1.06,.75],'powder coated frame')
 for y in [F+.33,F+.71]:
     box('Open cabinet shelf',[8,y,-2.85],[1.0,.05,.6],'warm reception timber',.01)

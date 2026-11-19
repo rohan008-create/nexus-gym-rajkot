@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-19",
+  "results": {
+    "node scripts/gym-tour/test-tour.cjs": "PASS: continuous desktop/mobile camera and guide routes, doorway clearance, reversible convergence and fallback geometry",
+    "node scripts/gym-tour/verify-arrival.cjs": "PASS: 39 checks; no uncaught runtime or shader errors",
+    "npm run build": "PASS: production compilation, lint/type checks and 8 static pages"
+  },
+  "browserEvidence": "artifacts/gym-tour/arrival/browser-checks.json",
+  "screenshots": "artifacts/gym-tour/arrival/",
+  "limits": [
+    "Touch tested with Chrome emulation, not a physical phone.",
+    "Successful browser run used explicit D3D11 ANGLE; default backend had shader validation errors and SwiftShader was too slow on this host.",
+    "No guaranteed FPS or total-mobile-transfer-budget claim."
+  ]
+}

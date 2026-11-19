@@ -1,10 +1,15 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { createContext, useContext, useEffect, useRef, type MutableRefObject } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const ScrollContext = createContext<MutableRefObject<Lenis | null> | null>(null);
+export function usePageScroller() {
+  return useContext(ScrollContext);
+}
 
 /**
  * Global Lenis Smooth Scroll Provider
@@ -46,5 +51,5 @@ export default function SmoothScroll({ children, enabled = true }: { children: R
     };
   }, [enabled]);
 
-  return <>{children}</>;
+  return <ScrollContext.Provider value={lenisRef}>{children}</ScrollContext.Provider>;
 }

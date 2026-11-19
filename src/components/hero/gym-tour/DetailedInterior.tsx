@@ -21,14 +21,20 @@ export default function DetailedInterior({ active, fallback }: { active: boolean
   useEffect(() => {
     if (!active || asset) return;
     let mounted = true;
+    let idle: number | undefined;
     // Wait until the hero is interactive; do not parse another GLB during the
     // punching-bag impact. The procedural interior remains immediately usable.
     const timer = setTimeout(() => {
-      loadInterior().then(value => { if (mounted) setAsset(value); }).catch(() => {
-        if (mounted) { gl.domElement.dataset.interiorSource = 'fallback'; invalidate(); }
-      });
+      const load = () => {
+        if (!mounted) return;
+        loadInterior().then(value => { if (mounted) setAsset(value); }).catch(() => {
+          if (mounted) { gl.domElement.dataset.interiorSource = 'fallback'; invalidate(); }
+        });
+      };
+      if ('requestIdleCallback' in window) idle = window.requestIdleCallback(load, { timeout: 1200 });
+      else load();
     }, 350);
-    return () => { mounted = false; clearTimeout(timer); };
+    return () => { mounted = false; clearTimeout(timer); if (idle !== undefined) window.cancelIdleCallback(idle); };
   }, [active, asset, gl, invalidate]);
   useEffect(() => {
     gl.domElement.dataset.interiorSource = clone ? 'detailed' : 'fallback';

@@ -1,0 +1,14 @@
+{
+  "source": "public/models/avatar-preview/ryan-smart.glb",
+  "output": "public/models/nexus-gym/ryan-guide.glb",
+  "sourceBytes": 40881436,
+  "bytes": 1713764,
+  "clips": [
+    "Idle",
+    "Walk",
+    "Wave"
+  ],
+  "maxTextureSize": 512,
+  "provenance": "User supplied local Ryan GLB. Original retained unchanged in avatar-preview.",
+  "rights": "No new third-party asset downloaded."
+}

@@ -1,4 +1,4 @@
-.membership-print-section { position: relative; isolation: isolate; z-index: 5; overflow: hidden; padding: 65px var(--page-gutter) 75px; color: #eeedec; background: #050505; scroll-margin-top: 80px; text-align: center; }
+.membership-print-section { position: relative; isolation: isolate; z-index: 5; overflow: hidden; padding: 65px var(--page-gutter) 75px; color: #eeedec; background: #000; scroll-margin-top: 80px; text-align: center; }
 .membership-print-index { display: flex; align-items: center; justify-content: space-between; margin: 0 0 55px; padding-top: 18px; border-top: 1px solid #ffffff14; color: #68686e; font: 8px monospace; letter-spacing: .13em; }
 .membership-print-index > span:first-child { color: #d02b42; }
 .membership-print-header { margin: 0 auto 26px; }
@@ -45,3 +45,45 @@
   .membership-print-note { font-size: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .membership-print-section * { transition: none !important; } }
+
+/* Thermal printers: each column owns its scale, so paper and hardware stay aligned. */
+.membership-auto-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; max-width:1240px; margin:36px auto 0; align-items:start; }
+.membership-auto-machine { min-width:0; width:100%; container-type:inline-size; position:relative; }
+.membership-auto-label { display:flex; justify-content:space-between; gap:12px; border-top:1px solid #ffffff20; padding:15px 4px 0; color:#777781; font:8px monospace; letter-spacing:.09em; }
+.membership-auto-label > span:first-child { color:#eeedec; }
+.is-popular .membership-auto-label { border-color:#ef304870; }
+.is-popular .membership-auto-label > span:first-child { color:#ff4058; }
+.membership-auto-printer { --receipt-unit:min(calc((100cqw - 12px) / 440), .95px); background:#000 !important; min-height:0 !important; isolation:isolate; }
+.membership-auto-printer > button { bottom:0; right:0; width:36px; height:36px; opacity:.8; }
+.membership-auto-printer > div:last-child > p { color:#86868d; }
+.membership-plan-paper { background:linear-gradient(90deg,#e0dfd7,#fcfaf1 6%,#fcfaf1 94%,#deddd4); color:#2b2a27; padding:calc(var(--u) * 26) calc(var(--u) * 23) calc(var(--u) * 28); font-family:monospace; text-align:left; line-height:1.5; }
+.membership-plan-content { border:0; min-width:0; padding:0; margin:0; position:relative; }
+.membership-paper-store { margin:0; text-align:center; font-size:calc(var(--u) * 15); font-weight:800; letter-spacing:.025em; }
+.membership-paper-location { margin:calc(var(--u) * 3) 0 0; text-align:center; font-size:calc(var(--u) * 10); letter-spacing:.12em; }
+.membership-paper-rule { border-top:1px dashed #727167; margin:calc(var(--u) * 16) 0; }
+.membership-paper-order { display:flex; justify-content:space-between; gap:8px; font-size:calc(var(--u) * 9); }
+.membership-plan-content h3 { font-size:calc(var(--u) * 38); font-weight:900; letter-spacing:-.05em; line-height:1; margin:calc(var(--u) * 15) 0 calc(var(--u) * 12); }
+.membership-plan-content h3 > span { display:block; font-size:calc(var(--u) * 10); letter-spacing:.18em; font-weight:500; margin-top:calc(var(--u) * 8); }
+.membership-paper-description { font-size:calc(var(--u) * 12); margin:0; line-height:1.7; }
+.membership-paper-stamp { position:absolute; top:calc(var(--u) * 99); right:0; color:#d4231a; font-size:calc(var(--u) * 10); padding:calc(var(--u) * 3); border:2px solid #d4231a; transform:rotate(-12deg); font-weight:800; }
+.membership-paper-focus { font-size:calc(var(--u) * 11); font-weight:800; margin:0 0 calc(var(--u) * 10); }
+.membership-plan-content ul { margin:0; padding:0; list-style:none; font-size:calc(var(--u) * 11); }
+.membership-plan-content li { display:flex; gap:calc(var(--u) * 8); margin-top:calc(var(--u) * 7); line-height:1.5; }
+.membership-paper-row { display:flex; justify-content:space-between; gap:8px; font-size:calc(var(--u) * 11); margin-top:calc(var(--u) * 5); }
+.membership-paper-confirm { font-size:calc(var(--u) * 9); opacity:.7; margin:calc(var(--u) * 10) 0 calc(var(--u) * 14); }
+.membership-plan-content button { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; min-height:44px; border:0; color:#fff9e9; background:#d4231a; padding:8px 12px; font-size:max(10px,calc(var(--u) * 12)); font-weight:700; letter-spacing:.04em; }
+.membership-plan-content button:disabled { cursor:default; }
+.membership-plan-content button:hover:not(:disabled) { background:#af2019; }
+.membership-print-section .membership-plan-content button:focus-visible { outline-color:#2b2a27; outline-offset:3px; }
+.membership-paper-barcode { width:80%; height:calc(var(--u) * 30); margin:calc(var(--u) * 16) auto 0; background:repeating-linear-gradient(90deg,#262624 0 2px,transparent 2px 5px,#262624 5px 6px,transparent 6px 9px); }
+.membership-paper-thanks { text-align:center; font-size:calc(var(--u) * 9); letter-spacing:.13em; margin:calc(var(--u) * 8) 0 0; }
+.membership-auto-printer [role=button] { touch-action:pan-y; }
+@media(max-width:1050px) { .membership-auto-grid { grid-template-columns:1fr; max-width:440px; gap:30px; } .membership-auto-label { font-size:9px; } }
+@media(max-width:719px) { .membership-auto-grid { margin-top:28px; gap:24px; } .membership-auto-printer { --receipt-unit:min(calc((100cqw - 8px) / 440), .95px); } .membership-print-note { max-width:340px; font-size:10px; } }
+@media(prefers-reduced-motion:reduce) { .membership-auto-machine { transform:none !important; opacity:1 !important; } }
+.membership-auto-printer > button { width:44px; height:44px; }
+.membership-paper-description { font-size:calc(var(--u) * 14); }
+.membership-plan-content ul { font-size:calc(var(--u) * 13); }
+.membership-paper-confirm { font-size:calc(var(--u) * 10); }
+
+.membership-auto-printer > .receipt-printer-grain { display:none; }

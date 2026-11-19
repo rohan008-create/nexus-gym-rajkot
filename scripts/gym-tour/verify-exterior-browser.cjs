@@ -1,5 +1,5 @@
 const fs=require('node:fs');const path=require('node:path');const assert=require('node:assert/strict');const {execFileSync}=require('node:child_process');
-const session=process.env.AB_SESSION||'nexus-exterior-phase3';const base=process.env.TOUR_TEST_URL||'http://localhost:3000';const out=path.resolve('artifacts/gym-tour/phase3');fs.mkdirSync(out,{recursive:true});
+const session=process.env.AB_SESSION||'nexus-exterior-phase3';const base=process.env.TOUR_TEST_URL||'http://localhost:3000';const out=path.resolve(process.env.TOUR_TEST_OUTPUT || 'artifacts/gym-tour/phase3');fs.mkdirSync(out,{recursive:true});
 const report={checks:[],errors:[],mode:'headed Chromium viewport checks; physical-mobile performance not certified'};
 function ab(...args){let raw;try{raw=execFileSync('agent-browser',['--session',session,'--headed','--json',...args],{encoding:'utf8',timeout:120000,maxBuffer:8*1024*1024});}catch(e){throw Error([e.message,e.stdout,e.stderr].filter(Boolean).join('\n'));}const value=JSON.parse(raw);if(!value.success)throw Error(JSON.stringify(value));return value.data;}
 function js(code){return ab('eval',code).result;}function wait(code){ab('wait','--fn',code);}function check(label,condition){assert.ok(condition,label);report.checks.push(label);}

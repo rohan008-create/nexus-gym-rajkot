@@ -1,0 +1,20 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": ["shared-camera-playback", "animated-character", "continuous-doorway"],
+  "scope": ["hero navigation and overlays", "gym-tour scene and camera", "derived Ryan hero asset", "targeted tour validators"],
+  "decisions": [
+    "Keep the original downloaded avatar and existing avatar preview intact; derive a smaller hero asset locally.",
+    "Replace the opaque doorway cut with a real shader-carved opening and a connected landing, retaining the existing exterior and interior assets.",
+    "Place the greeter at the stair approach so the welcome and stair ascent form one continuous character path.",
+    "Use scroll-sampled walking and two-bone leg placement on the known stair dimensions; pause animation when the hero is inactive."
+  ],
+  "acceptance": [
+    "No navbar or old numbered footer rail; the scene fills the viewport.",
+    "Centered building, visible Ryan greeting, scroll-driven ascent and continuous doorway entry.",
+    "Reverse scrolling, mobile framing, reduced motion, asset failure and context loss remain usable.",
+    "TypeScript, targeted geometry/camera tests and browser checks pass after the final edits."
+  ]
+}

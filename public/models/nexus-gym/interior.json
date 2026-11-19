@@ -5,11 +5,11 @@
   "basis": "Original concept interior, not a scan or claim about the actual gym layout.",
   "coordinateConvention": "metres, glTF Y-up; gym floorY4.2",
   "model": "interior.glb",
-  "bytes": 1346856,
+  "bytes": 1346944,
   "materials": 19,
   "meshes": 19,
   "primitives": 19,
-  "triangles": 19278,
+  "triangles": 18132,
   "images": 4,
   "features": [
     "detailed racks, J hooks, plate storage and barbells",

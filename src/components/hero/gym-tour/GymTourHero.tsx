@@ -1,85 +1,100 @@
-'use client';
+﻿'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowUpRight, MapPin } from 'lucide-react';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import GymTourCanvas from './GymTourCanvas';
-import { TOUR_BEATS, tourBeatAt, tourCutOpacity, type TourStatus } from './gymTourConfig';
+import { usePageScroller } from '../../layout/SmoothScroll';
+import { tourBeatAt, type TourStatus } from './gymTourConfig';
 import './gym-tour.css';
 
 type Props = { active: boolean; reduced: boolean; onStatus: (status: TourStatus) => void; onTrial: () => void; onExplorePrograms: () => void };
 export default function GymTourHero({ active, reduced, onStatus, onTrial, onExplorePrograms }: Props) {
-  const root = useRef<HTMLElement>(null), progress = useRef(0), beatRef = useRef(0), invalidate = useRef<() => void>(() => {});
-  const [status, setStatus] = useState<TourStatus>('loading'), [beat, setBeat] = useState(0), [mobile, setMobile] = useState(false), [inView, setInView] = useState(true), [pageVisible, setPageVisible] = useState(true);
+  const root = useRef<HTMLElement>(null), progress = useRef(0), invalidate = useRef<() => void>(() => {});
+  const scroller = usePageScroller();
+  const [status, setStatus] = useState<TourStatus>('loading');
+  const [beat, setBeat] = useState(0), [mobile, setMobile] = useState(false), [inView, setInView] = useState(true), [pageVisible, setPageVisible] = useState(true);
+  const [attempt, setAttempt] = useState(0);
   const entryFocusDone = useRef(false);
+  const lastBeat = useRef(0);
   const staticView = reduced || status === 'error';
+  const present = useCallback((value: number) => {
+    const position = value.toFixed(4);
+    if (root.current && root.current.dataset.tourProgress !== position) root.current.dataset.tourProgress = position;
+    const next = tourBeatAt(value);
+    if (lastBeat.current !== next) { lastBeat.current = next; setBeat(next); }
+  }, []);
   const ready = useCallback(() => { setStatus('ready'); onStatus('ready'); }, [onStatus]);
   const fail = useCallback(() => { setStatus('error'); onStatus('error'); }, [onStatus]);
-  useEffect(() => { if (reduced) { setStatus('ready'); onStatus('ready'); } }, [reduced, onStatus]);
+  const retry = () => { setAttempt(value => value + 1); setStatus('loading'); onStatus('loading'); };
+  useEffect(() => {
+    if (status !== 'loading' || reduced || !pageVisible) return;
+    const timeout = window.setTimeout(fail, 20000);
+    return () => window.clearTimeout(timeout);
+  }, [status, reduced, pageVisible, fail, attempt]);
+  useEffect(() => { if (reduced) onStatus('ready'); }, [reduced, onStatus]);
   useEffect(() => {
     if (!active) { entryFocusDone.current = false; return; }
     const element = root.current;
-    // Page's entry callback can run before the inert landing has committed.
-    // Hand focus over once after this hero actually becomes interactive. The
-    // standalone preview and later scroll/dialog updates must never take focus.
     if (entryFocusDone.current || element?.closest('.nexus-entrance')?.getAttribute('data-entrance') !== 'revealed') return;
     const frame = requestAnimationFrame(() => {
       const heading = element.querySelector<HTMLElement>('#hero-title');
       if (!heading || element.closest('[inert]') || element.closest('.nexus-entrance')?.getAttribute('data-entrance') !== 'revealed') return;
       if (document.activeElement !== document.body && document.activeElement !== heading) return;
-      if (document.activeElement !== heading) heading.focus({ preventScroll: true });
-      entryFocusDone.current = document.activeElement === heading;
+      heading.focus({ preventScroll: true }); entryFocusDone.current = true;
     });
     return () => cancelAnimationFrame(frame);
   }, [active]);
-
   useEffect(() => {
     const element = root.current!;
-    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting)); observer.observe(element);
-    const visible = () => setPageVisible(!document.hidden); document.addEventListener('visibilitychange', visible);
-    const media = matchMedia('(max-width: 760px)'); const resize = () => { setMobile(media.matches); measure(); update(); };
-    let top = 0, range = 1;
+    let intersecting = true, top = 0, range = 1;
+    // An edge touching the viewport can still be "intersecting" with zero area.
+    const observer = new IntersectionObserver(([entry]) => {
+      intersecting = entry.isIntersecting && entry.intersectionRatio >= .001;
+      setInView(intersecting);
+    }, { threshold: .001 });
+    observer.observe(element);
+    const visible = () => setPageVisible(!document.hidden);
+    visible(); document.addEventListener('visibilitychange', visible);
+    const media = matchMedia('(max-width: 760px)');
     const measure = () => { top = element.getBoundingClientRect().top + window.scrollY; range = Math.max(1, element.offsetHeight - window.innerHeight); };
     const update = () => {
       const value = staticView ? 0 : Math.max(0, Math.min(1, (window.scrollY - top) / range));
-      progress.current = value; const nextBeat = tourBeatAt(value); if (nextBeat !== beatRef.current) { beatRef.current = nextBeat; setBeat(nextBeat); }
-      element.dataset.tourProgress = value.toFixed(4);
-      element.style.setProperty('--tour-progress', String(value));
-      element.style.setProperty('--tour-cut', String(tourCutOpacity(value)));
-      if (active && !document.hidden && element.getBoundingClientRect().bottom > 0 && element.getBoundingClientRect().top < window.innerHeight) invalidate.current();
+      if (value === progress.current) return;
+      progress.current = value;
+      if (active && intersecting && !document.hidden && !staticView) invalidate.current();
     };
+    const resize = () => { setMobile(media.matches); measure(); update(); };
+    if (staticView) present(0);
     resize();
     window.addEventListener('scroll', update, { passive: true }); window.addEventListener('resize', resize, { passive: true });
     const sizeObserver = new ResizeObserver(() => { measure(); update(); }); sizeObserver.observe(element);
     return () => { observer.disconnect(); sizeObserver.disconnect(); document.removeEventListener('visibilitychange', visible); window.removeEventListener('scroll', update); window.removeEventListener('resize', resize); };
-  }, [active, staticView]);
-  const goToBeat = (index: number) => {
-    const element = root.current!;
-    const stops = [0, .28, .64, 1];
-    window.scrollTo({ top: element.getBoundingClientRect().top + window.scrollY + (element.offsetHeight - window.innerHeight) * stops[index], behavior: reduced ? 'instant' : 'smooth' });
+  }, [active, staticView, present]);
+  const scrollTo = (top: number) => {
+    if (scroller?.current) scroller.current.scrollTo(top, { immediate: reduced });
+    else window.scrollTo({ top, behavior: reduced ? 'instant' : 'smooth' });
   };
-  const current = TOUR_BEATS[staticView ? 0 : beat];
-  return <section ref={root} id="home" className={`gym-tour-hero${staticView ? ' is-static' : ''}`} data-tour-status={status} data-tour-beat={current.id} data-tour-progress={progress.current.toFixed(4)} aria-labelledby="hero-title">
+  const skip = () => {
+    const about = document.getElementById('about');
+    if (about) scrollTo(about.getBoundingClientRect().top + window.scrollY);
+  };
+  const begin = () => {
+    const element = root.current!;
+    scrollTo(element.getBoundingClientRect().top + window.scrollY + (element.offsetHeight - window.innerHeight) * .12);
+  };
+  return <section ref={root} id="home" className={`gym-tour-hero${staticView ? ' is-static' : ''}`} data-tour-active={active && inView && pageVisible && !staticView ? 'true' : 'false'} data-tour-status={reduced ? 'ready' : status} data-tour-beat={['exterior', 'entry', 'strength', 'cardio'][staticView ? 0 : beat]} data-tour-progress="0.0000" aria-labelledby="hero-title">
+    <h1 id="hero-title" tabIndex={-1} className="gym-tour-accessible-title">Welcome to Nexus Fitness Club, Rajkot. Follow Ryan inside.</h1>
     <div className="gym-tour-stage">
       <div className="gym-tour-visual" aria-hidden="true">
-        <img className={`gym-tour-poster${staticView ? ' is-visible' : ''}`} src="/assets/photography/nexus-real-building.webp" alt="" />
-        {!staticView && <GymTourCanvas progress={progress} active={active && inView && pageVisible} mobile={mobile} onInvalidate={invalidate} onReady={ready} onFailure={fail} />}
+        <img className={`gym-tour-poster${staticView || status === 'loading' ? ' is-visible' : ''}`} src="/assets/photography/nexus-real-building.webp" alt="" decoding="async" />
+        {!staticView && <GymTourCanvas key={attempt} progress={progress} active={active && inView && pageVisible} mobile={mobile} onInvalidate={invalidate} onPresent={present} onReady={ready} onFailure={fail} />}
       </div>
-      <div className="gym-tour-shade" aria-hidden="true" />
-      <div className="gym-tour-cut" aria-hidden="true" />
-      <div className="gym-tour-location"><MapPin size={13} aria-hidden />RAJKOT, GUJARAT</div>
-      <div className={`gym-tour-copy${beat === 2 ? ' is-right' : ''}`}>
-        <p className="gym-tour-eyebrow"><span />{current.label}</p>
-        <p className="gym-tour-brand">NEXUS FITNESS CLUB</p>
-        <h1 id="hero-title" tabIndex={-1}><span>{current.title[0]}</span><em>{current.title[1]}</em></h1>
-        <p className="gym-tour-description">{current.description}</p>
-        <div className="gym-tour-actions"><button className="gym-tour-trial" data-tour-trial onClick={onTrial}>Book a Trial<ArrowUpRight size={18} aria-hidden /></button><button className="gym-tour-programs" onClick={onExplorePrograms}>Explore Programs<ArrowUpRight size={16} aria-hidden /></button></div>
-      </div>
-      <div className="gym-tour-footer">
-        <div className="gym-tour-caption"><span>{String((staticView ? 0 : beat) + 1).padStart(2, '0')} / THE NEXUS EXPERIENCE</span><strong>{current.detail}</strong></div>
-        {!staticView && <nav className="gym-tour-stops" aria-label="Gym tour views">{TOUR_BEATS.map((item, i) => <button key={item.id} onClick={() => goToBeat(i)} aria-label={`View ${item.id === 'entry' ? 'entrance' : item.id}`} aria-current={beat === i ? 'step' : undefined}><span>{String(i + 1).padStart(2, '0')}</span><i /></button>)}</nav>}
-        {!staticView && <button className="gym-tour-scroll" onClick={() => beat < 3 ? goToBeat(beat + 1) : document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}>{beat < 3 ? (mobile ? 'NEXT VIEW' : 'SCROLL TO STEP INSIDE') : 'DISCOVER MORE'}<ArrowDown size={16} aria-hidden /></button>}
-      </div>
+      {!staticView && <div className="gym-tour-edge-shade" aria-hidden="true" />}
+      {!staticView && status === 'ready' && beat === 0 && <button className="gym-tour-enter" onClick={begin}><span>FOLLOW RYAN INSIDE</span><ArrowDown size={15} aria-hidden /></button>}
+      {!staticView && <button className="gym-tour-skip" onClick={skip}>Skip tour <ArrowUpRight size={13} aria-hidden /></button>}
+      {!staticView && beat === 3 && <div className="gym-tour-final-actions"><button data-tour-trial onClick={onTrial}>Book a trial <ArrowUpRight size={16} aria-hidden /></button><button onClick={onExplorePrograms}>Explore programs <ArrowUpRight size={16} aria-hidden /></button></div>}
+      {staticView && <div className="gym-tour-static-copy"><p>NEXUS FITNESS CLUB · RAJKOT</p><h2>Your next level starts here.</h2><button data-tour-trial onClick={onTrial}>Book a trial <ArrowUpRight size={16} aria-hidden /></button><button onClick={onExplorePrograms}>Explore programs</button></div>}
       {status === 'loading' && !reduced && <span className="gym-tour-loading" role="status">Opening Nexus…</span>}
-      {status === 'error' && <span className="gym-tour-fallback-note" role="status">Explore Nexus. Your next chapter starts here.</span>}
+      {status === 'error' && <div className="gym-tour-fallback-note"><span role="status">Explore Nexus at your own pace.</span><button type="button" onClick={retry}>Retry tour</button></div>}
     </div>
   </section>;
 }

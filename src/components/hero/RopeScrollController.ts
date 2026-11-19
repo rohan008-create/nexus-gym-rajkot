@@ -39,7 +39,7 @@ export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: Ro
     const context = gsap.context(() => {
       if (reduced) { gsap.set('[data-reveal], .persistent-scene, .site-nav', { autoAlpha: 1, clearProps: 'transform' }); return; }
       if (gymTour) {
-        entrance.current = gsap.timeline({ paused: true }).fromTo('.site-nav', { y: -6, opacity: 0 }, { y: 0, opacity: 1, duration: .55, ease: 'power3.out' });
+        entrance.current = gsap.timeline({ paused: true }).fromTo('.gym-tour-stage', { opacity: 0 }, { opacity: 1, duration: .55, ease: 'power3.out' });
         if (enabled.current) entrance.current.play();
         return;
       }
@@ -78,7 +78,10 @@ export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: Ro
       const scroll = { value: 0 };
       const timeline = gsap.timeline({ scrollTrigger: { trigger: element.querySelector(gymTour ? '#about' : '.hero-section'), ...(gymTour ? { start: 'top 95%', end: 'top 15%' } : ROPE_SCROLL), scrub: reduced ? true : .35,
         onUpdate: self => { velocity.current = reduced ? 0 : Math.min(1, Math.abs(self.getVelocity()) / 2400); }, onRefresh: measure } });
-      timeline.to(scroll, { value: 1, duration: 1, ease: 'none', onUpdate: () => { progress.current = scroll.value; } }, 0)
+      timeline.to(scroll, { value: 1, duration: 1, ease: 'none', onUpdate: () => { progress.current = scroll.value; } }, 0);
+      // The redesigned About owns its reveal/parallax; retain legacy reveals only
+      // for the old composition so two timelines never animate the new section.
+      if (!element.querySelector('[data-about-motion]')) timeline
         .fromTo('.gym-image-reveal', { clipPath: 'inset(12% 0 12% 100%)', opacity: 0 }, { clipPath: 'inset(0% 0 0% 0%)', opacity: 1, duration: .3, ease: 'power2.out' }, .52)
         .fromTo('.gym-photo-group', { xPercent: reduced ? 0 : 3, scale: reduced ? 1 : 1.06 }, { xPercent: 0, scale: 1, duration: .4, ease: 'none' }, .6)
         .fromTo('.about-line > span', reduced ? { opacity: 0 } : { yPercent: 108, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .13, stagger: .06, ease: 'power2.out' }, .58)

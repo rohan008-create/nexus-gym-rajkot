@@ -5,7 +5,7 @@
   "basis": "Original geometry inferred from one Nexus building photograph; approximate dimensions, not a survey.",
   "coordinateConvention": "metres, glTF Y-up; +Z street",
   "model": "exterior.glb",
-  "bytes": 2929168,
+  "bytes": 2929156,
   "meshes": 17,
   "materials": 17,
   "triangles": 45280,

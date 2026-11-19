@@ -183,23 +183,23 @@ box('Rooftop stair housing',[-.4,16.35,-7.7],[3.5,1.75,3.15],'plaster',.045)
 box('Rooftop housing cap',[-.4,17.25,-7.7],[3.8,.17,3.45],'cut stone',.025)
 box('Rooftop vent',[-.4,16.4,-6.08],[.9,.7,.07],'deep shadow',.005)
 # Proper stair stringers, repeated treads and a connected sloping balustrade.
-steps=20; bottom_z=6.4; run=.355; rise=4.2/steps
+steps=20; bottom_z=8.8; run=.355; rise=4.2/steps
 for i in range(steps):
     z=bottom_z-i*run;y=.24+(i+.5)*rise
-    box('Stair tread',[10.18,y,z],[2.1,.15,.38],'charcoal ACM',.012)
-    box('Stair nosing',[10.18,y+.081,z+.17],[2.12,.025,.045],'brushed aluminium',.004)
-    box('Stair riser shadow',[10.18,y-.065,z-.15],[1.96,.17,.055],'deep shadow',.004)
-box('Stair upper landing',[10.17,4.42,-.7],[2.24,.18,1.45],'charcoal ACM',.018)
-for x in [9.19,11.17]:
-    rod('Stair stringer',[x,.2,6.48],[x,4.38,-.55],.095,'black frames',10)
+    box('Stair tread',[8.05,y,z],[2.1,.15,.38],'charcoal ACM',.012)
+    box('Stair nosing',[8.05,y+.081,z+.17],[2.12,.025,.045],'brushed aluminium',.004)
+    box('Stair riser shadow',[8.05,y-.065,z-.15],[1.96,.17,.055],'deep shadow',.004)
+box('Stair upper landing',[8.04,4.42,1.7],[2.24,.18,1.45],'charcoal ACM',.018)
+for x in [7.06,9.04]:
+    rod('Stair stringer',[x,.2,8.88],[x,4.38,1.85],.095,'black frames',10)
     for i in range(0,steps,3):
         y=.24+(i+.5)*rise;z=bottom_z-i*run
         rod('Rail post',[x,y+.08,z],[x,y+1.03,z],.027,'brushed aluminium')
         box('Rail post base',[x,y+.1,z],[.13,.04,.13],'brushed aluminium',.005)
-    rod('Continuous handrail',[x,1.12,6.55],[x,5.48,-.64],.035,'brushed aluminium',12)
-    rod('Mid rail',[x,.65,6.55],[x,5.01,-.64],.021,'brushed aluminium')
-    rod('Landing post',[x,4.52,-1.31],[x,5.48,-1.31],.027,'brushed aluminium')
-    rod('Landing handrail',[x,5.48,-.64],[x,5.48,-1.31],.035,'brushed aluminium')
+    rod('Continuous handrail',[x,1.12,8.95],[x,5.48,1.76],.035,'brushed aluminium',12)
+    rod('Mid rail',[x,.65,8.95],[x,5.01,1.76],.021,'brushed aluminium')
+    rod('Landing post',[x,4.52,1.09],[x,5.48,1.09],.027,'brushed aluminium')
+    rod('Landing handrail',[x,5.48,1.76],[x,5.48,1.09],.035,'brushed aluminium')
 # Quiet parking marks beyond the clear pedestrian landing.
 for x in [-9,-5,-1,3]:box('Parking bay mark',[x,-.047,8],[.065,.01,3.3],'warm lettering',0)
 

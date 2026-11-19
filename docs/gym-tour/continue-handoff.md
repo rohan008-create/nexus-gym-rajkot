@@ -1,6 +1,6 @@
 # Nexus gym tour: continuation handoff
 
-Updated 2026-11-18. This is the English brief for the next AI. Read this file and the linked phase records before editing.
+Updated 2026-11-18 after the Phase 5/6 implementation continuation. Read [Phase 5](phase5.md) and [Phase 6](phase6.md) first. The user explicitly requested skipping testing: implementation is delivered, but performance measurements and final QA are deferred and release readiness is unverified. The detailed phase instructions below describe the original acceptance scope; their verification steps were not executed in this continuation.
 
 ## Status and remaining phases
 
@@ -10,10 +10,10 @@ Updated 2026-11-18. This is the English brief for the next AI. Read this file an
 | 2 | Complete | Working four-stop scroll hero, desktop/mobile camera tracks, fallback and integration. |
 | 3 | Complete | Detailed original exterior inspired by the supplied Nexus building photo. |
 | 4 | Complete | Detailed original concept interior with strength/cardio equipment, reception, branding and static mirrors. |
-| 5 | Pending implementation | Final lighting/contact shading/baking, reflection polish, asset/loading/render optimization and measured performance. Only preliminary reconnaissance occurred; no Phase 5 implementation or validation is complete. |
-| 6 | Pending | Final responsive/interaction/accessibility/regression QA, remaining visual polish and release readiness. |
+| 5 | Implementation delivered; unverified | Contact shading, one-time reflections, lighting balance, loading scheduling and render guards. Offline baking/compression not adopted; performance measurements deferred by user. See phase5.md. |
+| 6 | Polish delivered; QA deferred by user | Retry/loading timeout, focus and short-screen layout improvements. Browser/device regressions, typecheck, build and release certification not run. See phase6.md. |
 
-There are **two remaining phases: 5 and 6**. Do not restart completed phases or claim Phase 5 is finished.
+Both implementation passes have been delivered. Their original verification gates remain open under the user's testing waiver. Do not claim measured smoothness, passed regression QA or release readiness. Do not restart completed work.
 
 ## User-approved product scope
 
@@ -59,7 +59,7 @@ Preview: `/hero` bypasses intro; `/` tests the actual intro-to-hero flow. Start 
 - Static mirrors/sky textures exist, but final baked lighting has NOT been implemented. Source logo stays unchanged; builders optimize embedded versions.
 - Do not reintroduce the near-camera ceiling crossbeam at interior Z=-2.5: it hid equipment. Rear/perimeter structure remains.
 
-## Phase 5: implement next
+## Original Phase 5 scope (implementation notes in phase5.md; measurements deferred)
 
 1. Capture comparable baseline screenshots and loading/scroll performance before edits. Record hardware, native versus software rendering, viewport/DPR, cache/network and dev versus production conditions.
 2. Improve contact shading, depth, lighting balance and material readability. Prefer reproducible offline AO/light baking where useful; document what was actually baked. Polish static/selective reflections without an unbounded realtime mirror cost. Preserve equipment, branding and all tour features.
@@ -68,7 +68,7 @@ Preview: `/hero` bypasses intro; `/` tests the actual intro-to-hero flow. Start 
 5. Compare desktop/tablet/mobile captures, get independent visual review according to the available frontend skill, and fix issues before completion.
 6. Store actual evidence under `artifacts/gym-tour/phase5/` and write `docs/gym-tour/phase5.md`. Record limitations and exact commands/results.
 
-## Phase 6: then finish
+## Original Phase 6 QA scope (deferred by user; polish notes in phase6.md)
 
 Test the full intro -> hero -> About journey, all four stops in both directions, navbar bypass/Home, trial CTA and close/Escape, touch/native scroll, keyboard/focus/inert unlock, mobile menu, resize/orientation, portrait/short landscape and desktop/tablet framing. Check reduced motion, failed/slow assets, real WebGL context loss and retry, tab reactivation, repeated navigation/replay and resource behavior. Verify downstream sections remain functional. Run TypeScript, relevant tests and a production build, then document remaining device/browser limitations. Physical Android/iOS Safari testing is still needed; emulation does not certify them. Publishing/deploying is a separate user decision.
 
@@ -94,4 +94,4 @@ Use separate production build output/source snapshot if a development server is 
 
 ## Suggested instruction to the next AI
 
-Continue this repository from completed Phase 4. Read `docs/gym-tour/continue-handoff.md` and the phase records. Implement Phase 5 first, preserving all existing tour features and the surrounding page. Produce measurable before/after evidence and reproducible asset builds, then run the relevant checks and report honest limitations. After Phase 5, proceed to Phase 6 final QA/polish. Do not restart the project, replace the punching-bag intro, redesign later sections, or claim unmeasured smoothness.
+Read `docs/gym-tour/phase5.md` and `phase6.md` before making further edits. Phase 5/6 source changes are delivered with testing explicitly skipped at the user's request. Preserve that preference unless the user authorizes validation. If validation is later requested, use the original QA scope above and write fresh evidence into the correct phase output directories. Do not present historical Phase 4 evidence as proof for these changes. Do not replace the punching-bag intro, redesign later sections or claim unmeasured smoothness.

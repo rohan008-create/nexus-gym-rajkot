@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Navbar, { Destination } from '../layout/Navbar';
+import type { Destination } from '../layout/Navbar';
 import GymTourHero from './gym-tour/GymTourHero';
 import type { TourStatus } from './gym-tour/gymTourConfig';
 import TrialDialog from './TrialDialog';
@@ -8,7 +8,6 @@ import { useReducedMotion } from '../../hooks/useBagAnimation';
 import { useHeroTransition } from './RopeScrollController';
 import AboutNexus, { AboutPanel } from '../sections/AboutNexus';
 import type { RopeLayout } from './ropeGeometry';
-import AboutGymVisual from '../sections/AboutGymVisual';
 import ProgramsSection from '../sections/ProgramsSection';
 import ArmorySection from '../armory/ArmorySection';
 import NexusAdvantageSection from '../advantage/NexusAdvantageSection';
@@ -45,11 +44,9 @@ export default function HeroSection({ onReplayIntro, entranceEnabled = true, int
   // Entrance timing only plays the prepared GSAP timeline. Keep the large
   // landing tree unchanged while the two front sheets are animating.
   const content = useMemo(() => <main ref={root} className="site-shell rope-experience" data-rope-status={status} onPointerMove={event => { pointer.current.x = event.clientX / window.innerWidth * 2 - 1; pointer.current.y = 1 - event.clientY / window.innerHeight * 2; }} onPointerLeave={() => { pointer.current.x = 0; pointer.current.y = 0; }}>
-    <Navbar active={active} onNavigate={navigate} onTrial={() => setTrial(true)} />
     <div className="hero-experience">
       <GymTourHero active={interactive} reduced={reduced} onStatus={setStatus} onTrial={() => setTrial(true)} onExplorePrograms={() => navigate('Programs')} />
       <section className="continuation-section about-section" id="about" aria-labelledby="about-title">
-        <AboutGymVisual />
         <AboutNexus panel={panel} onTrial={() => setTrial(true)} />
       </section>
     </div>

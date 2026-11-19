@@ -20,6 +20,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
+  type ReactNode,
 } from "react";
 import {
   MotionConfig,
@@ -27,12 +28,12 @@ import {
   motion,
   motionValue,
   useMotionValue,
-  useReducedMotion,
   useTransform,
+  useReducedMotion,
   type MotionValue,
-} from "framer-motion";
+} from "motion/react";
 import { Volume2, VolumeX } from "lucide-react";
-const cn = (...classes: (string | false | undefined)[]) => classes.filter(Boolean).join(" ");
+import { cn } from "@/lib/utils";
 
 export type ReceiptItem = { name: string; qty: number; price: number };
 
@@ -45,20 +46,26 @@ export type ReceiptPrinterProps = {
   taxRate?: number;
   onPrint?: (order: number) => void;
   className?: string;
-  summary?: { label: string; value: string }[];
-  documentLabel?: string;
-  footer?: string;
-  embedded?: boolean;
-  appearance?: 'light' | 'dark';
-  idlePreview?: boolean;
+  receiptContent?: ReactNode;
+  autoPrint?: boolean;
+  autoPrintDelay?: number;
+  onComplete?: () => void;
+  allowTear?: boolean;
+  printLabel?: string;
 };
 
-/** One design unit. The compact stage is 440 x 760 units. */
+const ITEMS: ReceiptItem[] = [
+  { name: "Cola", qty: 2, price: 100 },
+  { name: "Melon soda", qty: 1, price: 90 },
+  { name: "Peach", qty: 1, price: 120 },
+  { name: "Rice crackers", qty: 1, price: 180 },
+];
+
+/** One design unit. The stage is 440 x 930 units. */
 const u = (n: number) => `calc(var(--u) * ${n})`;
 const W = 440;
-const H = 760;
-const SLOT_Y = 520; // where the paper comes out
-const PRINTER_Y = SLOT_Y - 50;
+const H = 930;
+const SLOT_Y = 690; // where the paper comes out
 const PAPER_W = 300;
 const PAPER_X = (W - PAPER_W) / 2;
 
@@ -67,25 +74,30 @@ type Receipt = {
   order: number;
   date: string;
   frac: MotionValue<number>;
-  paper: PaperProps;
 };
 type Phase = "idle" | "printing" | "stopped";
 
 export function ReceiptPrinter({
-  store = "Nexus Fitness Club",
-  address = "Rajkot, Gujarat",
-  items = [],
-  currency = "INR ",
-  taxRate = 0,
+  store = "Fizz & Co.",
+  address = "12 Harbor Street, Lisbon",
+  items = ITEMS,
+  currency = "¥",
+  taxRate = 0.1,
   onPrint,
   className,
-  summary,
-  documentLabel = "Preview",
-  footer = "YOUR NEXT CHAPTER",
-  embedded = false,
-  appearance = 'light',
-  idlePreview = false,
+  receiptContent,
+  autoPrint = false,
+  autoPrintDelay = 0,
+  onComplete,
+  allowTear = true,
+  printLabel = 'Print receipt',
 }: ReceiptPrinterProps) {
+  const reduced = useReducedMotion();
+  const autoStarted = useRef(false);
+  const autoAction = useRef<() => void>(() => {});
+  const pending = useRef(false);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const later = (action: () => void, delay: number) => { timers.current.push(setTimeout(action, delay)); };
   // The paper is one continuous strip: every print joins a new receipt onto the end of it.
   const [strip, setStrip] = useState([] as Receipt[]);
   const [flying, setFlying] = useState(
@@ -99,11 +111,7 @@ export function ReceiptPrinter({
   );
   const [phase, setPhase] = useState("idle" as Phase);
   const [pressed, setPressed] = useState(false);
-  const [soundOff, setSoundOff] = useState(() => muted);
-  const reduced = useReducedMotion();
-  const phaseRef = useRef<Phase>("idle");
-  const pressTimer = useRef<ReturnType<typeof setTimeout>>();
-  const mounted = useRef(true);
+  const [soundOff, setSoundOff] = useState(false);
   const order = useRef(426);
   const nextId = useRef(0);
   const feeding = useRef(null as null | { stop: () => void });
@@ -125,13 +133,25 @@ export function ReceiptPrinter({
 
   const lines = 16 + items.length; // roughly how long one receipt takes
 
+  useEffect(() => () => { feeding.current?.stop(); timers.current.forEach(clearTimeout); }, []);
   useEffect(() => {
-    mounted.current = true;
-    return () => { mounted.current = false; feeding.current?.stop(); clearTimeout(pressTimer.current); };
-  }, []);
+    if (!autoPrint || autoStarted.current) return;
+    const element = stageRef.current;
+    if (!element) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !autoStarted.current) {
+        if (timer !== undefined) return;
+        timer = setTimeout(() => { if (!autoStarted.current) { autoStarted.current = true; autoAction.current(); } observer.disconnect(); }, autoPrintDelay);
+      } else if (timer !== undefined) { clearTimeout(timer); timer = undefined; }
+    }, { threshold: .18 });
+    observer.observe(element);
+    return () => { observer.disconnect(); if (timer !== undefined) clearTimeout(timer); };
+  }, [autoPrint, autoPrintDelay]);
+  const stageRef = useRef<HTMLDivElement>(null);
 
   /** Print a whole new receipt onto the end of the strip. */
-  const printOne = () => {
+  const printOne = (silent = false) => {
     order.current += 1;
     const r: Receipt = {
       id: nextId.current++,
@@ -143,16 +163,15 @@ export function ReceiptPrinter({
         hour: "2-digit",
         minute: "2-digit",
       }),
-      frac: motionValue(0),
-      paper: { ...paper, items: paper.items.map(item => ({ ...item })), summary: paper.summary?.map(row => ({ ...row })) },
+      frac: motionValue(reduced ? 1 : 0),
     };
-    setStrip((s) => [...s, r]);
-    phaseRef.current = "printing";
+    setStrip((s) => receiptContent ? [r] : [...s, r]);
     setPhase("printing");
     onPrint?.(order.current);
 
-    const dur = reduced ? .08 : 0.9 + lines * 0.1;
-    const stopSound = sfx.feed(dur);
+    if (reduced) { setPhase('stopped'); onComplete?.(); return; }
+    const dur = 0.9 + lines * 0.1;
+    const stopSound = silent || soundOff ? () => {} : sfx.feed(dur);
     // a steady feed: it eases off the line for a beat, runs at an even speed, then stops
     const a = animate(r.frac, 1, { duration: dur, ease: [0.4, 0, 0.9, 1] });
     feeding.current = {
@@ -162,18 +181,17 @@ export function ReceiptPrinter({
       },
     };
     a.then(() => {
-      if (!mounted.current || r.frac.get() < 0.999) return; // stopped early
+      if (r.frac.get() < 0.999) return; // stopped early
       feeding.current = null;
-      phaseRef.current = "stopped";
       setPhase("stopped");
-      sfx.done();
+      if (!silent && !soundOff) sfx.done();
+      onComplete?.();
     });
   };
 
   const stopFeed = () => {
     feeding.current?.stop();
     feeding.current = null;
-    phaseRef.current = "stopped";
     setPhase("stopped");
   };
 
@@ -185,25 +203,26 @@ export function ReceiptPrinter({
     sfx.rip();
     setFlying({ strip, x: pullX.get(), y: pullY.get(), vx, vy });
     setStrip([]);
-    phaseRef.current = "idle";
     setPhase("idle");
     pullX.set(0);
     pullY.set(0);
   };
 
   // PRINT: stops the feed if it's running, otherwise prints another receipt onto the strip.
-  const print = () => {
-    sfx.unlock();
-    sfx.button();
+  const print = (silent = false) => {
+    if (pending.current) return;
+    autoStarted.current = true;
+    if (!silent && !soundOff) { sfx.unlock(); sfx.button(); }
     setPressed(true);
-    clearTimeout(pressTimer.current);
-    pressTimer.current = setTimeout(() => setPressed(false), 140);
-    if (phaseRef.current === "printing") stopFeed();
-    else printOne();
+    later(() => setPressed(false), 140);
+    if (phase === "printing") stopFeed();
+    else { pending.current = true; later(() => { pending.current = false; printOne(silent); }, 160); }
   };
+  autoAction.current = () => print(true);
 
   /* Pulling the strip: it gives a little (it's still attached), then rips. */
   const onDown = (e: PointerEvent<HTMLDivElement>) => {
+    if (!allowTear || (e.target as HTMLElement).closest('button, a')) return;
     sfx.unlock();
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = {
@@ -242,6 +261,7 @@ export function ReceiptPrinter({
     animate(pullY, 0, { type: "spring", stiffness: 500, damping: 22 });
   };
   const onKey = (e: KeyboardEvent) => {
+    if (!allowTear || e.target !== e.currentTarget) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       tear(0, -900);
@@ -250,38 +270,34 @@ export function ReceiptPrinter({
 
   const total = items.reduce((t, i) => t + i.qty * i.price, 0);
   const tax = Math.round(total * taxRate);
-  const paper = { store, address, items, currency, total, tax, taxRate, summary, documentLabel, footer };
+  const paper = { store, address, items, currency, total, tax, taxRate, receiptContent };
   const hint =
     phase === "printing"
-      ? "Printing... press PRINT to stop"
+      ? "Printing your next chapter…"
       : strip.length
-        ? "Pull to tear it off, or print another"
-        : "Select your plan. Press PRINT.";
+        ? allowTear ? "Pull to tear it off, or print another" : strip[strip.length - 1].frac.get() >= .999 ? "Your plan is ready. Make your move." : "Paused. Press PRINT to start again."
+        : "Press print";
 
   return (
     <MotionConfig reducedMotion="user">
       <div
+        ref={stageRef}
         className={cn(
-          "receipt-printer relative grid w-full place-items-center overflow-hidden font-sans text-[#2b2a27]",
-          !embedded && "min-h-dvh",
-          appearance === 'dark' && 'receipt-printer-dark',
+          "relative grid min-h-dvh w-full place-items-center overflow-hidden font-sans text-[#2b2a27]",
           className,
         )}
-        data-printer-phase={phase}
-        data-receipt-count={strip.length}
         style={
           {
-            "--u": "var(--receipt-unit, min((100vw - 32px) / 440, (100dvh - 24px) / 760))",
-            height: embedded ? u(H + 24) : undefined,
+            "--u": "var(--receipt-unit, min((100vw - 32px) / 440, (100dvh - 24px) / 930))",
             background:
-              appearance === 'dark' ? 'transparent' : "radial-gradient(80% 70% at 50% 35%, #e9e6df 0%, #dcd8cf 55%, #cdc8bd 100%)",
+              "radial-gradient(80% 70% at 50% 35%, #e9e6df 0%, #dcd8cf 55%, #cdc8bd 100%)",
           } as CSSProperties
         }
       >
-        {appearance !== 'dark' && <div
-          className="pointer-events-none absolute inset-0 opacity-[0.35] mix-blend-multiply"
+        <div
+          className="receipt-printer-grain pointer-events-none absolute inset-0 opacity-[0.35] mix-blend-multiply"
           style={{ backgroundImage: GRAIN }}
-        />}
+        />
 
         {/* sound on / off */}
         <button
@@ -297,7 +313,6 @@ export function ReceiptPrinter({
           }}
           aria-label={soundOff ? "Turn sound on" : "Turn sound off"}
           aria-pressed={soundOff}
-          style={appearance === 'dark' ? { background: '#141416', color: '#99999f', boxShadow: 'inset 0 0 0 1px #ffffff12' } : undefined}
           className="absolute right-4 bottom-4 z-40 grid size-10 cursor-pointer place-items-center rounded-full bg-white/70 text-[#2b2a27] shadow-[0_1px_2px_rgb(0_0_0/0.08),0_6px_16px_-8px_rgb(0_0_0/0.3)] ring-1 ring-black/5 backdrop-blur transition-[transform,background-color] duration-200 hover:bg-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d4231a]"
         >
           {soundOff ? (
@@ -308,14 +323,6 @@ export function ReceiptPrinter({
         </button>
 
         <div className="relative" style={{ width: u(W), height: u(H) }}>
-          {idlePreview && !strip.length && <div className="receipt-printer-idle-paper" aria-hidden="true" style={{ left: u(PAPER_X), top: u(SLOT_Y - 390), width: u(PAPER_W), height: u(390), padding: `${u(30)} ${u(24)}`, fontSize: u(10) }}>
-            <span style={{ letterSpacing: '.18em', fontSize: u(9) }}>NEXUS FITNESS CLUB</span>
-            <div style={{ borderTop: '1px dashed #aaa', margin: `${u(18)} 0` }} />
-            <strong style={{ display: 'block', fontSize: u(36), lineHeight: 1.15, letterSpacing: '-.06em' }}>YOUR NEXT<br />CHAPTER.</strong>
-            <span style={{ display: 'block', marginTop: u(24), color: '#777', fontSize: u(9) }}>CHOOSE A PLAN. PRESS PRINT.</span>
-            <span className="receipt-printer-idle-barcode" style={{ bottom: u(40), height: u(36) }} />
-            <span style={{ position: 'absolute', bottom: u(20), left: 0, width: '100%', color: '#777', fontSize: u(8), letterSpacing: '.14em' }}>BASIC / PRO / ELITE</span>
-          </div>}
           {/* the strip, rising out of the slot; clipped at the slot so it comes from inside, free to run off the top */}
           <div
             className="pointer-events-none absolute z-10 overflow-hidden"
@@ -328,15 +335,15 @@ export function ReceiptPrinter({
           >
             {strip.length > 0 && (
               <motion.div
-                role="button"
-                tabIndex={0}
-                aria-label="Receipt. Pull it, or press Enter, to tear it off."
+                role={allowTear ? 'button' : undefined}
+                tabIndex={allowTear ? 0 : undefined}
+                aria-label={allowTear ? 'Receipt. Pull it, or press Enter, to tear it off.' : undefined}
                 onPointerDown={onDown}
                 onPointerMove={onMove}
                 onPointerUp={onUp}
                 onPointerCancel={onUp}
                 onKeyDown={onKey}
-                className="pointer-events-auto absolute bottom-0 cursor-grab touch-none outline-none focus-visible:ring-2 focus-visible:ring-[#d4231a]/60 active:cursor-grabbing"
+                className={cn('pointer-events-auto absolute bottom-0 outline-none focus-visible:ring-2 focus-visible:ring-[#d4231a]/60', allowTear ? 'cursor-grab touch-none active:cursor-grabbing' : 'touch-pan-y')}
                 style={{
                   left: u(40),
                   width: u(PAPER_W),
@@ -346,7 +353,7 @@ export function ReceiptPrinter({
                   transformOrigin: "50% 100%",
                 }}
               >
-                <Strip strip={strip} />
+                <Strip strip={strip} paper={paper} />
               </motion.div>
             )}
           </div>
@@ -354,7 +361,6 @@ export function ReceiptPrinter({
           {/* the strip that got torn off */}
           {flying && (
             <motion.div
-              data-flying-receipt
               className="pointer-events-none absolute z-30"
               style={{
                 left: u(PAPER_X),
@@ -371,8 +377,8 @@ export function ReceiptPrinter({
                 opacity: 1,
               }}
               animate={{
-                x: reduced ? flying.x : flying.x + flying.vx * 0.55,
-                y: reduced ? flying.y : flying.y + flying.vy * 0.55 - 120,
+                x: flying.x + flying.vx * 0.55,
+                y: flying.y + flying.vy * 0.55 - 120,
                 rotate:
                   flying.x * 0.04 +
                   flying.vx * 0.03 +
@@ -380,20 +386,20 @@ export function ReceiptPrinter({
                 opacity: 0,
               }}
               transition={{
-                duration: reduced ? .1 : .85,
+                duration: 0.85,
                 ease: [0.2, 0.7, 0.3, 1],
-                opacity: { duration: reduced ? .1 : .85, ease: "easeIn" },
+                opacity: { duration: 0.85, ease: "easeIn" },
               }}
               onAnimationComplete={() => setFlying(null)}
             >
-              <Strip strip={flying.strip} />
+              <Strip strip={flying.strip} paper={paper} />
             </motion.div>
           )}
 
           {/* ---- the printer, from above ---- */}
           <div
             className="absolute"
-            style={{ left: u(20), top: u(PRINTER_Y), width: u(400), height: u(240) }}
+            style={{ left: u(20), top: u(640), width: u(400), height: u(240) }}
           >
             {/* body */}
             <div
@@ -401,8 +407,8 @@ export function ReceiptPrinter({
               style={{
                 borderRadius: u(40),
                 background:
-                  "var(--printer-surface, linear-gradient(180deg, #f6f4ef 0%, #ebe8e1 55%, #dedad1 100%))",
-                boxShadow: `var(--printer-shadow, inset 0 ${u(2)} ${u(1)} rgb(255 255 255 / 0.9), inset 0 ${u(-6)} ${u(10)} rgb(120 110 95 / 0.18), 0 ${u(2)} ${u(3)} rgb(60 50 40 / 0.18), ${u(10)} ${u(26)} ${u(40)} ${u(-8)} rgb(60 50 40 / 0.4))`,
+                  "linear-gradient(180deg, #f6f4ef 0%, #ebe8e1 55%, #dedad1 100%)",
+                boxShadow: `inset 0 ${u(2)} ${u(1)} rgb(255 255 255 / 0.9), inset 0 ${u(-6)} ${u(10)} rgb(120 110 95 / 0.18), 0 ${u(2)} ${u(3)} rgb(60 50 40 / 0.18), ${u(10)} ${u(26)} ${u(40)} ${u(-8)} rgb(60 50 40 / 0.4)`,
               }}
             />
             {/* lid seam */}
@@ -414,7 +420,7 @@ export function ReceiptPrinter({
                 top: u(92),
                 height: u(2),
                 borderRadius: u(2),
-                background: "var(--printer-seam, rgb(120 110 95 / 0.25))",
+                background: "rgb(120 110 95 / 0.25)",
                 boxShadow: `0 ${u(1)} 0 rgb(255 255 255 / 0.8)`,
               }}
             />
@@ -424,7 +430,7 @@ export function ReceiptPrinter({
               style={{
                 left: u(PAPER_X - 20 - 18),
                 width: u(PAPER_W + 36),
-                top: u(SLOT_Y - PRINTER_Y - 7),
+                top: u(SLOT_Y - 640 - 7),
                 height: u(14),
                 borderRadius: u(7),
                 background: "linear-gradient(180deg, #1b1a18, #3a3833)",
@@ -432,13 +438,13 @@ export function ReceiptPrinter({
               }}
             />
             {/* paper lip waiting in the slot */}
-            {!strip.length && !idlePreview && (
+            {!strip.length && (
               <div
                 className="absolute bg-[#fbfaf6]"
                 style={{
                   left: u(PAPER_X - 20),
                   width: u(PAPER_W),
-                  top: u(SLOT_Y - PRINTER_Y - 9),
+                  top: u(SLOT_Y - 640 - 9),
                   height: u(9),
                   WebkitMask: ZIGZAG_TOP,
                   mask: ZIGZAG_TOP,
@@ -454,7 +460,7 @@ export function ReceiptPrinter({
                 className="block rounded-full"
                 style={{ width: u(9), height: u(9) }}
                 animate={
-                  phase === "printing" && !reduced
+                  phase === "printing"
                     ? {
                         backgroundColor: ["#ffb340", "#7a5310", "#ffb340"],
                         boxShadow: [
@@ -469,7 +475,7 @@ export function ReceiptPrinter({
                       }
                 }
                 transition={
-                  phase === "printing" && !reduced
+                  phase === "printing"
                     ? { duration: 0.5, repeat: Infinity }
                     : { duration: 0.3 }
                 }
@@ -479,14 +485,16 @@ export function ReceiptPrinter({
             {/* PRINT button */}
             <button
               type="button"
-              onClick={print}
-              aria-label="Print receipt"
+                onClick={() => print()}
+              aria-label={printLabel}
               className="absolute grid cursor-pointer place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d4231a]"
               style={{
                 left: u(300),
                 top: u(104),
                 width: u(72),
                 height: u(72),
+                minWidth: 44,
+                minHeight: 44,
                 background:
                   "radial-gradient(circle at 50% 45%, #2f2d29, #1a1917)",
                 boxShadow: `inset 0 ${u(2)} ${u(3)} rgb(0 0 0 / 0.6), 0 ${u(1)} 0 rgb(255 255 255 / 0.9)`,
@@ -523,11 +531,11 @@ export function ReceiptPrinter({
                 top: u(182),
                 fontSize: u(18),
                 backgroundImage:
-                  "var(--printer-mark, linear-gradient(180deg, #6b6b70 0%, #1c1c1f 42%, #000 50%, #0b0b0d 78%, #2a2a2e 100%))",
-                filter: appearance === 'dark' ? 'none' : `drop-shadow(0 ${u(1)} 0 rgb(255 255 255 / 0.9)) drop-shadow(0 ${u(1)} ${u(1.5)} rgb(0 0 0 / 0.25))`,
+                  "linear-gradient(180deg, #6b6b70 0%, #1c1c1f 42%, #000 50%, #0b0b0d 78%, #2a2a2e 100%)",
+                filter: `drop-shadow(0 ${u(1)} 0 rgb(255 255 255 / 0.9)) drop-shadow(0 ${u(1)} ${u(1.5)} rgb(0 0 0 / 0.25))`,
               }}
             >
-              NEXUS / NX-07
+              NEXUS
             </span>
           </div>
 
@@ -553,8 +561,8 @@ export function ReceiptPrinter({
             aria-live="polite"
             initial={{ opacity: 0, y: 4, filter: "blur(4px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            className="receipt-printer-hint absolute inset-x-0 text-center text-[#6f6a60]"
-            style={{ top: u(H - 32), fontSize: u(12) }}
+            className="absolute inset-x-0 text-center text-[#6f6a60]"
+            style={{ top: u(898), fontSize: u(13) }}
           >
             {hint}
           </motion.p>
@@ -597,6 +605,7 @@ function Rule() {
 }
 
 type PaperProps = {
+  receiptContent?: ReactNode;
   store: string;
   address: string;
   items: ReceiptItem[];
@@ -604,19 +613,16 @@ type PaperProps = {
   total: number;
   tax: number;
   taxRate: number;
-  summary?: { label: string; value: string }[];
-  documentLabel: string;
-  footer: string;
 };
 
 /** The strip: receipts joined end to end, each shown as far as it has printed. */
-function Strip({ strip }: { strip: Receipt[] }) {
+function Strip({ strip, paper }: { strip: Receipt[]; paper: PaperProps }) {
   return (
     <div
       style={{ boxShadow: `0 ${u(10)} ${u(24)} ${u(-6)} rgb(40 35 25 / 0.35)` }}
     >
       {strip.map((r, i) => (
-        <Segment key={r.id} receipt={r} first={i === 0} paper={r.paper} />
+        <Segment key={r.id} receipt={r} first={i === 0} paper={paper} />
       ))}
     </div>
   );
@@ -653,6 +659,7 @@ function Segment({
 }
 
 function Paper({
+  receiptContent,
   receipt,
   first,
   store,
@@ -662,10 +669,8 @@ function Paper({
   total,
   tax,
   taxRate,
-  summary,
-  documentLabel,
-  footer,
 }: {
+  receiptContent?: ReactNode;
   receipt: Receipt;
   first?: boolean;
   store: string;
@@ -675,10 +680,8 @@ function Paper({
   total: number;
   tax: number;
   taxRate: number;
-  summary?: { label: string; value: string }[];
-  documentLabel: string;
-  footer: string;
 }) {
+  if (receiptContent) return <div className="membership-plan-paper">{receiptContent}</div>;
   const money = (n: number) => `${currency}${n.toLocaleString("en-US")}`;
   const bars = Array.from(
     { length: 46 },
@@ -707,10 +710,9 @@ function Paper({
           <div style={{ fontSize: u(10.5) }}>{address}</div>
         </div>
         <Rule />
-        <Row l={`${documentLabel} #${String(receipt.order).padStart(4, "0")}`} r="" />
+        <Row l={`Order #${String(receipt.order).padStart(4, "0")}`} r="" />
         <Row l={receipt.date} r="" />
         <Rule />
-        {summary ? <>{summary.map(row => <Row key={row.label} l={row.label} r={row.value} strong={row.label === 'Plan'} />)}<Rule /><p style={{ fontSize: u(9.5), textAlign: 'center', margin: 0 }}>MEMBERSHIP PREVIEW / NOT A PAYMENT RECEIPT</p></> : <>
         {items.map((it) => (
           <Row
             key={it.name}
@@ -723,7 +725,6 @@ function Paper({
         <Row l={`Tax ${Math.round(taxRate * 100)}%`} r={money(tax)} />
         <div style={{ height: u(6) }} />
         <Row l="Total" r={money(total + tax)} strong />
-        </>}
         <Rule />
         <div
           className="flex items-stretch justify-center"
@@ -741,13 +742,13 @@ function Paper({
           className="text-center tracking-[0.3em]"
           style={{ fontSize: u(9.5), marginTop: u(4) }}
         >
-          NX {String(receipt.order).padStart(4, "0")} / RAJKOT
+          {String(receipt.order).padStart(4, "0")} 2026 1110
         </div>
         <div
           className="text-center font-bold tracking-[0.2em]"
           style={{ fontSize: u(12), marginTop: u(14) }}
         >
-          {footer}
+          THANK YOU
         </div>
       </div>
       {/* the top end of the strip curls a touch */}
@@ -837,8 +838,8 @@ function noise(
   src.start(t);
 }
 
-const sounds = {
-  unlock: () => void ac().resume().catch(() => {}),
+const sfx = {
+  unlock: () => void ac().resume(),
   button: () => {
     noise(0.02, { freq: 1300, type: "bandpass", gain: 0.6 });
     tone(230, 0.05, { gain: 0.08, to: 160 });
@@ -920,14 +921,4 @@ const sounds = {
     noise(0.04, { freq: 3000, type: "highpass", gain: 0.5 });
     tone(900, 0.04, { gain: 0.05 });
   },
-};
-
-
-// Sound is optional: audio failures must never block printing or tearing.
-const sfx = {
-  unlock: () => { try { sounds.unlock(); } catch {} },
-  button: () => { try { sounds.button(); } catch {} },
-  feed: (duration: number) => { try { return sounds.feed(duration); } catch { return () => {}; } },
-  done: () => { try { sounds.done(); } catch {} },
-  rip: () => { try { sounds.rip(); } catch {} },
 };

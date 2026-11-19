@@ -1,0 +1,13 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "source-review-only-user-requested-no-testing",
+  "delegation": "none",
+  "reason_codes": ["tour-lighting", "render-lifecycle", "responsive-accessibility-polish", "explicit-testing-waiver"],
+  "scope": "Gym-tour implementation, phase documentation and configurable evidence output paths; no publishing or unrelated page redesign",
+  "decisions": [
+    "Use one deterministic contact overlay and one-time PMREM reflections instead of continuous shadow/mirror passes",
+    "Keep current under-budget GLBs and decoder compatibility without unmeasured compression changes",
+    "Deliver source changes while explicitly deferring performance evidence and final QA"
+  ]
+}

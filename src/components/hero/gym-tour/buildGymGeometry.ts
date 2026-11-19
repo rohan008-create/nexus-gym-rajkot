@@ -53,12 +53,12 @@ export function buildGymGeometry() {
       add('concrete', [x, y, .15], [.12, 2.4, .3]);
     }
     add('concrete', [0, 15.15, -6], [18.6, .3, 12.6]);
-    // External staircase on the right, kept outside the gym's front glazing.
-    for (let i = 0; i < 18; i++) add('frame', [10.1, .12 + i * .233, 5.5 - i * .32], [2, .23, .34]);
-    add('frame', [10.1, 4.2, -.6], [2.2, .18, 1.5]);
-    for (const x of [9.15, 11.05]) {
-      for (let i = 0; i < 7; i++) add('steel', [x, 1.1 + i * .65, 5.2 - i * .9], [.05, 1, .05]);
-      add('steel', [x, 3.1, 2.45], [.055, .055, 7.2], [.63, 0, 0]);
+    // The approach, treads and top landing share the doorway centreline.
+    for (let i = 0; i < 20; i++) add('frame', [8.05, .24 + (i + .5) * .21, 8.8 - i * .355], [2.1, .15, .38]);
+    add('frame', [8.04, 4.42, 1.7], [2.24, .18, 1.45]);
+    for (const x of [7.06, 9.04]) {
+      for (let i = 0; i < 20; i += 3) add('steel', [x, .795 + (i + .5) * .21, 8.8 - i * .355], [.05, .95, .05]);
+      add('steel', [x, 3.3, 5.35], [.055, .055, 8.4], [.545, 0, 0]);
     }
     // Understated pavement and parking marks establish human scale.
     for (const x of [-10, -6, -2, 2, 6]) add('light', [x, -.04, 7], [.07, .025, 3.6]);
@@ -75,10 +75,6 @@ export function buildGymGeometry() {
     for (let x = -7.5; x < 0; x += 2.5) add('steel', [x, 5.8, -11.92], [2.35, 2.55, .04]);
     add('red', [0, 7.25, -11.9], [17.8, .09, .06]);
     for (const x of [-7, -1, 5]) add('light', [x, 7.5, -6], [.08, .07, 10]);
-    // Reception, separated from the clear central aisle.
-    add('frame', [6.4, 4.8, -1.8], [3.2, 1.2, 1]);
-    add('red', [6.4, 4.85, -1.27], [3, .12, .025]);
-    add('steel', [6.4, 5.43, -1.8], [3.4, .1, 1.15]);
     // Strength stations: each repeated unit is baked into material buckets.
     for (const x of [-6, -2.8]) {
       for (const z of [-6, -9]) {

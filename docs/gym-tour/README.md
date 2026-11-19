@@ -1,6 +1,6 @@
 # Nexus gym tour
 
-Next AI: [continuation handoff and remaining phases](continue-handoff.md). Phases 1–4 complete; Phase 5 implementation and Phase 6 remain.
+Next AI: [continuation handoff](continue-handoff.md). Phases 1-4 complete. [Phase 5 implementation](phase5.md) and [Phase 6 polish](phase6.md) delivered; testing and measured performance were explicitly deferred by the user, so final QA and release readiness remain unverified.
 
 Current interior: [Phase 4 detailed gym](phase4.md). Exterior: [Phase 3 detailed model](phase3.md). Phase 2 implementation: [working hero tour](phase2.md). Phase 1 evidence below remains a historical preparation baseline.
 
