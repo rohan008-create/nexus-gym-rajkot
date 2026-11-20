@@ -11,7 +11,7 @@ export const TOUR_BEATS = [
 
 // One continuous eye-level route. Coordinates: metres, Y up, +Z street.
 export const DESKTOP_CAMERAS: CameraStop[] = [
-  { at: 0, position: [3, 10.5, 33], target: [1, 7.15, -1], fov: 40 },
+  { at: 0, position: [.6, 6.5, 30.5], target: [0, 7.5, 0], fov: 42 },
   { at: .12, position: [10.67, 3.2, 14.9], target: [8.05, 1.3, 8.6], fov: 46 },
   { at: .18, position: [8.05, 2.1, 11.6], target: [8.05, 1.6, 7.7], fov: 49 },
   { at: .52, position: [8.05, 5.9, 4.3], target: [8.05, 5.8, 1.7], fov: 52 },
@@ -28,7 +28,7 @@ export const MOBILE_CAMERAS: CameraStop[] = DESKTOP_CAMERAS.map(stop => ({
   ...stop, position: [...stop.position] as Point, target: [...stop.target] as Point,
   fov: stop.at === 0 ? 60 : Math.min(68, stop.fov + 8),
 }));
-MOBILE_CAMERAS[0] = { at: 0, position: [3, 12.5, 42], target: [1.1, 7.5, 0], fov: 60 };
+MOBILE_CAMERAS[0] = { at: 0, position: [2.2, 7, 43], target: [2.2, 7, 0], fov: 58 };
 
 export const DOORWAY = .74;
 export const STAIR = { x: 8.05, bottomZ: 8.8, run: .355, rise: .21, count: 20, landingY: 4.51 };

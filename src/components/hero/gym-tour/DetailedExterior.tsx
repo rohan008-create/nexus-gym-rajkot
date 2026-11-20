@@ -57,6 +57,8 @@ export default function DetailedExterior({ fallback }: { fallback: React.ReactNo
     object.updateWorldMatrix(true, true);
     object.traverse(node => {
       if (!(node instanceof THREE.Mesh)) return;
+      node.receiveShadow = true;
+      node.castShadow = !node.name.toLowerCase().includes('glaz');
       node.geometry = node.geometry.clone();
       raiseGymBand(node.geometry, node.matrixWorld, node.name.includes('official_Nexus_logo') ? 'logo' : node.name.includes('warm_lettering') ? 'lettering' : null);
       geometries.push(node.geometry);

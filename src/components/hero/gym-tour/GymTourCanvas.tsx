@@ -13,7 +13,7 @@ import EntranceArchitecture, { openEntrance } from './EntranceArchitecture';
 import { raiseGymBand } from './raiseGymBand';
 
 const INITIAL_CAMERA = { position: DESKTOP_CAMERAS[0].position, fov: DESKTOP_CAMERAS[0].fov, near: .06, far: 180 };
-const GL_OPTIONS = { antialias: false, powerPreference: 'high-performance' as WebGLPowerPreference, alpha: false };
+const GL_OPTIONS = { antialias: true, powerPreference: 'high-performance' as WebGLPowerPreference, alpha: false };
 
 function Sign({ text, position, width, color = '#f02643' }: { text: string; position: Point; width: number; color?: string }) {
   const texture = useMemo(() => {
@@ -101,8 +101,8 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     // Independently frame width and height without moving the camera closer.
     // Keep the whole building visible, easing back before the stair shot.
     const opening = 1 - THREE.MathUtils.smoothstep(motion.progress, 0, .12);
-    const widthBoost = 1 + (mobile ? .02 : .13) * opening;
-    const heightBoost = 1 - (mobile ? .03 : .11) * opening;
+    const widthBoost = 1 + (mobile ? .02 : .20) * opening;
+    const heightBoost = 1 + (mobile ? -.03 : .02) * opening;
     perspective.fov = fov;
     perspective.updateProjectionMatrix();
     perspective.projectionMatrix.elements[0] *= widthBoost;
@@ -142,7 +142,7 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     <color attach="background" args={['#94c5e7']} />
     <TourReflections />
     <hemisphereLight ref={sky} args={['#f3eee0', '#676f6d', 2.2]} />
-    <directionalLight ref={sun} position={[8, 18, 14]} intensity={3.2} color="#fff1d9" />
+    <directionalLight ref={sun} position={[8, 18, 14]} intensity={3.2} color="#fff1d9" castShadow shadow-mapSize={[1536,1536]} shadow-camera-left={-28} shadow-camera-right={28} shadow-camera-top={25} shadow-camera-bottom={-24} shadow-camera-near={.5} shadow-camera-far={80} shadow-normalBias={.035} shadow-bias={-.0001} />
     <directionalLight ref={fill} position={[-12, 8, -6]} intensity={1.2} color="#b8d6e2" />
     <group ref={exterior} dispose={null}>
       <DetailedExterior fallback={<>
@@ -152,7 +152,7 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
         <Sign text="RESULTS MATTER" position={[3.8, 7.7, .36]} width={5} color="#f3eee0" />
       </>} />
     </group>
-    <StreetExterior motion={motion} />
+    <StreetExterior motion={motion} active={active} />
     <EntranceArchitecture motion={motion} />
     <RyanTourGuide motion={motion} active={active} />
     <group ref={interior} position={[0, .31, 0]} dispose={null}>
@@ -172,5 +172,5 @@ class Boundary extends Component<{ children: React.ReactNode; onFailure: () => v
   render() { return this.state.failed ? null : this.props.children; }
 }
 export default function GymTourCanvas(props: Parameters<typeof Scene>[0]) {
-  return <Boundary onFailure={props.onFailure}><Canvas frameloop="demand" dpr={1} camera={INITIAL_CAMERA} gl={GL_OPTIONS} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1; }} aria-hidden="true"><Scene {...props} /></Canvas></Boundary>;
+  return <Boundary onFailure={props.onFailure}><Canvas className="gym-tour-world" shadows="soft" frameloop="demand" dpr={[1, 1.5]} camera={INITIAL_CAMERA} gl={GL_OPTIONS} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1; }} aria-hidden="true"><Scene {...props} /></Canvas></Boundary>;
 }

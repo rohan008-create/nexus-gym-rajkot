@@ -1,65 +1,42 @@
 'use client';
 import { Suspense, useMemo, useRef } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { smooth, type TourPlayback } from './gymTourConfig';
+import { createReceptionGreeting } from './receptionGreeting';
 
 function DeskHost({ asset, motion }: { asset: GLTF; motion: TourPlayback }) {
+  const { camera, gl } = useThree();
   const rig = useMemo(() => {
     const avatar = clone(asset.scene);
     const bounds = new THREE.Box3().setFromObject(avatar);
-    const center = bounds.getCenter(new THREE.Vector3());
     const scale = 1.74 / (bounds.max.y - bounds.min.y);
     avatar.scale.multiplyScalar(scale);
-    avatar.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
-    const direction = new THREE.Vector3(), goal = new THREE.Vector3();
-    const start = new THREE.Vector3(), rotation = new THREE.Quaternion(), parent = new THREE.Quaternion();
-    function limb(side: string, from: string, to: string) {
-      const bone = avatar.getObjectByName('mixamorig' + side + from)!;
-      const child = avatar.getObjectByName('mixamorig' + side + to)!;
-      const rest = bone.quaternion.clone();
-      return (x: number, y: number, z: number) => {
-        bone.quaternion.copy(rest);
-        bone.getWorldPosition(start);
-        child.getWorldPosition(direction).sub(start).normalize();
-        rotation.setFromUnitVectors(direction, goal.set(x,y,z).normalize());
-        bone.getWorldQuaternion(parent).premultiply(rotation);
-        bone.quaternion.copy(bone.parent!.getWorldQuaternion(rotation).invert().multiply(parent));
-      };
-    }
-    const sides = ['Left','Right'].map((side,i) => ({
-      sign: i === 0 ? 1 : -1, thigh: limb(side,'UpLeg','Leg'), shin: limb(side,'Leg','Foot'),
-      arm: limb(side,'Arm','ForeArm'), forearm: limb(side,'ForeArm','Hand'),
-      hand: limb(side,'Hand','HandMiddle1'), wrist: avatar.getObjectByName('mixamorig'+side+'Hand')!,
-      index: avatar.getObjectByName('mixamorig'+side+'HandIndex1')!, pinky: avatar.getObjectByName('mixamorig'+side+'HandPinky1')!
-    }));
-    return {avatar,sides, across: new THREE.Vector3(), point: new THREE.Vector3(), up: new THREE.Vector3(0,1,0), twist: new THREE.Quaternion()};
+    avatar.position.y = -bounds.min.y * scale;
+    avatar.updateMatrixWorld(true);
+    const hip = avatar.getObjectByName('mixamorigHips')!.getWorldPosition(new THREE.Vector3());
+    const left = avatar.getObjectByName('mixamorigLeftFoot')!.getWorldPosition(new THREE.Vector3());
+    const right = avatar.getObjectByName('mixamorigRightFoot')!.getWorldPosition(new THREE.Vector3());
+    avatar.position.x -= hip.x;
+    avatar.position.z -= (left.z + right.z) / 2;
+    avatar.updateMatrixWorld(true);
+    return { avatar, greet: createReceptionGreeting(avatar) };
   }, [asset]);
   const anchor = useRef<THREE.Group>(null);
-  const last = useRef(-1);
   useFrame(() => {
     const p = motion.progress;
-    if (p < .45 || p === last.current) return;
-    last.current = p;
-    const stand = smooth((p-.815)/.025), greet = smooth((p-.835)/.02);
-    anchor.current!.position.y = 4.51 - .44*(1-stand);
-    for (const {sign, thigh, shin, arm, forearm, hand, wrist, index, pinky} of rig.sides) {
-      thigh(0,-.1-stand,1-stand); shin(0,-1,0);
-      arm(sign*.05,-1+.52*greet,.58+.32*greet);
-      forearm(-sign*(.15+.62*greet),.12+.45*greet,.86-.7*greet);
-      hand(0,greet+.01,1-greet);
-      if (greet > 0) {
-        index.getWorldPosition(rig.across).sub(pinky.getWorldPosition(rig.point));
-        const angle = Math.atan2(rig.across.x,rig.across.z);
-        const q = wrist.parent!.getWorldQuaternion(rig.twist);
-        rig.point.copy(rig.up).applyQuaternion(q.invert());
-        wrist.quaternion.premultiply(rig.twist.setFromAxisAngle(rig.point,-angle*greet));
-      }
-    }
+    if (p < .45 || !anchor.current) return;
+    const host = anchor.current;
+    host.rotation.y = Math.atan2(camera.position.x - host.position.x, camera.position.z - host.position.z);
+    const greeting = smooth((p - .745) / .035);
+    const error = rig.greet(host, greeting);
+    gl.domElement.dataset.receptionPose = greeting > .99 ? 'namaskar' : 'standing';
+    gl.domElement.dataset.receptionHandError = error.toFixed(4);
+    gl.domElement.dataset.receptionHeight = host.position.y.toFixed(2);
   });
-  return <group ref={anchor} position={[6.95,4.07,-2.73]}><primitive object={rig.avatar} dispose={null} /></group>;
+  return <group ref={anchor} position={[6.95, 4.51, -2.73]}><primitive object={rig.avatar} dispose={null} /></group>;
 }
 
 function Block({ at, size, color }: { at: [number,number,number]; size: [number,number,number]; color: string }) {
@@ -135,10 +112,6 @@ export default function ReceptionOffice({asset,motion,active}: {asset: GLTF|null
       <Block at={[6.41,1.65,-3.54]} size={[5.82,3.3,.12]} color="#344748"/>
       <Block at={[9.2,1.65,-2.57]} size={[.12,3.3,2.4]} color="#435553"/>
       <Suspense fallback={null}><ReceptionFinishes/></Suspense>
-      <Block at={[6.95,.45,-2.78]} size={[.49,.1,.5]} color="#34383b"/>
-      <Block at={[6.95,.74,-3.03]} size={[.49,.55,.08]} color="#394042"/>
-      <Block at={[6.95,.21,-2.78]} size={[.07,.4,.07]} color="#899294"/>
-      <Block at={[6.95,.04,-2.78]} size={[.5,.06,.45]} color="#34383b"/>
       <GymFloorDoor motion={motion}/>
     </group>
     {asset && <DeskHost asset={asset} motion={motion}/>}

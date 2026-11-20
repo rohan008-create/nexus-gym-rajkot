@@ -8,6 +8,7 @@ type Props = { progress: MutableRefObject<number>; pointer: MutableRefObject<{ x
 function Sculpture({ progress, pointer, invalidateRef, selected, active, reduced }: Props) {
   const assembly = useRef<THREE.Group>(null);
   const plates = useRef<(THREE.Group | null)[]>([]);
+  const elapsed = useRef(0);
   const { invalidate, gl, scene, camera, setFrameloop } = useThree();
   useEffect(() => {
     invalidateRef.current = () => { if (active && !document.hidden) invalidate(); };
@@ -19,12 +20,20 @@ function Sculpture({ progress, pointer, invalidateRef, selected, active, reduced
     gl.domElement.addEventListener('webglcontextlost', lost);
     return () => gl.domElement.removeEventListener('webglcontextlost', lost);
   }, [gl, setFrameloop]);
-  useFrame(() => {
+  useFrame((_, delta) => {
     if (!active || document.hidden || gl.getContext().isContextLost()) return;
     const p = reduced ? .5 : progress.current;
-    if (assembly.current) assembly.current.rotation.set(.22 + (reduced ? 0 : pointer.current.y * .08), -.35 + p * .7 + (reduced ? 0 : pointer.current.x * .12), -.38);
-    plates.current.forEach((plate, i) => { if (plate) plate.position.x = (i < 3 ? -1 : 1) * (.82 + (i % 3) * (.24 + Math.sin(p * Math.PI) * .18)); });
+    if (!reduced) elapsed.current += Math.min(delta,.05);
+    const t = elapsed.current;
+    if (assembly.current) {
+      assembly.current.rotation.set(.22 + (reduced ? 0 : pointer.current.y * .08 + Math.sin(t * .5) * .06), -.35 + p * .7 + (reduced ? 0 : pointer.current.x * .12 + Math.sin(t * .32) * .22), -.32);
+      assembly.current.position.y = .25 + (reduced ? 0 : Math.sin(t * .8) * .065);
+    }
+    plates.current.forEach((plate, i) => { if (plate) plate.position.x = THREE.MathUtils.lerp(plate.position.x, (i < 3 ? -1 : 1) * (.82 + (i % 3) * (.24 + Math.sin(p * Math.PI) * .18 + selected * .09)), reduced ? 1 : .08); });
+    gl.domElement.dataset.aboutFrame = t.toFixed(3);
+    gl.domElement.dataset.aboutSelected = String(selected);
     gl.render(scene, camera);
+    if (!reduced) invalidate();
   }, 1);
   const accent = ['#ef3048', '#ff8755', '#b8d6e2'][selected];
   return <>

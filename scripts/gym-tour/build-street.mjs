@@ -6,8 +6,17 @@ import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { writeFile } from 'node:fs/promises';
 
 const scene = new T.Scene();
-const surface = new T.MeshStandardMaterial({vertexColors:true, roughness:.74});
+const surface = new T.MeshStandardMaterial({vertexColors:true, roughness:.88, side:T.DoubleSide});
 let pieces = [];
+let wheels = [];
+const finishes = {
+ paint: new T.MeshPhysicalMaterial({vertexColors:true, roughness:.3, metalness:.22, clearcoat:.65, clearcoatRoughness:.23}),
+ chrome: new T.MeshStandardMaterial({vertexColors:true, roughness:.23, metalness:.85}),
+ rubber: new T.MeshStandardMaterial({vertexColors:true, roughness:.95}),
+ glass: new T.MeshPhysicalMaterial({vertexColors:true, transparent:true, opacity:.3, roughness:.12, metalness:.15, depthWrite:false, side:T.DoubleSide}),
+ cloth: new T.MeshStandardMaterial({vertexColors:true, roughness:.85}),
+ frame: new T.MeshStandardMaterial({vertexColors:true, roughness:.45, metalness:.55}),
+};
 const V = (x,y,z) => new T.Vector3(x,y,z);
 function part(g, position, color, rotation=[0,0,0], scale=[1,1,1]) {
   if(g.index) g = g.toNonIndexed();
@@ -19,37 +28,65 @@ function part(g, position, color, rotation=[0,0,0], scale=[1,1,1]) {
   g.scale(...scale);
   g.applyMatrix4(new T.Matrix4().makeRotationFromEuler(new T.Euler(...rotation)));
   g.translate(...position);
+  g.userData.finish = ['#08754d','#eca914','#485968'].includes(color) ? 'paint' : color === '#a9aca6' ? 'chrome' : color === '#232629' ? 'rubber' : color === '#557b84' ? 'glass' : ['#283337','#53595e'].includes(color) ? 'frame' : 'cloth';
   pieces.push(g);
 }
 function finish(name) {
+  if(name === 'Rickshaw' || name === 'Scooter') {
+    const vehicle = new T.Group(); vehicle.name=name;
+    const wheelParts = new Set(wheels.flatMap(w => Array.from({length:w.end-w.start},(_,i)=>w.start+i)));
+    function batch(target, list) {
+      for(const key of Object.keys(finishes)) {
+        const selected=list.filter(g=>g.userData.finish===key);
+        if(selected.length) { const mesh=new T.Mesh(mergeVertices(mergeGeometries(selected)), finishes[key]); mesh.name=key; target.add(mesh); }
+      }
+    }
+    batch(vehicle,pieces.filter((_,i)=>!wheelParts.has(i)));
+    wheels.forEach((w,i)=>{
+      const pivot=new T.Group(); pivot.name='Wheel_'+i; pivot.position.copy(w.pivot); pivot.userData.radius=w.radius;
+      const selected=pieces.slice(w.start,w.end);
+      selected.forEach(g=>g.translate(-w.pivot.x,-w.pivot.y,-w.pivot.z));
+      batch(pivot,selected); vehicle.add(pivot);
+    });
+    scene.add(vehicle); pieces=[]; wheels=[]; return;
+  }
   const mesh = new T.Mesh(mergeVertices(mergeGeometries(pieces)), surface);
-  mesh.name=name; scene.add(mesh); pieces=[];
+  mesh.name=name; scene.add(mesh); pieces=[]; wheels=[];
 }
 const box=(p,s,c,r=[0,0,0])=>part(new T.BoxGeometry(...s),p,c,r);
-const round=(p,s,c,radius=.08,r=[0,0,0])=>part(new RoundedBoxGeometry(...s,1,radius),p,c,r);
-const oval=(p,s,c,r=[0,0,0])=>part(new T.SphereGeometry(1,12,8),p,c,r,s);
+const round=(p,s,c,radius=.08,r=[0,0,0])=>part(new RoundedBoxGeometry(...s,2,radius),p,c,r);
+const oval=(p,s,c,r=[0,0,0])=>part(new T.SphereGeometry(1,20,14),p,c,r,s);
 function rod(a,b,r,c,top=r) {
   const start=V(...a), end=V(...b), axis=end.clone().sub(start);
-  const g=new T.CylinderGeometry(top,r,axis.length(),7);
+  const g=new T.CylinderGeometry(top,r,axis.length(),12);
   g.applyQuaternion(new T.Quaternion().setFromUnitVectors(V(0,1,0),axis.normalize()));
   part(g,start.lerp(end,.5).toArray(),c);
 }
 const rubber='#232629', silver='#a9aca6', black='#283337';
 function wheel(x,y,z,r) {
-  part(new T.TorusGeometry(r*.72,r*.28,7,20),[x,y,z],rubber);
-  part(new T.CylinderGeometry(r*.59,r*.59,r*.22,14),[x,y,z],silver,[Math.PI/2,0,0]);
+  const start=pieces.length;
+  part(new T.TorusGeometry(r*.72,r*.28,12,32),[x,y,z],rubber);
+  part(new T.CylinderGeometry(r*.59,r*.59,r*.22,24),[x,y,z],silver,[Math.PI/2,0,0]);
   for(let i=0;i<5;i++){
     const a=i*Math.PI*2/5;
     for(const sign of [-1,1]) oval([x+Math.cos(a)*r*.37,y+Math.sin(a)*r*.37,z+sign*r*.12],[r*.105,r*.13,.008],black);
   }
+  wheels.push({start,end:pieces.length,pivot:V(x,y,z),radius:r});
 }
 function person(x,y,z,shirt,helmet=false) {
-  oval([x,y+.42,z],[.16,.34,.23],shirt,[0,0,-.12]);
+  round([x,y+.42,z],[.30,.55,.41],shirt,.09,[0,0,-.12]);
   oval([x+.04,y+.94,z],[.15,.20,.14],'#9b694a');
   oval([x+.025,y+1.055,z],[.154,.105,.148],helmet ? '#53595e':'#29221d');
+  oval([x+.187,y+.94,z],[.038,.037,.033],'#b88460');
+  for(const side of [-1,1]) {
+    oval([x+.16,y+.985,z+side*.061],[.012,.014,.018],'#252524');
+    oval([x+.03,y+.94,z+side*.14],[.034,.055,.022],'#9b694a');
+    oval([x+.20,y-.47,z+side*.17],[.16,.065,.075],rubber);
+  }
   for(const sign of [-1,1]) {
     rod([x+.02,y+.61,z+sign*.18],[x+.14,y+.38,z+sign*.23],.075,shirt);
     rod([x+.14,y+.38,z+sign*.23],[x+.44,y+.45,z+sign*.20],.054,'#a57654');
+    oval([x+.44,y+.45,z+sign*.20],[.07,.055,.055],'#a57654');
     rod([x,y+.09,z+sign*.11],[x+.3,y-.14,z+sign*.16],.09,'#39444b');
     rod([x+.3,y-.14,z+sign*.16],[x+.18,y-.47,z+sign*.18],.075,'#39444b');
   }
@@ -93,6 +130,18 @@ function rickshaw() {
   round([.91,.90,0],[.33,.54,1.01],green,.15);
   round([.92,1.15,0],[.27,.12,1.02],yellow,.055);
   round([.83,1.43,0],[.047,.57,.94],'#557b84',.023,[0,0,.48]);
+  // Weather seals, wiper, mirrors, stainless bumper and rear lamps.
+  for(const side of [-1,1]) {
+    rod([.91,1.25,side*.49],[1.02,1.48,side*.69],.018,silver);
+    oval([1.03,1.49,side*.70],[.045,.095,.075],black);
+    oval([1.068,.99,side*.32],[.04,.115,.112],silver);
+    oval([1.092,.99,side*.32],[.025,.084,.084],'#fff4cf');
+    round([-1.027,.70,side*.45],[.02,.15,.10],'#a8271c',.014);
+    rod([-.99,1.71,side*.65],[.87,1.71,side*.65],.018,black);
+  }
+  rod([.94,.43,-.49],[.94,.43,.49],.037,silver);
+  rod([.94,1.23,-.05],[.73,1.62,.19],.012,black);
+  box([-1.039,.57,0],[.014,.10,.32],'#f0b939');
   for(const side of [-1,1]) oval([1.056,.99,side*.32],[.035,.103,.10],'#efeeda');
   round([1.03,.53,0],[.61,.14,.34],green);
   box([1.082,.79,0],[.025,.09,.3],'#f0b939');
@@ -119,6 +168,41 @@ for(let i=0;i<4;i++){
  box([x,2.78,-1.33],[5.32,.10,.90],'#4e7892',[.13,0,0]);
  scooter(x-.2,-.35,i%2?'#672d23':'#283f48');
 }
+// Repeated parked two-wheelers and planted forecourt match the street's scale.
+for(let i=0;i<7;i++) scooter(12.6+i*1.43,1.25,i%3===0?'#652a26':i%3===1?'#293138':'#4a5350');
+for(const x of [-7.15,-3.55,.05,3.65]) {
+  round([x,.42,3.85],[2.65,.46,.64],'#b6a58c',.045);
+  box([x,.655,3.85],[2.46,.015,.49],'#3a3328');
+  for(let i=0;i<11;i++) {
+    const dx=-1.1+i*.22;
+    for(let j=0;j<34;j++) {
+      const angle=j*2.39996+i*.51, ring=Math.sqrt(1-((j+.5)/34)**2);
+      const leaf=new T.BufferGeometry();
+      leaf.setAttribute('position',new T.Float32BufferAttribute([0,0,0,-.035,.055,.009,0,.115,.022,.035,.055,.009],3));
+      leaf.setIndex([0,1,2,0,2,3]); leaf.computeVertexNormals();
+      part(leaf,[x+dx+Math.cos(angle)*ring*.21,.72+((j+.5)/34)*.24,3.85+Math.sin(angle)*ring*.23],['#344e25','#4c6529','#627c31','#718441'][j%4],[.3+(j%5)*.27,angle,(j%3-.8)*.4]);
+    }
+  }
+}
+for(const x of [-9.3,-5.35,-1.75,1.85,5.65,10.45]) {
+  part(new T.CylinderGeometry(.26,.19,.46,20),[x,.42,3.8],'#3e4140');
+  for(let i=0;i<11;i++) {
+    const angle=i*2.4;
+    const points=new Float32Array([0,0,0,-.055,.44,.10,0,.92,.29,.055,.44,.10]);
+    const leaf=new T.BufferGeometry(); leaf.setAttribute('position',new T.BufferAttribute(points,3)); leaf.setIndex([0,1,2,0,2,3]);leaf.computeVertexNormals();
+    part(leaf,[x,.61,3.8],i%2?'#647a2c':'#344f25',[.1+(i%3)*.12,angle,0]);
+  }
+}
+for(const x of [-9.9,-5.1,-.7,3.7,10.7]) {
+  rod([x,.2,4.53],[x,.94,4.53],.066,'#303537');
+  part(new T.CylinderGeometry(.069,.069,.09,12),[x,.83,4.53],'#c4b37e');
+}
+// Curved street lamp and a small circular traffic sign on the corner.
+rod([-11.2,.1,3.9],[-11.2,8.2,3.9],.065,silver);
+rod([-11.2,8.2,3.9],[-10.15,8.45,3.9],.05,silver);
+oval([-10.02,8.43,3.9],[.31,.055,.12],'#333d41');
+rod([-11.2,.1,4.5],[-11.2,3.8,4.5],.035,silver);
+part(new T.CylinderGeometry(.22,.22,.035,28),[-11.2,3.7,4.5],'#efece0',[Math.PI/2,0,0]);
 for(let i=0;i<7;i++){
  const z=-6-i*9.5;
  box([-24,1.8,z],[4.8,3.7,8.7],i%2?'#ccc0a6':'#bdad8c');

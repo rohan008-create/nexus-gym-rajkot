@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import GymTourCanvas from './GymTourCanvas';
-import ArrivalPhotograph, { type ArrivalShot } from './ArrivalPhotograph';
+import ArrivalPhotograph from './ArrivalPhotograph';
 import { usePageScroller } from '../../layout/SmoothScroll';
 import { tourBeatAt, type TourStatus } from './gymTourConfig';
 import './gym-tour.css';
@@ -10,7 +10,6 @@ import './gym-tour.css';
 type Props = { active: boolean; reduced: boolean; onStatus: (status: TourStatus) => void; onTrial: () => void; onExplorePrograms: () => void };
 export default function GymTourHero({ active, reduced, onStatus, onTrial, onExplorePrograms }: Props) {
   const root = useRef<HTMLElement>(null), progress = useRef(0), invalidate = useRef<() => void>(() => {});
-  const photograph = useRef<ArrivalShot>(null);
   const scroller = usePageScroller();
   const [status, setStatus] = useState<TourStatus>('loading');
   const [beat, setBeat] = useState(0), [mobile, setMobile] = useState(false), [inView, setInView] = useState(true), [pageVisible, setPageVisible] = useState(true);
@@ -19,7 +18,6 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
   const lastBeat = useRef(0);
   const staticView = reduced || status === 'error';
   const present = useCallback((value: number) => {
-    photograph.current?.present(value);
     const position = value.toFixed(4);
     if (root.current && root.current.dataset.tourProgress !== position) root.current.dataset.tourProgress = position;
     const next = tourBeatAt(value);
@@ -88,8 +86,8 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
     <h1 id="hero-title" tabIndex={-1} className="gym-tour-accessible-title">Welcome to Nexus Fitness Club, Rajkot. Follow Ryan inside.</h1>
     <div className="gym-tour-stage">
       <div className="gym-tour-visual" aria-hidden="true">
-        <ArrivalPhotograph ref={photograph} interactive={active && inView && pageVisible && !staticView} />
         {!staticView && <GymTourCanvas key={attempt} progress={progress} active={active && inView && pageVisible} mobile={mobile} onInvalidate={invalidate} onPresent={present} onReady={ready} onFailure={fail} />}
+        {staticView && <ArrivalPhotograph />}
       </div>
       {!staticView && <div className="gym-tour-edge-shade" aria-hidden="true" />}
       {!staticView && status === 'ready' && beat === 0 && <button className="gym-tour-enter" onClick={begin}><span>FOLLOW RYAN INSIDE</span><ArrowDown size={15} aria-hidden /></button>}

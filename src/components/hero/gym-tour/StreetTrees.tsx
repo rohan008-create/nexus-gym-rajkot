@@ -8,7 +8,7 @@ import * as THREE from 'three';
 // leaves its establishing shot and approaches the stairs.
 const planting = [
   // x, z, crown width, tree height, yaw
-  [-16.6, 2.4, 9.8, 10.1, .05],
+  [-18, 2.4, 7.8, 8.8, .05],
   [-19.7, -7.6, 10.5, 11.2, -.24],
   [-18.9, -19, 8.8, 9.3, .26],
   [-19.6, -31, 10.2, 10.7, -.17],
@@ -19,7 +19,7 @@ const planting = [
   [13.4, -21, 8.1, 8.7, -.4],
   [24, -23, 13.8, 12.5, -.13],
   // Overhanging crown on the far pavement, high above the sight line.
-  [-11.2, 17, 10.6, 14.3, .28],
+  [-11.5, 18.5, 7, 12, .28],
 ] as const;
 
 function plantTrees(aspect: number, texture: THREE.Texture) {

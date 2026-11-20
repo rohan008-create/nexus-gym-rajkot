@@ -23,7 +23,7 @@ function StreetSurfaces() {
     const geometry = new THREE.PlaneGeometry(175, 1, 1, 3);
     const positions = geometry.getAttribute('position');
     const uv = geometry.getAttribute('uv');
-    const rows = [[4.9, -.054], [8.82, -.054], [8.9, -.029], [27.1, -.029]];
+    const rows = [[4.9, -.035], [8.82, -.035], [8.9, -.029], [120, -.029]];
     rows.forEach(([z, y], row) => {
       for (let side = 0; side < 2; side++) {
         const i = row * 2 + side;
@@ -58,8 +58,8 @@ function StreetSurfaces() {
   return <>
     {maps.sky && <mesh position={[0,36,-99]}><planeGeometry args={[245,90]}/>
       <meshBasicMaterial map={maps.sky} toneMapped={false} depthWrite={false}/></mesh>}
-    {maps.asphalt && <mesh geometry={roadway}>
-      <meshStandardMaterial map={maps.asphalt} color="#ffe0d3" roughness={1}/></mesh>}
+    {maps.asphalt && <mesh geometry={roadway} receiveShadow>
+      <meshStandardMaterial map={maps.asphalt} color="#a7b0b7" roughness={.96}/></mesh>}
   </>;
 }
 
@@ -80,8 +80,9 @@ function TrafficShadow({ width, depth }: { width: number; depth: number }) {
   </mesh>;
 }
 
-export default function StreetExterior({ motion }: { motion: TourPlayback }) {
-  const { invalidate, size } = useThree();
+export default function StreetExterior({ motion, active }: { motion: TourPlayback; active: boolean }) {
+  const { invalidate, gl } = useThree();
+  const elapsed = useRef(0);
   const [street, setStreet] = useState<THREE.Group>();
   const autoShadow = useRef<THREE.Group>(null);
   const bikeShadow = useRef<THREE.Group>(null);
@@ -92,22 +93,34 @@ export default function StreetExterior({ motion }: { motion: TourPlayback }) {
     loadStreet().then(source => {
       if (!mounted) return;
       const clone = source.clone(true);
+      clone.traverse(node => { if (node instanceof THREE.Mesh) { node.castShadow = true; node.receiveShadow = true; } });
       traffic.current = {rickshaw: clone.getObjectByName('Rickshaw')!, scooter: clone.getObjectByName('Scooter')!};
       setStreet(clone);
       invalidate();
     }).catch(() => { /* The existing facade also works without street props. */ });
     return () => { mounted = false; traffic.current = undefined; };
   }, [invalidate]);
-  useFrame(() => {
+  useFrame((_, delta) => {
     if(group.current) group.current.visible = motion.progress < .60;
     const cars = traffic.current;
-    if (!cars) return;
+    if (!cars || !active || document.hidden || motion.progress >= .60) return;
+    if (motion.progress < .12) elapsed.current += Math.min(delta,.1);
     const travel = clamp(motion.progress / .115);
-    const portrait = size.width < size.height;
-    cars.rickshaw.position.set((portrait ? -4.5 : -7.6) + travel * 34, -.032, 9.65);
-    cars.scooter.position.set((portrait ? 5.5 : 9.4) + travel * 29, -.032, 10.9);
+    const autoX = ((elapsed.current * 1.8 + 13) % 48) - 24;
+    const bikeX = 24 - ((elapsed.current * 2.8 + 13) % 48);
+    cars.rickshaw.position.set(autoX + travel * 48, -.029, 9.1);
+    cars.scooter.position.set(bikeX - travel * 48, -.029, 10.5);
+    cars.scooter.rotation.y = Math.PI;
+    for (const [vehicle, distance] of [[cars.rickshaw, -elapsed.current * 1.8], [cars.scooter, -elapsed.current * 2.8]] as const) {
+      vehicle.traverse(node => { if (node.name.startsWith('Wheel_')) node.rotation.z = distance / (node.userData.radius || .3); });
+    }
+    gl.domElement.dataset.trafficWheelRotation = cars.rickshaw.getObjectByName('Wheel_0')?.rotation.z.toFixed(3) || '0';
+    gl.domElement.dataset.streetSource = '3d';
+    gl.domElement.dataset.trafficPosition = `${autoX.toFixed(3)},${bikeX.toFixed(3)}`;
+    gl.domElement.dataset.trafficTime = elapsed.current.toFixed(3);
     autoShadow.current?.position.copy(cars.rickshaw.position);
     bikeShadow.current?.position.copy(cars.scooter.position);
+    if (motion.progress < .12) invalidate();
   });
   return <>
     <StreetFrontage />
