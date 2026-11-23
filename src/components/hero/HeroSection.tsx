@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Destination } from '../layout/Navbar';
 import GymTourHero from './gym-tour/GymTourHero';
 import type { TourStatus } from './gym-tour/gymTourConfig';
@@ -22,8 +22,8 @@ import SmoothScroll from '../layout/SmoothScroll';
 import NexusFooter from '../footer/NexusFooter';
 import './iron-world.css';
 
-export type HeroSectionProps = { onReplayIntro?: () => void; entranceEnabled?: boolean; interactive?: boolean; onPrepared?: () => void };
-export default function HeroSection({ onReplayIntro, entranceEnabled = true, interactive = true, onPrepared }: HeroSectionProps) {
+export type HeroSectionProps = { onReplayIntro?: () => void; entranceEnabled?: boolean; interactive?: boolean };
+export default function HeroSection({ onReplayIntro, entranceEnabled = true, interactive = true }: HeroSectionProps) {
   const root = useRef<HTMLElement>(null), progress = useRef(0), pointer = useRef({ x: 0, y: 0 });
   const velocity = useRef(0);
   const layout = useRef<RopeLayout>({ unit: .00715, viewHeight: 6.43, heroHeight: 900, rootTop: 0, aboutStart: 1020, aboutEnd: 1500, headingPageY: 1120, version: 0 });
@@ -34,9 +34,6 @@ export default function HeroSection({ onReplayIntro, entranceEnabled = true, int
   const [membershipPlan, setMembershipPlan] = useState<string | undefined>();
   const sectionChanged = useCallback((section: 'Home' | 'About' | 'Programs') => setActive(current => section === 'About' && (current === 'Plans' || current === 'Location') ? current : section), []);
   useHeroTransition(root, { progress, pointer, velocity, layout }, reduced, sectionChanged, entranceEnabled, true);
-  useEffect(() => {
-    if (status !== 'loading') onPrepared?.();
-  }, [status, onPrepared]);
   const navigate = useCallback((destination: Destination) => {
     setActive(destination);
     if (destination !== 'Home' && destination !== 'Programs' && destination !== 'Plans') setPanel(destination);

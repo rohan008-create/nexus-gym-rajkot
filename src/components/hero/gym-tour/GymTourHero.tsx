@@ -1,13 +1,15 @@
 ﻿'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowUpRight } from 'lucide-react';
-import GymTourCanvas from './GymTourCanvas';
+import dynamic from 'next/dynamic';
 import ArrivalPhotograph from './ArrivalPhotograph';
 import { usePageScroller } from '../../layout/SmoothScroll';
 import TactileHighlight from '../../ui/tactile-highlight';
 import TourChapterCopy from './TourChapterCopy';
 import { tourBeatAt, tourChapterAt, tourRailProgress, type TourStatus } from './gymTourConfig';
 import './gym-tour.css';
+
+const GymTourCanvas = dynamic(() => import('./GymTourCanvas'), { ssr: false });
 
 type Props = { active: boolean; reduced: boolean; onStatus: (status: TourStatus) => void; onTrial: () => void; onExplorePrograms: () => void };
 export default function GymTourHero({ active, reduced, onStatus, onTrial, onExplorePrograms }: Props) {
@@ -16,6 +18,7 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
   const [status, setStatus] = useState<TourStatus>('loading');
   const [beat, setBeat] = useState(0), [mobile, setMobile] = useState(false), [inView, setInView] = useState(true), [pageVisible, setPageVisible] = useState(true);
   const [attempt, setAttempt] = useState(0);
+  const [interiorRequested, setInteriorRequested] = useState(false);
   const [chapter, setChapter] = useState(0);
   const entryFocusDone = useRef(false);
   const lastBeat = useRef(0);
@@ -36,10 +39,16 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
   const fail = useCallback(() => { setStatus('error'); onStatus('error'); }, [onStatus]);
   const retry = () => { setAttempt(value => value + 1); setStatus('loading'); onStatus('loading'); };
   useEffect(() => {
-    if (status !== 'loading' || reduced || !pageVisible) return;
+    if (active || reduced) return;
+    setStatus('loading');
+    onStatus('loading');
+    setInteriorRequested(false);
+  }, [active, reduced, onStatus]);
+  useEffect(() => {
+    if (!active || !inView || status !== 'loading' || reduced || !pageVisible) return;
     const timeout = window.setTimeout(fail, 60000);
     return () => window.clearTimeout(timeout);
-  }, [status, reduced, pageVisible, fail, attempt]);
+  }, [active, inView, status, reduced, pageVisible, fail, attempt]);
   useEffect(() => {
     // The shared hook starts conservatively at true during hydration. Only a
     // real reduced-motion preference may bypass the detailed-model gate.
@@ -71,7 +80,10 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
     const media = matchMedia('(max-width: 760px)');
     const measure = () => { top = element.getBoundingClientRect().top + window.scrollY; range = Math.max(1, element.offsetHeight - window.innerHeight); };
     const update = () => {
-      const value = staticView ? 0 : Math.max(0, Math.min(1, (window.scrollY - top) / range));
+      const scrollY = window.scrollY;
+      const value = staticView ? 0 : Math.max(0, Math.min(1, (scrollY - top) / range));
+      // Start the room and host downloads on the stairs, before the room enters view.
+      if (!interiorRequested && active && intersecting && value >= .10 && scrollY < top + range + window.innerHeight) setInteriorRequested(true);
       if (value === progress.current) return;
       progress.current = value;
       if (active && intersecting && !document.hidden && !staticView) invalidate.current();
@@ -82,7 +94,7 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
     window.addEventListener('scroll', update, { passive: true }); window.addEventListener('resize', resize, { passive: true });
     const sizeObserver = new ResizeObserver(() => { measure(); update(); }); sizeObserver.observe(element);
     return () => { observer.disconnect(); sizeObserver.disconnect(); document.removeEventListener('visibilitychange', visible); window.removeEventListener('scroll', update); window.removeEventListener('resize', resize); };
-  }, [active, staticView, present]);
+  }, [active, staticView, present, interiorRequested]);
   const scrollTo = (top: number) => {
     if (scroller?.current) scroller.current.scrollTo(top, { immediate: reduced });
     else window.scrollTo({ top, behavior: reduced ? 'instant' : 'smooth' });
@@ -100,8 +112,8 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
     <h1 id="hero-title" tabIndex={-1} className="gym-tour-accessible-title">Welcome to Nexus Fitness Club, Rajkot. Follow Ryan inside.</h1>
     <div className="gym-tour-stage">
       <div className="gym-tour-visual" aria-hidden="true">
-        {!staticView && <GymTourCanvas key={attempt} progress={progress} active={active && inView && pageVisible} mobile={mobile} onInvalidate={invalidate} onPresent={present} onReady={ready} onFailure={fail} />}
-        {staticView && <ArrivalPhotograph />}
+        {active && !staticView && <GymTourCanvas key={attempt} progress={progress} active={inView && pageVisible} mobile={mobile} interiorRequested={interiorRequested} onInvalidate={invalidate} onPresent={present} onReady={ready} onFailure={fail} />}
+        {(!active || staticView || status === 'loading') && <ArrivalPhotograph />}
       </div>
       {!staticView && <div className="gym-tour-edge-shade" aria-hidden="true" />}
       {!staticView && active && <TourChapterCopy chapterIndex={chapter} />}

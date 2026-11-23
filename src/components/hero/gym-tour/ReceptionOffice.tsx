@@ -132,7 +132,7 @@ function GymFloorDoor({motion}: {motion: TourPlayback}) {
     </group>
   </group>;
 }
-export default function ReceptionOffice({motion,active}: {motion: TourPlayback; active:boolean}) {
+export default function ReceptionOffice({motion,active,requested}: {motion: TourPlayback; active:boolean; requested:boolean}) {
   const room = useRef<THREE.Group>(null);
   const light = useRef<THREE.PointLight>(null);
   useFrame(()=>{
@@ -146,9 +146,9 @@ export default function ReceptionOffice({motion,active}: {motion: TourPlayback; 
     <group position={[0,4.51,0]}>
       <Block at={[6.41,1.65,-3.54]} size={[5.82,3.3,.12]} color="#344748"/>
       <Block at={[9.2,1.65,-2.57]} size={[.12,3.3,2.4]} color="#435553"/>
-      <Suspense fallback={null}><ReceptionFinishes/></Suspense>
+      {requested && <Suspense fallback={null}><ReceptionFinishes/></Suspense>}
       <GymFloorDoor motion={motion}/>
     </group>
-    <HostBoundary><Suspense fallback={null}><PriyaHost motion={motion}/></Suspense></HostBoundary>
+    {requested && <HostBoundary><Suspense fallback={null}><PriyaHost motion={motion}/></Suspense></HostBoundary>}
   </group></>;
 }

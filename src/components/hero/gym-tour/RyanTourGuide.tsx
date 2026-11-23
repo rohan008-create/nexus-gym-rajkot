@@ -202,7 +202,7 @@ function AnimatedRyan({ asset, active, motion }: Props & { asset: GLTF }) {
   </group>;
 }
 
-export default function RyanTourGuide(props: Props) {
+export default function RyanTourGuide({ interiorRequested, ...props }: Props & { interiorRequested: boolean }) {
   const [asset, setAsset] = useState<GLTF | null>(null);
   const { gl, invalidate } = useThree();
   useEffect(() => {
@@ -211,5 +211,5 @@ export default function RyanTourGuide(props: Props) {
     loadGuide().then(value => { if (mounted) setAsset(value); }).catch(() => { if (mounted) { gl.domElement.dataset.guideSource = 'error'; invalidate(); } });
     return () => { mounted = false; };
   }, [gl, invalidate]);
-  return <><ReceptionOffice motion={props.motion} active={props.active} />{asset && <AnimatedRyan {...props} asset={asset} />}</>;
+  return <><ReceptionOffice motion={props.motion} active={props.active} requested={interiorRequested} />{asset && <AnimatedRyan {...props} asset={asset} />}</>;
 }

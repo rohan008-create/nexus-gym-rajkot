@@ -14,14 +14,12 @@ export default function Page() {
   const [stage, setStage] = useState<Stage>('waiting');
   const [sceneFailed, setSceneFailed] = useState(false);
   const sceneFailure = useCallback(() => setSceneFailed(true), []);
-  const [prepared, setPrepared] = useState(false);
   const [heroEntering, setHeroEntering] = useState(false);
   const [run, setRun] = useState(0);
   const reduced = useReducedMotion();
   const welcomeAudio = useRef<HTMLAudioElement>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const clearTimers = useCallback(() => { timers.current.forEach(clearTimeout); timers.current = []; }, []);
-  const ready = useCallback(() => setPrepared(true), []);
   useEffect(() => {
     return () => { clearTimers(); navigator.vibrate?.(0); };
   }, [clearTimers]);
@@ -69,14 +67,14 @@ export default function Page() {
   return <div className="nexus-entrance" data-entrance={stage}>
     <audio ref={welcomeAudio} src="/audio/welcome-nexus-natural.mp3" preload="auto" />
     <div className="entrance-landing" aria-hidden={stage !== 'revealed'} ref={node => { if (node) node.inert = stage !== 'revealed'; }}>
-      <Hero entranceEnabled={heroEntering} interactive={stage === 'revealed'} onPrepared={ready} onReplayIntro={replay} />
+      <Hero entranceEnabled={heroEntering} interactive={stage === 'revealed'} onReplayIntro={replay} />
     </div>
     {stage !== 'revealed' && <div className="entrance-overlay" role="region" aria-label="Break through to Nexus">
-      <Intro key={run} breakthrough canStart={prepared} onExplosionStart={start} onExplosionComplete={finish} onSceneFailure={sceneFailure} />
-      {stage === 'waiting' && prepared && !sceneFailed && !reduced && <div className="entrance-thunder" aria-hidden="true">
+      <Intro key={run} breakthrough onExplosionStart={start} onExplosionComplete={finish} onSceneFailure={sceneFailure} />
+      {stage === 'waiting' && !sceneFailed && !reduced && <div className="entrance-thunder" aria-hidden="true">
         <Lightning className="entrance-lightning" interactive={false} placement="sides" color="#ff2945" cloudColor="#5c1222" clouds={.32} branches={3} amplitude={.85} reach={.88} frequency={.65} speed={.8} glow={.8} intensity={1.05} thickness={1.6} quality={.65} fade="bottom" opacity={.8} seed={7} />
       </div>}
-      {stage === 'waiting' && <button className="entrance-skip" disabled={!prepared} onClick={finish}>{prepared ? 'ENTER NEXUS ↗' : 'PREPARING NEXUS'}</button>}
+      {stage === 'waiting' && <button className="entrance-skip" onClick={finish}>ENTER NEXUS ↗</button>}
     </div>}
   </div>;
 }

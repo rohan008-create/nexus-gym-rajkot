@@ -1,7 +1,7 @@
 'use client';
 import { useNightScene } from './useNightScene';
 
-// A still is reserved for reduced motion or a failed WebGL context.
+// Show the same arrival while the scene loads and when WebGL is unavailable.
 export default function ArrivalPhotograph() {
   const night = useNightScene();
   const name = night ? 'arrival-night' : 'arrival-street';

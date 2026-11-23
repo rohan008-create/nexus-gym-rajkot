@@ -56,9 +56,20 @@ const base = process.env.ENTRANCE_TEST_URL || 'http://127.0.0.1:3001';
     await page.getByRole('button', { name: 'Close dialog' }).click();
     await page.getByRole('dialog').waitFor({ state: 'hidden' });
     await page.close();
-    const skipped = await open();
+    const skipped = await browser.newPage();
+    skipped.on('pageerror', e => errors.push(e.message));
+    const tourModels = [];
+    await skipped.route('**/models/nexus-gym/*.glb', route => {
+      tourModels.push(route.request().url());
+      return route.abort();
+    });
+    await skipped.goto(base, { waitUntil: 'domcontentloaded' });
+    await skipped.locator('.intro[data-ready="true"]').waitFor({ timeout: 60000 });
+    assert.deepEqual(tourModels, [], 'tour models do not load during the intro');
     await skipped.getByRole('button', { name: 'ENTER NEXUS' }).click();
     await skipped.locator('[data-entrance="revealed"]').waitFor();
+    assert.equal(await skipped.locator('.entrance-landing').evaluate(el => el.inert), false, 'entry works without the detailed tour models');
+    assert.equal(tourModels.some(url => /\/(interior|priya-reception)\.glb$/.test(url)), false, 'interior assets wait for tour progress');
     await skipped.close();
     for (const reduced of [false, true]) {
       const mobile = await open(true, reduced);

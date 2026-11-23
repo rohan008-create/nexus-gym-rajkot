@@ -14,7 +14,7 @@ function loadInterior() {
   });
   return cachedInterior;
 }
-export default function DetailedInterior({ active, fallback }: { active: boolean; fallback: React.ReactNode }) {
+export default function DetailedInterior({ requested, fallback }: { requested: boolean; fallback: React.ReactNode }) {
   const { gl, scene, camera, invalidate } = useThree();
   const [asset, setAsset] = useState<GLTF | null>(null);
   const [prepared, setPrepared] = useState(false);
@@ -33,23 +33,13 @@ export default function DetailedInterior({ active, fallback }: { active: boolean
     return () => { mounted = false; };
   }, [clone, camera, gl, scene, invalidate]);
   useEffect(() => {
-    if (asset) return;
+    if (!requested) return;
     let mounted = true;
-    let idle: number | undefined;
-    // Prepare behind the intact bag so entering never exposes the placeholder
-    // room or starts parsing a GLB during the impact animation.
-    const timer = setTimeout(() => {
-      const load = () => {
-        if (!mounted) return;
-        loadInterior().then(value => { if (mounted) setAsset(value); }).catch(() => {
-          if (mounted) { gl.domElement.dataset.interiorSource = 'fallback'; gl.domElement.dataset.interiorSettled = 'true'; invalidate(); }
-        });
-      };
-      if ('requestIdleCallback' in window) idle = window.requestIdleCallback(load, { timeout: 1200 });
-      else load();
-    }, 350);
-    return () => { mounted = false; clearTimeout(timer); if (idle !== undefined) window.cancelIdleCallback(idle); };
-  }, [active, asset, gl, invalidate]);
+    loadInterior().then(value => { if (mounted) setAsset(value); }).catch(() => {
+      if (mounted) { gl.domElement.dataset.interiorSource = 'fallback'; gl.domElement.dataset.interiorSettled = 'true'; invalidate(); }
+    });
+    return () => { mounted = false; };
+  }, [requested, gl, invalidate]);
   useEffect(() => {
     gl.domElement.dataset.interiorSource = clone && prepared ? 'detailed' : 'fallback';
     if (clone && prepared) gl.domElement.dataset.interiorSettled = 'true';

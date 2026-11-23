@@ -1,5 +1,5 @@
 'use client';
-import { Component, useEffect, useMemo, useRef } from 'react';
+import { Component, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { buildGymGeometry } from './buildGymGeometry';
@@ -30,11 +30,13 @@ function Sign({ text, position, width, color = '#f02643' }: { text: string; posi
   useEffect(() => () => texture.dispose(), [texture]);
   return <mesh position={position}><planeGeometry args={[width, width * .1875]} /><meshBasicMaterial map={texture} transparent depthWrite={false} /></mesh>;
 }
-function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onFailure }: {
+function Scene({ progress, active, mobile, interiorRequested, onInvalidate, onPresent, onReady, onFailure, onDprChange }: {
   progress: React.MutableRefObject<number>; active: boolean; mobile: boolean; onInvalidate: React.MutableRefObject<() => void>; onReady: () => void; onFailure: () => void;
+  interiorRequested: boolean;
+  onDprChange: (dpr: number) => void;
   onPresent: (progress: number, shutter: number) => void;
 }) {
-  const { camera, gl, scene, invalidate, size, setFrameloop, setDpr } = useThree();
+  const { camera, gl, scene, invalidate, size, setFrameloop } = useThree();
   const night = useNightScene();
   useEffect(() => { gl.domElement.dataset.sceneTime = night ? 'night' : 'day'; invalidate(); }, [night, gl, invalidate]);
   const slowFrames = useRef(0);
@@ -58,11 +60,9 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
   };
   useEffect(() => {
     lifecycle.current.stopped = false;
-    setFrameloop('demand');
     onInvalidate.current = () => { if (!lifecycle.current.stopped) invalidate(); };
     const lost = (event: Event) => { event.preventDefault(); stopForContextLoss(); };
     gl.domElement.addEventListener('webglcontextlost', lost);
-    invalidate();
     return () => {
       lifecycle.current.stopped = true;
       setFrameloop('never');
@@ -71,11 +71,16 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
       gl.domElement.removeEventListener('webglcontextlost', lost);
     };
   }, [invalidate, gl, onReady, onFailure, onInvalidate, setFrameloop]);
-  useEffect(() => { motion.initialized = false; invalidate(); }, [active, mobile, invalidate, motion]);
+  useEffect(() => {
+    if (lifecycle.current.stopped) return;
+    setFrameloop(active ? 'demand' : 'never');
+    motion.initialized = false;
+    if (active) invalidate();
+  }, [active, mobile, invalidate, motion, setFrameloop]);
   useEffect(() => () => assets.dispose(), [assets]);
   // Update progress before the guide/door sample it, including the last demand frame.
   useFrame((_, delta) => {
-    if (lifecycle.current.stopped || document.hidden || (!active && readiness.current.announced)) return;
+    if (lifecycle.current.stopped || document.hidden || !active) return;
     if (!motion.initialized) {
       motion.progress = progress.current;
       motion.initialized = true;
@@ -87,7 +92,7 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
         slowFrames.current = delta > .026 ? slowFrames.current + 1 : Math.max(0, slowFrames.current - 1);
         if (slowFrames.current >= 8) {
           const resolution = gl.getPixelRatio();
-          if (resolution > .7) setDpr(Math.max(.7, resolution - .15));
+          if (resolution > .7) onDprChange(Math.max(.7, resolution - .15));
           slowFrames.current = 0;
         }
         invalidate();
@@ -97,7 +102,7 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     }
   }, -1);
   useFrame(() => {
-    if (lifecycle.current.stopped || document.hidden || (!active && readiness.current.announced)) return;
+    if (lifecycle.current.stopped || document.hidden || !active) return;
     if (gl.getContext().isContextLost()) { stopForContextLoss(); return; }
     const fov = sampleCamera(motion.progress, mobile, motion.position, motion.target);
     // Camera stops and guide choreography share the complex's local frame.
@@ -139,9 +144,8 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     }
     onPresent(motion.progress, motion.shutter);
     // Announce readiness on the following RAF, after the successful final draw.
-    const modelsReady = gl.domElement.dataset.exteriorSettled === 'true'
-      && gl.domElement.dataset.interiorSettled === 'true';
-    if (modelsReady && !readiness.current.announced && !readiness.current.scheduled && size.width > 0 && size.height > 0) {
+    const exteriorReady = gl.domElement.dataset.exteriorSettled === 'true';
+    if (exteriorReady && !readiness.current.announced && !readiness.current.scheduled && size.width > 0 && size.height > 0) {
       readiness.current.scheduled = true;
       readiness.current.frame = requestAnimationFrame(() => {
         if (!lifecycle.current.stopped && !gl.getContext().isContextLost()) {
@@ -154,7 +158,7 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     <color attach="background" args={[night ? '#080e20' : '#94c5e7']} />
     <TourReflections />
     <hemisphereLight ref={sky} args={['#f3eee0', '#676f6d', 2.2]} />
-    <directionalLight ref={sun} position={[8, 18, 14]} intensity={3.2} color="#fff1d9" castShadow shadow-mapSize={[1536,1536]} shadow-camera-left={-28} shadow-camera-right={28} shadow-camera-top={25} shadow-camera-bottom={-24} shadow-camera-near={.5} shadow-camera-far={80} shadow-normalBias={.035} shadow-bias={-.0001} />
+    <directionalLight ref={sun} position={[8, 18, 14]} intensity={3.2} color="#fff1d9" castShadow shadow-mapSize={mobile ? [1024, 1024] : [1536, 1536]} shadow-camera-left={-28} shadow-camera-right={28} shadow-camera-top={25} shadow-camera-bottom={-24} shadow-camera-near={.5} shadow-camera-far={80} shadow-normalBias={.035} shadow-bias={-.0001} />
     <directionalLight ref={fill} position={[-12, 8, -6]} intensity={1.2} color="#b8d6e2" />
     <StreetExterior motion={motion} active={active} />
     <NightExteriorLighting night={night} />
@@ -171,15 +175,14 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
       </>} />
     </group>
     <EntranceArchitecture motion={motion} />
-    <RyanTourGuide motion={motion} active={active} />
+    <RyanTourGuide motion={motion} active={active} interiorRequested={interiorRequested} />
     <group ref={interior} position={[0, .31, 0]} dispose={null}>
-      <DetailedInterior active={active} fallback={<>
+      <DetailedInterior requested={interiorRequested} fallback={<>
         {assets.interior.map((part, i) => <mesh key={i} geometry={part.geometry} material={part.material} />)}
         <Sign text="NEXUS" position={[3.8, 6.3, -11.75]} width={4.6} />
         <Sign text="BEYOND LIMITS" position={[3.8, 5.65, -11.74]} width={3.8} color="#f3eee0" />
       </>} />
-      <InteriorContactShading />
-      <InteriorDesign />
+      {interiorRequested && <><InteriorContactShading /><InteriorDesign /></>}
     </group>
     </group>
   </>;
@@ -190,6 +193,9 @@ class Boundary extends Component<{ children: React.ReactNode; onFailure: () => v
   componentDidCatch() { this.props.onFailure(); }
   render() { return this.state.failed ? null : this.props.children; }
 }
-export default function GymTourCanvas(props: Parameters<typeof Scene>[0]) {
-  return <Boundary onFailure={props.onFailure}><Canvas className="gym-tour-world" shadows="soft" frameloop="demand" dpr={[1, 1.5]} camera={INITIAL_CAMERA} gl={GL_OPTIONS} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1; }} aria-hidden="true"><Scene {...props} /></Canvas></Boundary>;
+export default function GymTourCanvas(props: Omit<Parameters<typeof Scene>[0], 'onDprChange'>) {
+  // Keep the chosen resolution across React renders as tour chapters change.
+  const [adaptiveDpr, setAdaptiveDpr] = useState<number>();
+  const dpr: number | [number, number] = props.mobile ? Math.min(1, adaptiveDpr ?? 1) : adaptiveDpr ?? [1, 1.5];
+  return <Boundary onFailure={props.onFailure}><Canvas className="gym-tour-world" shadows="soft" frameloop="demand" dpr={dpr} camera={INITIAL_CAMERA} gl={GL_OPTIONS} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1; }} aria-hidden="true"><Scene {...props} onDprChange={setAdaptiveDpr} /></Canvas></Boundary>;
 }
