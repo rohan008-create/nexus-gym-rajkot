@@ -6,7 +6,8 @@ import { Lightning } from '../components/ui/lightning';
 import './entrance.css';
 
 const Intro = dynamic(() => import('../components/intro/PunchingBagIntro'), { ssr: false, loading: () => <div className="loading" aria-label="Loading 3D scene" /> });
-const Hero = memo(dynamic(() => import('../components/hero/HeroSection'), { ssr: false }));
+// Keep the landing server-rendered while splitting its interactive scene code.
+const Hero = memo(dynamic(() => import('../components/hero/HeroSection')));
 type Stage = 'waiting' | 'breaking' | 'revealed';
 
 export default function Page() {
@@ -14,7 +15,6 @@ export default function Page() {
   const [sceneFailed, setSceneFailed] = useState(false);
   const sceneFailure = useCallback(() => setSceneFailed(true), []);
   const [prepared, setPrepared] = useState(false);
-  const [mountHero, setMountHero] = useState(false);
   const [heroEntering, setHeroEntering] = useState(false);
   const [run, setRun] = useState(0);
   const reduced = useReducedMotion();
@@ -23,15 +23,8 @@ export default function Page() {
   const clearTimers = useCallback(() => { timers.current.forEach(clearTimeout); timers.current = []; }, []);
   const ready = useCallback(() => setPrepared(true), []);
   useEffect(() => {
-    const timer = setTimeout(() => setMountHero(true), 600);
-    return () => { clearTimeout(timer); clearTimers(); navigator.vibrate?.(0); };
+    return () => { clearTimers(); navigator.vibrate?.(0); };
   }, [clearTimers]);
-  useEffect(() => {
-    if (!mountHero) return;
-    // HTML remains usable even if the optional rope renderer stalls.
-    const timer = setTimeout(ready, 10000);
-    return () => clearTimeout(timer);
-  }, [mountHero, ready]);
   useEffect(() => {
     if (stage === 'revealed') return;
     const previous = document.body.style.overflow;
@@ -75,15 +68,15 @@ export default function Page() {
   }, [clearTimers]);
   return <div className="nexus-entrance" data-entrance={stage}>
     <audio ref={welcomeAudio} src="/audio/welcome-nexus-natural.mp3" preload="auto" />
-    {mountHero && <div className="entrance-landing" aria-hidden={stage !== 'revealed'} ref={node => { if (node) node.inert = stage !== 'revealed'; }}>
+    <div className="entrance-landing" aria-hidden={stage !== 'revealed'} ref={node => { if (node) node.inert = stage !== 'revealed'; }}>
       <Hero entranceEnabled={heroEntering} interactive={stage === 'revealed'} onPrepared={ready} onReplayIntro={replay} />
-    </div>}
+    </div>
     {stage !== 'revealed' && <div className="entrance-overlay" role="region" aria-label="Break through to Nexus">
       <Intro key={run} breakthrough canStart={prepared} onExplosionStart={start} onExplosionComplete={finish} onSceneFailure={sceneFailure} />
       {stage === 'waiting' && prepared && !sceneFailed && !reduced && <div className="entrance-thunder" aria-hidden="true">
         <Lightning className="entrance-lightning" interactive={false} placement="sides" color="#ff2945" cloudColor="#5c1222" clouds={.32} branches={3} amplitude={.85} reach={.88} frequency={.65} speed={.8} glow={.8} intensity={1.05} thickness={1.6} quality={.65} fade="bottom" opacity={.8} seed={7} />
       </div>}
-      {stage === 'waiting' && <button className="entrance-skip" disabled={!prepared && !sceneFailed} onClick={finish}>{prepared || sceneFailed ? 'ENTER NEXUS ↗' : 'PREPARING NEXUS'}</button>}
+      {stage === 'waiting' && <button className="entrance-skip" disabled={!prepared} onClick={finish}>{prepared ? 'ENTER NEXUS ↗' : 'PREPARING NEXUS'}</button>}
     </div>}
   </div>;
 }

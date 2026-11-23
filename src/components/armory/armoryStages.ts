@@ -31,8 +31,8 @@ export const armoryStages: readonly ArmoryStage[] = [
     label: 'Power',
     category: 'OLYMPIC GRADE HEAVY ARSENAL',
     description: 'Every breakthrough begins with strength. Built for the reps that push you further.',
-    image: '/assets/armory/barbell-3d.jpg',
-    imageAlt: 'Loaded Olympic barbell with precision calibrated bumper plates and steel bar in a crimson-lit dark studio',
+    image: '/assets/armory/barbell-transparent.webp',
+    imageAlt: 'Isolated Olympic barbell with matte black bumper plates and a brushed chrome shaft',
     specs: [
       { label: 'TENSILE RATING', value: '215,000 PSI' },
       { label: 'MAX CAPACITY', value: '450 KG' },
@@ -51,8 +51,8 @@ export const armoryStages: readonly ArmoryStage[] = [
     label: 'Endurance',
     category: 'AERO-KINETIC CARDIO SUITE',
     description: 'Keep moving. Build stamina, challenge your limits, and go further every session.',
-    image: '/assets/armory/treadmill-3d.jpg',
-    imageAlt: 'Futuristic curved commercial treadmill with carbon-fiber frame and glowing red telemetry cockpit',
+    image: '/assets/armory/treadmill-transparent.webp',
+    imageAlt: 'Isolated curved treadmill with charcoal frame, slat belt and red adjustment details',
     specs: [
       { label: 'PROPULSION', value: 'ZERO-MOTOR KINETIC' },
       { label: 'DECK IMPACT', value: '-38% JOINT STRESS' },
@@ -71,8 +71,8 @@ export const armoryStages: readonly ArmoryStage[] = [
     label: 'Precision',
     category: 'BIOMECHANICAL ISOLATION RIG',
     description: 'Control every movement. Focus on every rep. Progress with purpose.',
-    image: '/assets/armory/cable-machine-3d.jpg',
-    imageAlt: 'Dual-pulley commercial cable crossover rig with crimson backlit weight stacks and aircraft cables',
+    image: '/assets/armory/cable-transparent.webp',
+    imageAlt: 'Isolated dual-pulley functional trainer with charcoal weight towers and steel guide rods',
     specs: [
       { label: 'PULLEY RATIO', value: '2:1 ERGONOMIC' },
       { label: 'DUAL STACKS', value: '2 x 100 KG' },

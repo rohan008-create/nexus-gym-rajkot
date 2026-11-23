@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { motion, useReducedMotion, type Variants, type MotionStyle } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 /* -------------------------------------------------------------------------- */
@@ -21,8 +21,9 @@ import { cn } from "@/lib/utils";
 
 export interface FolderCardProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
-  "onAnimationStart" | "onDragStart" | "onDragEnd" | "onDrag"
+  "onAnimationStart" | "onDragStart" | "onDragEnd" | "onDrag" | "style"
 > {
+  style?: MotionStyle;
   /** Headline shown inside the folder tab. */
   title?: string;
   /** Supporting line under the title. */
@@ -163,7 +164,7 @@ export const FolderCard = React.forwardRef<HTMLDivElement, FolderCardProps>(
             "--folder-card-font": FONT_STACK,
             fontFamily: "var(--folder-card-font)",
             ...style,
-          } as React.CSSProperties
+          } as MotionStyle
         }
         className={cn(
           "w-[360px] max-w-full select-none [container-type:inline-size]",

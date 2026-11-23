@@ -1,6 +1,8 @@
 export type TourBeat = 'exterior' | 'entry' | 'strength' | 'cardio';
 export type TourStatus = 'loading' | 'ready' | 'error';
 export type Point = [number, number, number];
+// Keep the full stair flight behind the forecourt curb (world Z = 4.9).
+export const COMPLEX_SETBACK = 4.8;
 export type CameraStop = { at: number; position: Point; target: Point; fov: number };
 export const TOUR_BEATS = [
   { id: 'exterior' as TourBeat, label: 'THE ARRIVAL', title: ['WELCOME TO', 'NEXUS.'], description: 'Meet Ryan. Your journey starts at the steps.', detail: 'RAJKOT, GUJARAT' },
@@ -11,7 +13,7 @@ export const TOUR_BEATS = [
 
 // One continuous eye-level route. Coordinates: metres, Y up, +Z street.
 export const DESKTOP_CAMERAS: CameraStop[] = [
-  { at: 0, position: [.6, 6.5, 30.5], target: [0, 7.5, 0], fov: 42 },
+  { at: 0, position: [.6, 6.5, 35.5], target: [0, 7, 0], fov: 42 },
   { at: .12, position: [10.67, 3.2, 14.9], target: [8.05, 1.3, 8.6], fov: 46 },
   { at: .18, position: [8.05, 2.1, 11.6], target: [8.05, 1.6, 7.7], fov: 49 },
   { at: .52, position: [8.05, 5.9, 4.3], target: [8.05, 5.8, 1.7], fov: 52 },
@@ -22,7 +24,8 @@ export const DESKTOP_CAMERAS: CameraStop[] = [
   { at: .86, position: [4.75, 6.06, -.9], target: [6.82, 5.56, -2.65], fov: 65 },
   { at: .88, position: [4.58, 6.08, -1.52], target: [2.15, 5.8, -1.6], fov: 65 },
   { at: .92, position: [1.05, 6.1, -2.4], target: [-3.5, 5.3, -7.5], fov: 60 },
-  { at: 1, position: [.6, 6.12, -4.2], target: [4.2, 5.4, -7.2], fov: 60 },
+  // End with Ryan centred and enough distance to keep his full body in frame.
+  { at: 1, position: [.65, 6.05, -2.05], target: [.65, 5.42, -5.1], fov: 60 },
 ];
 export const MOBILE_CAMERAS: CameraStop[] = DESKTOP_CAMERAS.map(stop => ({
   ...stop, position: [...stop.position] as Point, target: [...stop.target] as Point,

@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "desktop dark: responsive layout, three pillars, 3D selection, enquiry and reduced motion",
+    "desktop light: responsive layout, three pillars, 3D selection, enquiry and reduced motion",
+    "mobile dark: responsive layout, three pillars, 3D selection, enquiry and reduced motion",
+    "mobile light: responsive layout, three pillars, 3D selection, enquiry and reduced motion",
+    "ambient 3D motion and offscreen pause"
+  ],
+  "errors": []
+}

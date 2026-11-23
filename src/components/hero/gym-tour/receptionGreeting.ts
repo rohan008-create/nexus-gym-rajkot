@@ -23,6 +23,7 @@ export function createReceptionGreeting(avatar: THREE.Object3D) {
     const get = (name: string) => avatar.getObjectByName(`mixamorig${side}${name}`)!;
     const upper = get('Arm'), lower = get('ForeArm'), hand = get('Hand');
     const a = upper.getWorldPosition(v()), b = lower.getWorldPosition(v()), c = hand.getWorldPosition(v());
+    const restWrist = c.clone();
     const fingers = get('HandMiddle1').getWorldPosition(v()).sub(c).normalize();
     const across = get('HandIndex1').getWorldPosition(v()).sub(get('HandPinky1').getWorldPosition(v())).normalize();
     across.addScaledVector(fingers, -across.dot(fingers)).normalize();
@@ -32,7 +33,7 @@ export function createReceptionGreeting(avatar: THREE.Object3D) {
       bone: get(`Hand${finger}${joint}`), child: get(`Hand${finger}${joint + 1}`), thumb: finger === 'Thumb',
     })));
     return { upper, lower, hand, sign: i === 0 ? 1 : -1, l1: a.distanceTo(b), l2: b.distanceTo(c),
-      handRotation: hand.getWorldQuaternion(q()), bindBasis, joints, target: v(), elbow: v(), pole: v(), direction: v(), bend: v() };
+      restWrist, handRotation: hand.getWorldQuaternion(q()), bindBasis, joints, target: v(), elbow: v(), pole: v(), direction: v(), bend: v() };
   });
   const facing = q(), targetBasis = q(), palmRotation = q();
   const head = avatar.getObjectByName('mixamorigHead');
@@ -47,7 +48,7 @@ export function createReceptionGreeting(avatar: THREE.Object3D) {
     let error = 0;
     for (const arm of arms) {
       const { upper, lower, hand, sign, l1, l2, target, elbow, pole, direction, bend } = arm;
-      target.set(sign * THREE.MathUtils.lerp(.25, .023, amount), THREE.MathUtils.lerp(.86, 1.18, amount), THREE.MathUtils.lerp(.08, .29, amount));
+      target.copy(arm.restWrist).lerp(pole.set(sign * .023, 1.18, .29), amount);
       anchor.localToWorld(target);
       upper.getWorldPosition(start);
       direction.subVectors(target, start);

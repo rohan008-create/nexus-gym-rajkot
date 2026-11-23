@@ -1,0 +1,7 @@
+{
+  "method": "Built-in image_gen edit; transparent_background=true",
+  "reference": "public/assets/nexus-logo.png",
+  "prompt": "Edit the supplied existing NEXUS FITNESS CLUB logo into a crisp official-looking LIGHT BACKGROUND version, keeping its exact original composition, emblem, proportions, red athlete silhouettes, dumbbell and typography. Preserve the spelling NEXUS FITNESS CLUB and its distinctive oversized diagonal X. Keep N,E,U,S red. Change the white X and the white FITNESS CLUB subtitle to deep charcoal (#202124) so they are fully legible on white. The circular athletes emblem retains its white interior, dark outline and red figures. Remove bevels, glow and heavy drop shadows for a clean flat print-quality logo, keep all letterforms faithful to reference. No new symbols or text. No rectangular badge, no background panel, no border around the whole design. Output only the complete uncropped horizontal logo on a genuinely transparent alpha background with tight comfortable margins.",
+  "original": "assets/imagegen/footer/nexus-logo-light-original.png",
+  "delivery": "public/assets/nexus-logo-light.webp"
+}

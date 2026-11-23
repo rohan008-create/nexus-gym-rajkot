@@ -1,9 +1,10 @@
 'use client';
-import { Suspense, useMemo, useRef } from 'react';
+import { Component, Suspense, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { smooth, type TourPlayback } from './gymTourConfig';
 import { createReceptionGreeting } from './receptionGreeting';
 
@@ -11,6 +12,8 @@ function DeskHost({ asset, motion }: { asset: GLTF; motion: TourPlayback }) {
   const { camera, gl } = useThree();
   const rig = useMemo(() => {
     const avatar = clone(asset.scene);
+    // GLTFLoader sanitizes Mixamo namespaces; keep exported variants compatible.
+    avatar.traverse(node => { node.name = node.name.replace('mixamorig:', 'mixamorig'); });
     const bounds = new THREE.Box3().setFromObject(avatar);
     const scale = 1.74 / (bounds.max.y - bounds.min.y);
     avatar.scale.multiplyScalar(scale);
@@ -25,18 +28,32 @@ function DeskHost({ asset, motion }: { asset: GLTF; motion: TourPlayback }) {
     return { avatar, greet: createReceptionGreeting(avatar) };
   }, [asset]);
   const anchor = useRef<THREE.Group>(null);
+  const worldPosition = useMemo(() => new THREE.Vector3(), []);
   useFrame(() => {
     const p = motion.progress;
     if (p < .45 || !anchor.current) return;
     const host = anchor.current;
-    host.rotation.y = Math.atan2(camera.position.x - host.position.x, camera.position.z - host.position.z);
+    host.getWorldPosition(worldPosition);
+    host.rotation.y = Math.atan2(camera.position.x - worldPosition.x, camera.position.z - worldPosition.z);
     const greeting = smooth((p - .745) / .035);
     const error = rig.greet(host, greeting);
     gl.domElement.dataset.receptionPose = greeting > .99 ? 'namaskar' : 'standing';
     gl.domElement.dataset.receptionHandError = error.toFixed(4);
     gl.domElement.dataset.receptionHeight = host.position.y.toFixed(2);
+    gl.domElement.dataset.receptionHost = 'priya';
   });
   return <group ref={anchor} position={[6.95, 4.51, -2.73]}><primitive object={rig.avatar} dispose={null} /></group>;
+}
+
+function PriyaHost({ motion }: { motion: TourPlayback }) {
+  const asset = useLoader(GLTFLoader, '/models/nexus-gym/priya-reception.glb');
+  return <DeskHost asset={asset} motion={motion} />;
+}
+
+class HostBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? null : this.props.children; }
 }
 
 function Block({ at, size, color }: { at: [number,number,number]; size: [number,number,number]; color: string }) {
@@ -44,10 +61,22 @@ function Block({ at, size, color }: { at: [number,number,number]; size: [number,
 }
 
 function ReceptionFinishes() {
+  const { gl, scene, camera } = useThree();
   const [wood, stone, logo] = useLoader(THREE.TextureLoader, [
     '/models/nexus-gym/walnut.webp', '/models/nexus-gym/limestone.webp', '/models/nexus-gym/reception-wordmark.webp'
   ]);
   for (const texture of [wood, stone, logo]) texture.colorSpace = THREE.SRGBColorSpace;
+  useEffect(() => {
+    // Include the hidden reception and procedural room once their textures are
+    // ready, rather than first compiling them halfway up the staircase.
+    let mounted = true;
+    gl.compileAsync(scene, camera).then(() => {
+      if (mounted) gl.domElement.dataset.receptionShaders = 'ready';
+    }).catch(() => {
+      if (mounted) gl.domElement.dataset.receptionShaders = 'deferred';
+    });
+    return () => { mounted = false; };
+  }, [gl, scene, camera, wood, stone, logo]);
   return <>
     {/* Bookmatched wall panels with recessed shadow joints. */}
     {[5.39,6.52,7.65,8.78].map(x =>
@@ -70,7 +99,6 @@ function ReceptionFinishes() {
     </group>
     <mesh position={[6.44,3.16,-2]}><boxGeometry args={[5.45,.12,3.4]}/><meshStandardMaterial color="#ddd3c1"/></mesh>
     {[4.35,6.9].map(x=><mesh key={x} position={[x,3.084,-2.75]} rotation={[Math.PI/2,0,0]}><circleGeometry args={[.105,20]}/><meshBasicMaterial color="#ffe2b6" side={THREE.DoubleSide}/></mesh>)}
-    <pointLight position={[5.45,2.75,-2.95]} color="#ffd4a1" intensity={5} distance={4}/>
     <group position={[8.8,0,-3.1]}>
       <mesh position={[0,.26,0]}><cylinderGeometry args={[.24,.17,.5,24]}/><meshStandardMaterial color="#666760"/></mesh>
       {Array.from({length:11},(_,i)=><group key={i} rotation={[0,i*2.4,0]}><mesh position={[.1,.77+(i%3)*.065,0]} rotation={[0,0,-.32-(i%4)*.11]} scale={[.095,.41,.035]}><sphereGeometry args={[1,8,6]}/><meshStandardMaterial color={i%2?'#36533f':'#506849'}/></mesh></group>)}
@@ -104,16 +132,23 @@ function GymFloorDoor({motion}: {motion: TourPlayback}) {
     </group>
   </group>;
 }
-export default function ReceptionOffice({asset,motion,active}: {asset: GLTF|null; motion: TourPlayback; active:boolean}) {
+export default function ReceptionOffice({motion,active}: {motion: TourPlayback; active:boolean}) {
   const room = useRef<THREE.Group>(null);
-  useFrame(()=>{room.current!.visible = active && motion.progress >= .45;});
-  return <group ref={room} visible={false}>
+  const light = useRef<THREE.PointLight>(null);
+  useFrame(()=>{
+    const visible = active && motion.progress >= .45;
+    room.current!.visible = visible;
+    light.current!.intensity = visible ? 5 : 0;
+  });
+  // Keep the light in the scene even outside reception. Toggling its visibility
+  // changes the shader light count and recompiles every lit material mid-scroll.
+  return <><pointLight ref={light} position={[5.45,7.26,-2.95]} color="#ffd4a1" intensity={0} distance={4}/><group ref={room} visible={false}>
     <group position={[0,4.51,0]}>
       <Block at={[6.41,1.65,-3.54]} size={[5.82,3.3,.12]} color="#344748"/>
       <Block at={[9.2,1.65,-2.57]} size={[.12,3.3,2.4]} color="#435553"/>
       <Suspense fallback={null}><ReceptionFinishes/></Suspense>
       <GymFloorDoor motion={motion}/>
     </group>
-    {asset && <DeskHost asset={asset} motion={motion}/>}
-  </group>;
+    <HostBoundary><Suspense fallback={null}><PriyaHost motion={motion}/></Suspense></HostBoundary>
+  </group></>;
 }

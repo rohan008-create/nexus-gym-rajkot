@@ -1,0 +1,98 @@
+[
+  {
+    "name": "whey",
+    "width": 1039,
+    "height": 1100,
+    "channels": 4,
+    "alpha": 0.4239522267914953,
+    "bytes": 109228
+  },
+  {
+    "name": "isolate",
+    "width": 1041,
+    "height": 1100,
+    "channels": 4,
+    "alpha": 0.4662003318487468,
+    "bytes": 71092
+  },
+  {
+    "name": "creatine",
+    "width": 1204,
+    "height": 1100,
+    "channels": 4,
+    "alpha": 0.4152680459075808,
+    "bytes": 126052
+  },
+  {
+    "name": "preworkout",
+    "width": 1204,
+    "height": 1100,
+    "channels": 4,
+    "alpha": 0.4352438840229538,
+    "bytes": 86816
+  },
+  {
+    "name": "electrolytes",
+    "width": 1044,
+    "height": 1100,
+    "channels": 4,
+    "alpha": 0.39449146638801813,
+    "bytes": 100998
+  },
+  {
+    "name": "gainer",
+    "width": 1077,
+    "height": 1100,
+    "channels": 4,
+    "alpha": 0.3511555668101629,
+    "bytes": 103050
+  },
+  {
+    "name": "peanut",
+    "width": 1204,
+    "height": 1100,
+    "channels": 4,
+    "alpha": 0.4629371790999698,
+    "bytes": 150676
+  },
+  {
+    "name": "bar",
+    "width": 2172,
+    "height": 724,
+    "channels": 4,
+    "alpha": 0.26687410335459844,
+    "bytes": 245264
+  },
+  {
+    "name": "shaker",
+    "width": 733,
+    "height": 1100,
+    "channels": 4,
+    "alpha": 0.558671710281533,
+    "bytes": 64682
+  },
+  {
+    "name": "straps",
+    "width": 1204,
+    "height": 1100,
+    "channels": 4,
+    "alpha": 0.4176117487163999,
+    "bytes": 320168
+  },
+  {
+    "name": "bands",
+    "width": 1536,
+    "height": 1024,
+    "channels": 4,
+    "alpha": 0.43462689717610675,
+    "bytes": 386028
+  },
+  {
+    "name": "bag",
+    "width": 1536,
+    "height": 1024,
+    "channels": 4,
+    "alpha": 0.4724419911702474,
+    "bytes": 283296
+  }
+]

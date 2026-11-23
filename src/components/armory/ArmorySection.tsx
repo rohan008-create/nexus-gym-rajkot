@@ -1,210 +1,92 @@
-'use client';
+﻿'use client';
+
 import { useRef, useState } from 'react';
-import { ArrowRight, Crosshair, Cpu } from 'lucide-react';
+import { ArrowDownRight, ArrowRight, ArrowUpRight, MoveUpRight } from 'lucide-react';
+import ClothPeelReveal from '../ui/cloth-peel-reveal';
 import { armoryStages } from './armoryStages';
-import { useArmoryScroll } from './useArmoryScroll';
-import ArmoryParticles from './ArmoryParticles';
+import './armory-gallery.css';
+
+const equipmentNames = ['Olympic barbell', 'Curved treadmill', 'Functional trainer'];
+const equipmentNotes = ['Built to carry your ambition.', 'Find your next gear.', 'Every angle. Every muscle.'];
 
 export default function ArmorySection({ onExplorePrograms }: { onExplorePrograms: () => void }) {
-  const root = useRef<HTMLElement>(null);
-  const [enhanced, setEnhanced] = useState(false);
   const [active, setActive] = useState(0);
-  const [activePin, setActivePin] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const stage = armoryStages[active];
 
-  useArmoryScroll(root, setEnhanced, setActive);
+  const select = (index: number, focus = false) => {
+    setActive(index);
+    if (focus) tabs.current[index]?.focus();
+  };
 
   return (
-    <section
-      ref={root}
-      className="armory-section"
-      id="armory"
-      aria-labelledby="armory-title"
-      data-armory-stage={armoryStages[active].id}
-    >
-      <header className="armory-intro">
-        <div className="armory-intro-header">
-          <div className="armory-eyebrow-container">
-            <p className="eyebrow">
-              <span aria-hidden />04 / THE NEXUS ARMORY
-            </p>
-            <span className="armory-hud-chip" aria-hidden="true">
-              <span className="armory-live-indicator" />
-              SYSTEM 04 // 3D ARSENAL
-            </span>
+    <section id="armory" className="armory-section armory-gallery" aria-labelledby="armory-title" data-armory-stage={stage.id} data-revealed={revealed}>
+      <ClothPeelReveal
+        sheetText={'ENGINEERED\nFOR STRENGTH.'}
+        sheetColor="#eeece5"
+        textColor="#20221f"
+        durationMs={1850}
+        delayMs={450}
+        angleDeg={198}
+        foldAmplitude={0.16}
+        foldFrequency={3.4}
+        tilt={0.95}
+        height="var(--armory-height)"
+        onReveal={() => setRevealed(true)}
+        className="armory-peel"
+      >
+        <div className="ag-content">
+          <header className="ag-header">
+            <p className="ag-eyebrow"><span />04 / THE NEXUS ARMORY</p>
+            <span className="ag-edition">THE TOOLS. THE WORK. THE TRANSFORMATION.</span>
+            <ArrowDownRight size={22} strokeWidth={1.3} aria-hidden />
+          </header>
+          <div className="ag-intro">
+            <h2 id="armory-title">ENGINEERED<br /><em>FOR STRENGTH.</em></h2>
+            <p>Exceptional equipment.{' '}<br />Extraordinary possibilities.<br /><span>Your next breakthrough starts here.</span></p>
           </div>
-
-          <h2 id="armory-title" className="armory-title-3d">
-            <span className="armory-title-text">ENGINEERED</span>
-            <br />
-            <em className="armory-title-highlight">FOR STRENGTH.</em>
-          </h2>
-
-          <div className="armory-meta-pills" aria-hidden="true">
-            <div className="armory-pill">
-              <Cpu size={12} className="text-red-500" />
-              <span>AERO-GRADE HIGH TENSILE</span>
+          <div className="ag-product" role="tabpanel" id="armory-equipment-panel" aria-labelledby={`armory-tab-${stage.id}`} tabIndex={0}>
+            <div className="ag-product-meta"><span>THE COLLECTION / {stage.number}</span><span>NEXUS FITNESS CLUB <MoveUpRight size={12} aria-hidden /></span></div>
+            <span className="ag-watermark" aria-hidden>{stage.label}</span>
+            <div key={stage.id} className={`ag-equipment-scene ag-equipment-${stage.id}`}>
+              <div className="ag-ground" aria-hidden />
+              <img className="ag-equipment" src={stage.image} alt={stage.imageAlt} width={1536} height={1024} decoding="async" />
             </div>
-            <div className="armory-pill">
-              <Crosshair size={12} className="text-red-500" />
-              <span>±0.05% ISO CALIBRATION</span>
+            <div className="ag-product-caption" key={`${stage.id}-caption`}>
+              <span className="ag-caption-line" aria-hidden />
+              <div><span className="ag-micro">{stage.number} / {equipmentNames[active]}</span><h3>{equipmentNotes[active]}</h3></div>
+              <span className="ag-caption-arrow" aria-hidden><ArrowUpRight size={24} strokeWidth={1.2} /></span>
             </div>
           </div>
+          <div className="ag-selector" role="tablist" aria-label="Equipment collection">
+            {armoryStages.map((item, index) => (
+              <button key={item.id} ref={node => { tabs.current[index] = node; }} role="tab" id={`armory-tab-${item.id}`}
+                aria-selected={active === index} aria-controls="armory-equipment-panel" tabIndex={active === index ? 0 : -1}
+                onClick={() => select(index)}
+                onKeyDown={event => {
+                  let next = active;
+                  if (event.key === 'ArrowRight') next = (active + 1) % 3;
+                  else if (event.key === 'ArrowLeft') next = (active + 2) % 3;
+                  else if (event.key === 'Home') next = 0;
+                  else if (event.key === 'End') next = 2;
+                  else return;
+                  event.preventDefault(); select(next, true);
+                }}>
+                <span className="ag-tab-number">{item.number}</span>
+                <span className="ag-tab-copy"><strong>{item.label}</strong><span>{equipmentNames[index]}</span></span>
+                <ArrowUpRight size={20} strokeWidth={1.5} aria-hidden />
+              </button>
+            ))}
+          </div>
+          <footer className="ag-footer">
+            <p className="ag-description" aria-live="polite">{stage.description}</p>
+            <button className="ag-cta" onClick={onExplorePrograms}>FIND YOUR PROGRAM <ArrowRight size={17} aria-hidden /></button>
+          </footer>
+          <p className="ag-disclaimer">EQUIPMENT CONCEPTS / BUILT FOR EVERY KIND OF STRONG.</p>
         </div>
-
-        <div className="armory-intro-side">
-          <p>
-            Discover the equipment that powers every rep, every challenge, and every breakthrough.
-          </p>
-          <div className="armory-spec-coords" aria-hidden="true">
-            <span>SECTOR: 04-ARSENAL</span>
-            <span>SPEC: 3D BIOMECHANICS</span>
-          </div>
-        </div>
-      </header>
-
-      <a className="armory-skip" href="#armory-end">
-        Skip equipment showcase
-      </a>
-
-      <div className="armory-showcase" aria-label="Cinematic equipment showcase">
-        <ArmoryParticles />
-
-        {armoryStages.map((stage, index) => (
-          <article
-            key={stage.id}
-            className="armory-stage"
-            data-stage={stage.id}
-            aria-hidden={enhanced ? active !== index : undefined}
-            aria-labelledby={`armory-${stage.id}`}
-          >
-            <div className="armory-stage-copy">
-              <div className="armory-stage-header">
-                <p className="armory-stage-number">
-                  {stage.number}
-                  <span>/ 03</span>
-                </p>
-                <span className="armory-category-tag" aria-hidden="true">
-                  {stage.category}
-                </span>
-              </div>
-
-              <h3 id={`armory-${stage.id}`}>
-                <span className="armory-title-line">
-                  <span>THE</span>
-                </span>
-                <span className="armory-title-line accent">
-                  <span>{stage.title}</span>
-                </span>
-              </h3>
-
-              <p className="armory-stage-description">{stage.description}</p>
-
-              <div className="armory-telemetry-specs" aria-label="Equipment specifications">
-                {stage.specs.map(spec => (
-                  <div key={spec.label} className="armory-spec-item">
-                    <span className="armory-spec-label">{spec.label}</span>
-                    <span className="armory-spec-val">{spec.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              <span
-                className="armory-stage-rule"
-                style={{ width: '125px', transform: `scaleX(${(index + 1) / 3})` }}
-                aria-hidden
-              />
-
-              {index === 2 && (
-                <button
-                  className="armory-programs-cta"
-                  tabIndex={enhanced && active !== 2 ? -1 : 0}
-                  onClick={event => {
-                    event.currentTarget.blur();
-                    onExplorePrograms();
-                  }}
-                >
-                  EXPLORE OUR PROGRAMS <ArrowRight size={16} aria-hidden />
-                </button>
-              )}
-            </div>
-
-            <div className="armory-visual">
-              <div className="armory-parallax">
-                <div className="armory-3d-stage">
-                  <div className="armory-grid-backing" aria-hidden="true" />
-                  <img
-                    className="armory-equipment"
-                    src={stage.image}
-                    alt={stage.imageAlt}
-                    width="1600"
-                    height="900"
-                    loading="lazy"
-                    decoding="async"
-                  />
-
-                  {/* 3D Holographic Callout Nodes */}
-                  <div className="armory-callouts-layer" aria-hidden="true">
-                    {stage.callouts.map((pin, pIdx) => {
-                      const isOpen = activePin === pIdx;
-                      return (
-                        <div
-                          key={pin.label}
-                          className={`armory-pin-node ${isOpen ? 'is-active' : ''}`}
-                          style={{ top: pin.top, left: pin.left }}
-                          onMouseEnter={() => setActivePin(pIdx)}
-                          onMouseLeave={() => setActivePin(null)}
-                        >
-                          <span className="armory-pin-ring" />
-                          <span className="armory-pin-dot" />
-                          <div className="armory-pin-card">
-                            <span className="armory-pin-tag">3D SPEC</span>
-                            <strong className="armory-pin-title">{pin.label}</strong>
-                            <p className="armory-pin-detail">{pin.detail}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-              <div className="armory-visual-shade" aria-hidden />
-            </div>
-          </article>
-        ))}
-
-        <div className="armory-scanner" aria-hidden />
-
-        <div
-          className="armory-progress"
-          role="progressbar"
-          aria-label="Equipment showcase stage"
-          aria-valuemin={1}
-          aria-valuemax={3}
-          aria-valuenow={active + 1}
-          aria-valuetext={`${armoryStages[active].number} of 03: ${armoryStages[active].label}`}
-        >
-          <div className="armory-progress-top">
-            <span aria-live="polite">
-              {armoryStages[active].number}
-              <i>/ 03</i>
-            </span>
-            <div>
-              {armoryStages.map((stage, index) => (
-                <span key={stage.id} className={active === index ? 'is-active' : ''}>
-                  {stage.label}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="armory-progress-track">
-            <span className="armory-progress-fill" />
-          </div>
-        </div>
-
-        <p className="armory-concept">ILLUSTRATIVE EQUIPMENT CONCEPTS // 3D SPECIFICATION</p>
-      </div>
-
-      <div id="armory-end" tabIndex={-1} className="armory-end" aria-label="End of equipment showcase" />
+      </ClothPeelReveal>
+      <div id="armory-end" />
     </section>
   );
 }

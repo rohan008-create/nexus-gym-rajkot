@@ -1,0 +1,1 @@
+{"planning":"direct","delegation":"none","scope":["src/components/hero/gym-tour/gymTourConfig.ts","artifacts/desktop-framing"],"decision":"Move desktop opening camera back 5m and lower target .5m to include foreground vehicle wheels","verification":"Desktop browser screenshots and TypeScript"}

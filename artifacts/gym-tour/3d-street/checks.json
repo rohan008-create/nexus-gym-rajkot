@@ -1,0 +1,22 @@
+{
+  "report": [
+    {
+      "label": "desktop",
+      "oneCanvas": true,
+      "noPhotograph": true,
+      "movingTraffic": true,
+      "rollingWheels": true,
+      "offscreenPauses": true
+    },
+    {
+      "label": "mobile",
+      "oneCanvas": true,
+      "noPhotograph": true,
+      "movingTraffic": true,
+      "rollingWheels": true,
+      "offscreenPauses": true
+    }
+  ],
+  "errors": [],
+  "modelBytes": 6839492
+}

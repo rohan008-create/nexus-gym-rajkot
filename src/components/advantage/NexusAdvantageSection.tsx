@@ -1,53 +1,61 @@
-'use client';
+﻿'use client';
 import { useRef, useState } from 'react';
-import { ArrowUpRight } from 'lucide-react';
 import { advantages } from './advantages';
 import { useAdvantageAnimation } from './useAdvantageAnimation';
+import './advantage-editorial.css';
 
-function AdvantageList() {
-  const [selected, setSelected] = useState(0);
-  const [hovered, setHovered] = useState<number | null>(null);
-  const active = hovered ?? selected;
-  return <div className="advantage-list" onPointerLeave={() => setHovered(null)}>
-    {advantages.map((item, index) => {
-      const Icon = item.icon;
-      const expanded = active === index;
-      return <article className={`advantage-item${expanded ? ' is-active' : ''}`} key={item.id}>
-        <button type="button" className="advantage-button" id={`advantage-button-${item.id}`} aria-expanded={expanded} aria-controls={`advantage-panel-${item.id}`}
-          onPointerEnter={event => { if (event.pointerType === 'mouse') setHovered(index); }}
-          onFocus={() => setHovered(null)}
-          onClick={() => { setSelected(index); setHovered(null); }}>
-          <span className="advantage-number">{item.number}</span><Icon className="advantage-icon" size={19} strokeWidth={1.5} aria-hidden />
-          <span className="advantage-feature-title">{item.title}</span><ArrowUpRight className="advantage-arrow" size={18} aria-hidden />
-        </button>
-        <div className="advantage-panel" id={`advantage-panel-${item.id}`} role="region" aria-labelledby={`advantage-button-${item.id}`} aria-hidden={!expanded}>
-          <div><p>{item.description}</p></div>
-        </div>
-      </article>;
-    })}
-  </div>;
-}
+const stories = [
+  { title: 'Premium equipment', photo: 'athlete-transparent.webp', alt: 'Athlete standing with dumbbells, isolated on a transparent background', line: 'Built for your next breakthrough.', tag: 'BETTER TOOLS. BIGGER POSSIBILITIES.' },
+  { title: 'Supportive environment', photo: 'coaching-transparent.webp', alt: 'Trainer coaching a woman with a dumbbell, isolated on a transparent background', line: 'A little support. A lot of possibility.', tag: 'YOUR PACE. YOUR PLACE.' },
+  { title: 'Goal-focused training', photo: 'athlete-transparent.webp', alt: 'Athlete holding dumbbells, isolated on a transparent background', line: 'Your ambition. A clear direction.', tag: 'EVERY SESSION HAS A PURPOSE.' },
+  { title: 'Fitness community', photo: 'community-transparent.webp', alt: 'Two athletes exchanging a fist bump, isolated on a transparent background', line: 'Good people. Great energy.', tag: 'STRONGER, TOGETHER.' },
+];
 
 export default function NexusAdvantageSection() {
   const root = useRef<HTMLElement>(null);
+  const [selected, setSelected] = useState(0);
+  const [hovered, setHovered] = useState<number | null>(null);
+  const active = hovered ?? selected;
+  const story = stories[active];
   useAdvantageAnimation(root);
-  return <section ref={root} id="advantage" className="advantage-section" aria-labelledby="advantage-title">
-    <div className="advantage-boundary" aria-hidden />
-    <div className="advantage-composition">
-      <div className="advantage-visual">
-        <div className="advantage-scroll-visual"><div className="advantage-pointer-visual">
-          <picture><source media="(max-width: 719px)" srcSet="/assets/photography/nexus-advantage-athlete-mobile.webp" /><img className="advantage-athlete" src="/assets/photography/nexus-advantage-athlete.webp" alt="Athlete in black training apparel performing a barbell deadlift in a dark gym with crimson rim lighting" width={1600} height={900} loading="lazy" decoding="async" /></picture>
-        </div></div>
-        <div className="advantage-haze" aria-hidden /><div className="advantage-darkness" aria-hidden /><div className="advantage-scanner" aria-hidden /><div className="advantage-vignette" aria-hidden /><div className="advantage-grain" aria-hidden />
-        <span className="advantage-image-caption">BUILT AROUND YOUR NEXT REP.</span>
+  return <section ref={root} id="advantage" className="advantage-section nexus-standard" aria-labelledby="advantage-title" data-active-feature={advantages[active].id}>
+    <div className="ns-topline ns-enter"><span>05 / THE NEXUS ADVANTAGE</span><span>THE DIFFERENCE IS PERSONAL.</span></div>
+    <header className="ns-heading ns-enter">
+      <h2 id="advantage-title"><span>NOT JUST A GYM.</span>A DIFFERENT<br /><em>STANDARD.</em></h2>
+      <p>Better equipment. The right guidance.{' '}<br />People who bring out your best.<br /><span>A space built around your progress.</span></p>
+    </header>
+    <div className="ns-layout">
+      <div className="ns-photo-column ns-enter">
+        <div className="ns-photo-frame">
+          <span className="ns-backdrop-word" aria-hidden>MORE.</span>
+          <div className="ns-ground-shadow" aria-hidden />
+          <div key={story.photo} className="ns-photo-picture">
+            <img className="ns-photo" src={`/assets/advantage/${story.photo}`} alt={story.alt} width={1024} height={1536} loading="lazy" decoding="async" />
+          </div>
+          <span className="ns-image-edition" aria-hidden>THE NEXUS STANDARD / 0{active + 1}</span>
+        </div>
+        <div className="ns-photo-caption"><span>{story.tag}</span><p>{story.line}</p></div>
       </div>
-      <div className="advantage-content">
-        <p className="eyebrow advantage-eyebrow"><span aria-hidden />05 / THE NEXUS ADVANTAGE</p>
-        <h2 id="advantage-title"><span className="advantage-heading-line"><span>NOT JUST A GYM.</span></span><span className="advantage-heading-line accent"><span>A DIFFERENT<br />STANDARD.</span></span></h2>
-        <p className="advantage-introduction">Your training environment should push you forward. Discover what makes the Nexus experience different.</p>
-        <AdvantageList />
+      <div className="ns-detail-column ns-enter">
+        <div className="ns-detail-intro"><span className="ns-kicker">FOUR REASONS TO SHOW UP.</span><h3>Made for your<br /><em>next level.</em></h3><p>Your training environment should push you forward. Discover what makes the Nexus experience different.</p></div>
+        <div className="ns-features" onPointerLeave={() => setHovered(null)}>
+          {advantages.map((item, index) => {
+            const expanded = active === index;
+            return <article key={item.id} className={`ns-feature${expanded ? ' is-active' : ''}`}>
+              <button type="button" className="ns-feature-button" id={`advantage-button-${item.id}`} aria-expanded={expanded} aria-controls={`advantage-panel-${item.id}`}
+                onPointerEnter={event => { if (event.pointerType === 'mouse') setHovered(index); }}
+                onFocus={() => setHovered(null)} onClick={() => { setSelected(index); setHovered(null); }}>
+                <span className="ns-feature-number">{item.number}</span><span className="ns-feature-title">{stories[index].title}</span><span className="ns-feature-toggle" aria-hidden>{expanded ? '−' : '+'}</span>
+              </button>
+              <div className="ns-feature-panel" id={`advantage-panel-${item.id}`} role="region" aria-labelledby={`advantage-button-${item.id}`} aria-hidden={!expanded}>
+                <div><p>{item.description}</p></div>
+              </div>
+            </article>;
+          })}
+        </div>
+        <p className="ns-bottom-note">Your effort. Your pace.<br /><strong>A stronger version of you.</strong></p>
       </div>
     </div>
-    <div className="advantage-exit-light" aria-hidden />
+    <footer className="ns-footer"><span>MORE THAN A MEMBERSHIP. A PLACE TO MOVE FORWARD.</span><span>RAJKOT / NEXUS FITNESS CLUB</span></footer>
   </section>;
 }

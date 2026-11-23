@@ -76,7 +76,7 @@ export default function BagExplosion({ asset, reduced, idle, onStart, onComplete
     return () => { window.removeEventListener('pointerup', cancel); window.removeEventListener('pointercancel', cancel); window.removeEventListener('blur', cancel); };
   }, [controls, phase]);
   const cameraBase = useRef(new THREE.Vector3());
-  const completionTimer = useRef<ReturnType<typeof setTimeout>>();
+  const completionTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(completionTimer.current), []);
   const finish = () => {
     if (lastPhase.current === 'COMPLETE') return;

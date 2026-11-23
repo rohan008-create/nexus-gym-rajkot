@@ -77,12 +77,13 @@ export default function DetailedExterior({ fallback }: { fallback: React.ReactNo
     loadExterior().then(value => { if (mounted) setAsset(value); }).catch(() => {
       // Decorative upgrade only: the existing procedural facade stays usable.
       // Do not throw an optional network failure into the scene error boundary.
-      if (mounted) { gl.domElement.dataset.exteriorSource = 'fallback'; invalidate(); }
+      if (mounted) { gl.domElement.dataset.exteriorSource = 'fallback'; gl.domElement.dataset.exteriorSettled = 'true'; invalidate(); }
     });
     return () => { mounted = false; };
   }, [gl, invalidate]);
   useEffect(() => {
     gl.domElement.dataset.exteriorSource = clone ? 'detailed' : 'fallback';
+    if (clone) gl.domElement.dataset.exteriorSettled = 'true';
     invalidate();
   }, [clone, gl, invalidate]);
   return clone ? <primitive object={clone} dispose={null} /> : <>{fallback}</>;

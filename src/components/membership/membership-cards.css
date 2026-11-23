@@ -1,0 +1,43 @@
+.membership-books { position:relative; isolation:isolate; z-index:5; padding:65px var(--page-gutter) 75px; background:var(--theme-page); color:var(--theme-ink); scroll-margin-top:80px; }
+.membership-books-index { display:flex; justify-content:space-between; gap:16px; padding-bottom:18px; border-bottom:1px solid var(--theme-line); color:var(--theme-muted); font:9px/1.5 monospace; letter-spacing:.12em; }
+.membership-books-header { margin:50px auto 0; max-width:850px; text-align:center; }
+.membership-books-header > p:first-child { color:#ed2940; font:9px/1.5 monospace; letter-spacing:.2em; }
+.membership-books-header h2 { margin:17px 0; font-family:var(--font-heading),Arial,sans-serif; font-size:clamp(35px,5.3vw,78px); font-weight:850; line-height:1; letter-spacing:-.045em; }
+.membership-books-header h2 em { color:#ed2940; font-style:normal; }
+.membership-books-header > p:last-child { color:var(--theme-muted); font-size:12px; line-height:1.8; }
+.membership-books-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:44px; max-width:1240px; margin:42px auto 0; }
+.membership-book-card { min-width:0; --book-paper:#eeeadf; --book-ink:#282720; }
+.membership-book-choose { display:flex; align-items:center; justify-content:space-between; gap:12px; width:224px; max-width:100%; min-height:46px; margin:18px auto 0; border:0; border-bottom:1px solid var(--theme-line); border-radius:0; padding:12px 0; background:transparent; color:var(--theme-ink); font-size:11px; font-weight:650; cursor:pointer; transition:color .2s,border-color .2s; }
+.membership-book-pro .membership-book-choose { color:#ed2940; }
+.membership-book-choose:hover { color:#ed2940; border-color:#ed2940; }
+.membership-book-choose:focus-visible { outline:2px solid var(--theme-ink); outline-offset:4px; }
+.membership-books-note { margin:27px auto 0; color:var(--theme-muted); font-size:10px; line-height:1.8; text-align:center; }
+html[data-theme="light"] .membership-book-card { --book-paper:#fffdf7; }
+@media(max-width:1050px) { .membership-books { padding-top:42px; padding-bottom:50px; } .membership-books-index { font-size:7px; } .membership-books-header { margin-top:34px; } .membership-books-header h2 { font-size:clamp(30px,8vw,52px); } .membership-books-grid { grid-template-columns:1fr; max-width:420px; margin-top:30px; }  .membership-books-note { max-width:300px; } }
+@media(max-width:359px) {  .curl-book-window.is-open .curl-book-stage { transform:scale(.55); } }
+@media(prefers-reduced-motion:reduce) { .membership-book-choose { transition:none; } }
+.membership-books-grid { display:flex; gap:36px; overflow-x:auto; overflow-y:hidden; max-width:1240px; padding:10px 0 18px; scrollbar-width:thin; scrollbar-color:#b3a99a44 transparent; scroll-behavior:smooth; }
+.membership-book-card { flex:1 0 calc((100% - 72px) / 3); min-width:264px; transition:flex-basis .55s cubic-bezier(.22,1,.36,1); }
+.membership-books-grid.has-open-book { padding-inline:max(0px,calc((100% - 560px) / 2)); }
+.membership-books-grid.has-open-book .membership-book-card { flex:0 0 264px; }
+.membership-books-grid .membership-book-card[data-open="true"] { flex-basis:560px; }
+.membership-books-grid .curl-book-window { height:420px; overflow:visible; }
+.membership-books-grid .curl-book-stage { transform:scale(1.1); }
+.membership-books-grid .curl-book-window.is-open .curl-book-stage { transform:scale(1.2); }
+.membership-books-grid .membership-book-choose { width:246px; }
+.membership-book-card[data-open="true"] .membership-book-choose { width:300px; }
+@media(max-width:1050px) { .membership-books-grid { max-width:none; gap:30px; } .membership-book-card { flex:0 0 280px; } .membership-books-grid.has-open-book { padding-inline:max(0px,calc((100% - 560px) / 2)); } }
+@media(prefers-reduced-motion:reduce) { .membership-book-card { transition:none; } .membership-books-grid { scroll-behavior:auto; } }
+.membership-books-grid .curl-book-window:not(.is-open) .curl-book-stage { clip-path:inset(-24px 20%); }
+/* Desktop: make room within the row, preserving both neighbouring books. */
+@media(min-width:1051px) {
+  .membership-books-grid,.membership-books-grid.has-open-book { padding-inline:0; gap:24px; overflow-x:hidden; }
+  .membership-books-grid .membership-book-card,.membership-books-grid.has-open-book .membership-book-card { flex:1 1 0; min-width:0; transition:flex-basis .55s cubic-bezier(.22,1,.36,1); }
+  .membership-books-grid .membership-book-card[data-open="true"] { flex:0 0 560px; }
+}
+@media(min-width:1051px) and (max-width:1299px) {
+  .membership-books-grid .membership-book-card[data-open="true"] { flex-basis:448px; }
+  .membership-books-grid .curl-book-stage { transform:scale(.9); }
+  .membership-books-grid .curl-book-window.is-open .curl-book-stage { transform:scale(1); }
+  .membership-books-grid .membership-book-choose { width:200px; }
+}

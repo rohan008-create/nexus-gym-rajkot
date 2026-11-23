@@ -635,3 +635,41 @@ html.lenis, html.lenis body { height: auto; }
   .equipment-pods-section .locker-heading { font-size: clamp(32px, 9vw, 56px); }
   .equipment-pods-section .locker-scene-area { height: 490px; margin-top: 20px; }
 }
+/* A shared steel rail and five separate attachment rings ground the lanyards. */
+.trainers-stage { position:relative; width:100%; max-width:1040px; margin-inline:auto; grid-template-columns:repeat(5,minmax(200px,1fr)); gap:10px; padding-top:16px; overflow-x:auto; overflow-y:hidden; min-height:480px; scrollbar-width:thin; scrollbar-color:#8885 transparent; }
+.trainers-support-rail { position:absolute; z-index:2; top:5px; left:0; width:max(100%,1040px); height:9px; border:1px solid #60646a; border-radius:6px; background:linear-gradient(#43474c,#d1d3d5 30%,#858a90 48%,#34383d 80%,#171a1d); box-shadow:0 3px 5px #0004,inset 0 1px 1px #fff8; pointer-events:none; }
+.trainers-support-rail > span { position:absolute; top:-6px; left:5px; width:22px; height:21px; border:1px solid #51555a; border-radius:4px; background:linear-gradient(100deg,#30343a,#92979c 40%,#393e44); box-shadow:0 3px 7px #0003; }
+.trainers-support-rail > span:last-child { left:auto; right:5px; }
+.trainer-installation { position:relative; }
+.trainer-rail-hook { position:absolute; z-index:3; top:-15px; left:50%; width:24px; height:30px; transform:translateX(-50%); border:4px solid #777d85; border-radius:12px; background:transparent; box-shadow:inset 1px 0 1px #fff9,1px 1px 2px #0008; pointer-events:none; }
+.trainer-lanyard-slot { height:410px; }
+@media(max-width:719px) { .trainers-stage { overflow:visible; padding-top:16px; } .trainers-support-rail { width:100%; } .trainer-lanyard-slot { height:470px; } }
+.trainers-stage { overflow:visible; grid-template-columns:repeat(5,minmax(0,1fr)); }
+.trainers-support-rail { width:100%; }
+.trainer-shared-canvas { position:absolute; z-index:1; left:0; top:16px; width:100%; height:410px; }
+.trainer-badge-label { position:relative; z-index:2; }
+.trainer-render-fallback { z-index:2; pointer-events:none; }
+@media(max-width:719px) { .trainer-shared-canvas { height:470px; } }
+.trainer-shared-canvas { left:50%; transform:translateX(-50%); width:calc(100vw - 32px); height:530px; }
+@media(max-width:719px) { .trainer-shared-canvas { height:590px; } }
+.trainers-stage > canvas.trainer-shared-canvas { position:absolute; left:50%; top:16px; transform:translateX(-50%); width:calc(100vw - 32px); height:530px; }
+@media(max-width:719px) { .trainers-stage > canvas.trainer-shared-canvas { height:590px; } }
+/* Keep trainer controls aligned with the hanging rack and prevent focus from
+   horizontally scrolling the entire section when badges overlap. */
+.trainers-section { overflow:clip; }
+.trainers-profile-area { max-width:1040px; min-width:0; margin:0 auto; }
+.trainers-selector { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; width:100%; }
+.trainers-selector button { min-width:0; justify-content:space-between; gap:8px; font-size:10px; text-align:left; }
+.trainers-selector button > span { flex-shrink:0; }
+.trainers-selector button > svg { flex-shrink:0; }
+.trainer-profile { grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:36px; min-height:0; padding-top:26px; }
+.trainer-profile > div { min-width:0; }
+.trainer-profile > div > p:not([class]) { max-width:none; }
+.trainers-instruction { position:relative; z-index:2; pointer-events:none; }
+@media(max-width:719px) {
+  .trainers-stage { margin-inline:auto; min-height:590px; }
+  .trainers-profile-area { width:100%; }
+  .trainers-selector { grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; }
+  .trainers-selector button { flex-direction:column; justify-content:flex-start; text-align:center; font-size:8px; line-height:1.5; overflow-wrap:anywhere; }
+  .trainer-profile { grid-template-columns:1fr; gap:18px; padding-top:22px; }
+}

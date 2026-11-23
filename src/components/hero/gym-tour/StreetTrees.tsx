@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useNightScene } from './useNightScene';
 
 // Independent roadside planting positions preserve parallax as the camera
 // leaves its establishing shot and approaches the stairs.
@@ -33,6 +34,7 @@ function plantTrees(aspect: number, texture: THREE.Texture) {
     depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2,
   });
   const crowns = new THREE.InstancedMesh(quad, leaves, planting.length);
+  crowns.name = 'Street canopy';
   const shadows = new THREE.InstancedMesh(quad, shade, planting.length);
   const dummy = new THREE.Object3D();
   planting.forEach(([x, z, width, height, yaw], i) => {
@@ -59,7 +61,14 @@ function plantTrees(aspect: number, texture: THREE.Texture) {
 
 export default function StreetTrees() {
   const { invalidate } = useThree();
+  const night = useNightScene();
+  const nightRef = useRef(night); nightRef.current = night;
   const group = useMemo(() => new THREE.Group(), []);
+  useEffect(() => {
+    const crowns = group.getObjectByName('Street canopy') as THREE.InstancedMesh | undefined;
+    if (crowns) (crowns.material as THREE.MeshBasicMaterial).color.set(night ? '#536179' : '#ffffff');
+    invalidate();
+  }, [night, group, invalidate]);
   useEffect(() => {
     let active = true;
     let trees: ReturnType<typeof plantTrees> | undefined;
@@ -67,6 +76,7 @@ export default function StreetTrees() {
       if (!active) return;
       map.colorSpace = THREE.SRGBColorSpace;
       trees = plantTrees(map.image.width / map.image.height, map);
+      (trees.crowns.material as THREE.MeshBasicMaterial).color.set(nightRef.current ? '#536179' : '#ffffff');
       group.add(trees.crowns, trees.shadows);
       invalidate();
     });

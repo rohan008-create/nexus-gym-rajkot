@@ -1,0 +1,23 @@
+{
+  "method": "Built-in image_gen; transparent_background=true",
+  "assets": [
+    {
+      "name": "athlete",
+      "prompt": "Photorealistic premium fitness campaign cutout of a muscular adult Indian male athlete wearing fitted black t-shirt, charcoal shorts and white training shoes, standing in natural three-quarter view holding one black dumbbell in each hand at his sides, composed confident expression, realistic anatomy and hands. Entire body head to toe fully visible, portrait composition, neutral soft studio lighting, precise clean silhouette. No floor, no scenery, no background, no typography, no logos, no graphic shapes. Genuine transparent background alpha. High-end commercial sports photography, natural human appearance.",
+      "original": "athlete-transparent-original.png",
+      "delivery": "public/assets/advantage/athlete-transparent.webp"
+    },
+    {
+      "name": "coaching",
+      "prompt": "Photorealistic premium fitness campaign cutout of two adult Indian people: a male personal trainer in black t-shirt and charcoal joggers gently coaching an athletic woman in dark olive training top and black leggings holding a small dumbbell at shoulder height. Both standing naturally side by side, engaged friendly expressions, anatomically correct, full bodies head to toe uncropped, white and black trainers, neutral softbox studio lighting, crisp detailed clothing. No floor, no gym background, no text, no logo, no illustration or graphic shapes. Genuinely transparent alpha background. High-end natural commercial sports photography.",
+      "original": "coaching-transparent-original.png",
+      "delivery": "public/assets/advantage/coaching-transparent.webp"
+    },
+    {
+      "name": "community",
+      "prompt": "Photorealistic premium fitness campaign cutout of two adult Indian athletes, an athletic woman with tied-back dark hair in a black training top and graphite leggings and an athletic man in a charcoal t-shirt and black shorts, standing next to each other exchanging a friendly fist bump after a workout, relaxed genuine smiles. Entire bodies head to toe fully visible uncropped, clean white sports shoes, realistic hands and anatomy, studio softbox neutral lighting, crisp silhouette. No floor, no background, no gym set, no text, no logos, no graphic shapes. Genuine transparent alpha background. Natural high-end commercial sports photography.",
+      "original": "community-transparent-original.png",
+      "delivery": "public/assets/advantage/community-transparent.webp"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "desktop light: section surfaces, controls, dialog, persistence, responsive layout",
+    "desktop dark: section surfaces, controls, dialog, persistence, responsive layout",
+    "mobile light: section surfaces, controls, dialog, persistence, responsive layout",
+    "mobile dark: section surfaces, controls, dialog, persistence, responsive layout",
+    "live 3D tour remains mounted across themes"
+  ],
+  "errors": []
+}

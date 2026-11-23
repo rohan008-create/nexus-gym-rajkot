@@ -1,0 +1,32 @@
+{
+  "report": [
+    {
+      "label": "desktop",
+      "cleanBackground": true,
+      "animatedAtRest": true,
+      "walkingTranslates": true,
+      "hiddenPauses": true,
+      "box": {
+        "x": 1295.131103515625,
+        "y": 669.7792358398438,
+        "width": 206.060791015625,
+        "height": 178.5924072265625
+      }
+    },
+    {
+      "label": "mobile",
+      "cleanBackground": true,
+      "animatedAtRest": true,
+      "walkingTranslates": true,
+      "hiddenPauses": true,
+      "box": {
+        "x": 289.6875,
+        "y": 553.5625,
+        "width": 81.875,
+        "height": 70.953125
+      }
+    }
+  ],
+  "errors": [],
+  "reducedMotion": true
+}

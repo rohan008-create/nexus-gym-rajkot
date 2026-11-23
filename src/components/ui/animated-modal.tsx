@@ -93,11 +93,14 @@ export const ModalTrigger = ({
 export const ModalBody = ({
   children,
   className,
+  labelledBy,
 }: {
   children: ReactNode;
   className?: string;
+  labelledBy?: string;
 }) => {
   const { open, setOpen } = useModal();
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -110,14 +113,33 @@ export const ModalBody = ({
 
   useEffect(() => {
     if (!open) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const focusable = () => Array.from(modalRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]') || []).filter(node => node.getClientRects().length);
+    const frame = requestAnimationFrame(() => {
+      const input = modalRef.current?.querySelector<HTMLElement>('input:not([disabled])');
+      (input || focusable()[0] || modalRef.current)?.focus();
+    });
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") { event.preventDefault(); setOpen(false); }
+      if (event.key !== 'Tab') return;
+      const nodes = focusable(), first = nodes[0], last = nodes[nodes.length - 1];
+      if (!first) { event.preventDefault(); modalRef.current?.focus(); return; }
+      if (event.shiftKey && (document.activeElement === first || !modalRef.current?.contains(document.activeElement))) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || !modalRef.current?.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
+    };
+    const containFocus = (event: FocusEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) (focusable()[0] || modalRef.current).focus();
     };
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    document.addEventListener('focusin', containFocus);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener('focusin', containFocus);
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    };
   }, [open, setOpen]);
 
-  const modalRef = useRef<HTMLDivElement>(null);
   useOutsideClick(modalRef, () => setOpen(false));
 
   return (
@@ -144,6 +166,9 @@ export const ModalBody = ({
             ref={modalRef}
             role="dialog"
             aria-modal="true"
+            aria-labelledby={labelledBy}
+            aria-label={labelledBy ? undefined : 'Nexus dialog'}
+            tabIndex={-1}
             className={cn(
               "min-h-[50%] max-h-[90%] md:max-w-[40%] bg-white dark:bg-neutral-950 border border-transparent dark:border-neutral-800 md:rounded-2xl relative z-50 flex flex-col flex-1 overflow-hidden",
               className

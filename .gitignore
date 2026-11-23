@@ -5,3 +5,4 @@ out/
 *.tsbuildinfo
 .env*.local
 qa/
+artifacts/audit-fixes/node_modules-backup/

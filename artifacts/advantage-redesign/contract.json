@@ -1,0 +1,31 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": [
+    "user-requested-transparent-cutouts",
+    "remove-star-and-decorative-icons",
+    "simplify-layout"
+  ],
+  "allowed_write_scope": [
+    "src/components/advantage/",
+    "scripts/test-advantage.cjs",
+    "artifacts/advantage-redesign/",
+    "public/assets/advantage/",
+    "assets/imagegen/advantage/"
+  ],
+  "acceptance": [
+    "transparent photographic cutouts across all feature states",
+    "no star or decorative icons in section",
+    "bold clean responsive composition",
+    "hover preview and persistent selection",
+    "keyboard and touch controls",
+    "reduced motion and no horizontal overflow",
+    "adjacent gallery remains usable"
+  ],
+  "validators": [
+    "npx tsc --noEmit",
+    "node scripts/test-advantage.cjs"
+  ]
+}

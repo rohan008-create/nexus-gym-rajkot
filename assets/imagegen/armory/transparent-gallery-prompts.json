@@ -1,0 +1,23 @@
+{
+  "method": "Built-in image_gen, transparent_background=true",
+  "assets": [
+    {
+      "name": "barbell",
+      "prompt": "A single complete premium Olympic barbell loaded with matte black bumper plates on both ends, brushed chrome shaft, restrained red plate markings, three-quarter perspective from slightly above, horizontal wide composition. Entire equipment visible uncropped, isolated product photograph, impeccable photorealistic industrial materials, crisp edges, studio softbox lighting suitable for an off-white luxury gym website. No floor, no backdrop, no text, no logo, no people. Genuinely transparent background with alpha.",
+      "original": "barbell-transparent-original.png",
+      "delivery": "public/assets/armory/barbell-transparent.webp"
+    },
+    {
+      "name": "treadmill",
+      "prompt": "A single premium non-motorized curved treadmill, matte charcoal sculpted metal frame, black curved slat running belt, subtle crimson adjustment details, minimal upright console. Complete machine visible uncropped, three-quarter side perspective, isolated photorealistic studio product photograph, polished high-end fitness equipment, soft neutral lighting suitable for off-white webpage. No floor, no backdrop, no text, no logos, no people. Genuinely transparent background with alpha.",
+      "original": "treadmill-transparent-original.png",
+      "delivery": "public/assets/armory/treadmill-transparent.webp"
+    },
+    {
+      "name": "cable",
+      "prompt": "A single premium dual adjustable pulley functional trainer machine, two matte charcoal weight towers, brushed steel guide rods, central pullup bridge, two cable handles, small red adjustment accents. Complete equipment visible uncropped, three-quarter frontal perspective, isolated photorealistic studio product photography, soft neutral lighting suitable for off-white luxury fitness webpage. No floor, no backdrop, no text, no logos, no people. Genuinely transparent background with alpha.",
+      "original": "cable-transparent-original.png",
+      "delivery": "public/assets/armory/cable-transparent.webp"
+    }
+  ]
+}

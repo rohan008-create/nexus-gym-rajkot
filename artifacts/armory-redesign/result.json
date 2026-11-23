@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": [
+    "three genuine alpha-channel equipment assets",
+    "viewport-triggered one-shot cloth reveal",
+    "section order preserved",
+    "all three equipment tabs and decoded images",
+    "arrow-key wrap, Home, End and focus",
+    "Programs CTA",
+    "390, 768, 1920 responsive layouts and touch selection",
+    "reduced-motion uncover",
+    "WebGL2 unavailable uncover",
+    "dark theme legibility"
+  ],
+  "errors": [],
+  "failures": []
+}

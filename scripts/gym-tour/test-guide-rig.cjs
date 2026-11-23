@@ -22,7 +22,7 @@ async function main() {
   const avatar = asset.scene;
   const config = { exports: {} };
   new Function('exports', ts.transpileModule(fs.readFileSync('src/components/hero/gym-tour/gymTourConfig.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText)(config.exports);
-  const { STAIR, stairHeight, smooth } = config.exports;
+  const { STAIR, stairHeight, smooth, COMPLEX_SETBACK } = config.exports;
   const source = fs.readFileSync('src/components/hero/gym-tour/RyanTourGuide.tsx', 'utf8');
   const normalize = source.slice(source.indexOf('function normalizeGuide('), source.indexOf('// Solve a two-bone'));
   new Function('THREE', 'avatar', ts.transpileModule(normalize, {}).outputText + '; normalizeGuide(avatar);')(THREE, avatar);
@@ -38,6 +38,9 @@ async function main() {
   const yaw = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
   let count = 0, maxLateral = 0, maxError = 0;
   const samples = Array.from({ length: 401 }, (_, i) => i / 20);
+  const complex = new THREE.Group(); complex.add(root);
+  complex.position.z = -COMPLEX_SETBACK;
+  assert.ok(STAIR.bottomZ + .25 - COMPLEX_SETBACK < 4.9, 'the lowest tread and supports must stay behind the road curb');
   for (const stair of [...samples, ...samples.toReversed()]) {
     rest.forEach(([b, p, q]) => { b.position.copy(p); b.quaternion.copy(q); });
     root.position.set(STAIR.x, stairHeight(0) + (STAIR.landingY - stairHeight(0)) * stair / 20, STAIR.bottomZ - stair * STAIR.run);

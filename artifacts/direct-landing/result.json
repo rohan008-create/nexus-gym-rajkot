@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "checks": [
+    "desktop-burst",
+    "mobile-burst",
+    "reduced-burst",
+    "desktop-skip",
+    "preview route opens main site directly and trial enquiry works"
+  ],
+  "tourRequests": [],
+  "errors": []
+}

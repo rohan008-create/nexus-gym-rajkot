@@ -6,13 +6,16 @@ import { buildGymGeometry } from './buildGymGeometry';
 import StreetExterior from './StreetExterior';
 import DetailedExterior from './DetailedExterior';
 import DetailedInterior from './DetailedInterior';
+import InteriorDesign from './InteriorDesign';
 import { InteriorContactShading, TourReflections } from './TourLighting';
-import { advanceTour, DESKTOP_CAMERAS, sampleCamera, type Point } from './gymTourConfig';
+import { advanceTour, COMPLEX_SETBACK, DESKTOP_CAMERAS, sampleCamera, type Point } from './gymTourConfig';
 import RyanTourGuide from './RyanTourGuide';
 import EntranceArchitecture, { openEntrance } from './EntranceArchitecture';
 import { raiseGymBand } from './raiseGymBand';
+import { useNightScene } from './useNightScene';
+import NightExteriorLighting from './NightExteriorLighting';
 
-const INITIAL_CAMERA = { position: DESKTOP_CAMERAS[0].position, fov: DESKTOP_CAMERAS[0].fov, near: .06, far: 180 };
+const INITIAL_CAMERA = { position: [DESKTOP_CAMERAS[0].position[0], DESKTOP_CAMERAS[0].position[1], DESKTOP_CAMERAS[0].position[2] - COMPLEX_SETBACK] as Point, fov: DESKTOP_CAMERAS[0].fov, near: .06, far: 180 };
 const GL_OPTIONS = { antialias: true, powerPreference: 'high-performance' as WebGLPowerPreference, alpha: false };
 
 function Sign({ text, position, width, color = '#f02643' }: { text: string; position: Point; width: number; color?: string }) {
@@ -32,6 +35,8 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
   onPresent: (progress: number, shutter: number) => void;
 }) {
   const { camera, gl, scene, invalidate, size, setFrameloop, setDpr } = useThree();
+  const night = useNightScene();
+  useEffect(() => { gl.domElement.dataset.sceneTime = night ? 'night' : 'day'; invalidate(); }, [night, gl, invalidate]);
   const slowFrames = useRef(0);
   const exterior = useRef<THREE.Group>(null), interior = useRef<THREE.Group>(null);
   const sky = useRef<THREE.HemisphereLight>(null), sun = useRef<THREE.DirectionalLight>(null), fill = useRef<THREE.DirectionalLight>(null);
@@ -95,6 +100,9 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     if (lifecycle.current.stopped || document.hidden || (!active && readiness.current.announced)) return;
     if (gl.getContext().isContextLost()) { stopForContextLoss(); return; }
     const fov = sampleCamera(motion.progress, mobile, motion.position, motion.target);
+    // Camera stops and guide choreography share the complex's local frame.
+    motion.position[2] -= COMPLEX_SETBACK;
+    motion.target[2] -= COMPLEX_SETBACK;
     camera.position.fromArray(motion.position);
     camera.lookAt(...motion.target);
     const perspective = camera as THREE.PerspectiveCamera;
@@ -113,9 +121,11 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     // Keep the exterior shell inside the gym since it supplies the ceiling.
     interior.current!.visible = motion.progress >= .45;
     const indoor = THREE.MathUtils.smoothstep(motion.progress, .66, .8);
-    sky.current!.intensity = THREE.MathUtils.lerp(2.2, 1.35, indoor);
-    sun.current!.intensity = THREE.MathUtils.lerp(3.2, 1.8, indoor);
-    fill.current!.intensity = THREE.MathUtils.lerp(1.2, 1.5, indoor);
+    scene.environmentIntensity = THREE.MathUtils.lerp(night ? .07 : .3, .3, indoor) * 128;
+    sky.current!.intensity = THREE.MathUtils.lerp(night ? .35 : 2.2, 1.35, indoor);
+    sun.current!.intensity = THREE.MathUtils.lerp(night ? .3 : 3.2, 1.8, indoor);
+    sun.current!.color.set(night ? '#9bb9ff' : '#fff1d9');
+    fill.current!.intensity = THREE.MathUtils.lerp(night ? .45 : 1.2, 1.5, indoor);
     // Own the final draw (priority 1), so a queued R3F frame cannot use a lost
     // or already-disposed program after the context-loss event/unmount begins.
     try {
@@ -129,7 +139,9 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     }
     onPresent(motion.progress, motion.shutter);
     // Announce readiness on the following RAF, after the successful final draw.
-    if (!readiness.current.announced && !readiness.current.scheduled && size.width > 0 && size.height > 0) {
+    const modelsReady = gl.domElement.dataset.exteriorSettled === 'true'
+      && gl.domElement.dataset.interiorSettled === 'true';
+    if (modelsReady && !readiness.current.announced && !readiness.current.scheduled && size.width > 0 && size.height > 0) {
       readiness.current.scheduled = true;
       readiness.current.frame = requestAnimationFrame(() => {
         if (!lifecycle.current.stopped && !gl.getContext().isContextLost()) {
@@ -139,11 +151,17 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
     }
   }, 1);
   return <>
-    <color attach="background" args={['#94c5e7']} />
+    <color attach="background" args={[night ? '#080e20' : '#94c5e7']} />
     <TourReflections />
     <hemisphereLight ref={sky} args={['#f3eee0', '#676f6d', 2.2]} />
     <directionalLight ref={sun} position={[8, 18, 14]} intensity={3.2} color="#fff1d9" castShadow shadow-mapSize={[1536,1536]} shadow-camera-left={-28} shadow-camera-right={28} shadow-camera-top={25} shadow-camera-bottom={-24} shadow-camera-near={.5} shadow-camera-far={80} shadow-normalBias={.035} shadow-bias={-.0001} />
     <directionalLight ref={fill} position={[-12, 8, -6]} intensity={1.2} color="#b8d6e2" />
+    <StreetExterior motion={motion} active={active} />
+    <NightExteriorLighting night={night} />
+    {/* Extend the forecourt to the existing street curb after setting the
+        building back; the complete stair flight now lands on paving. */}
+    <mesh position={[0, .02, 2.3]} receiveShadow><boxGeometry args={[23, .32, 5.2]} /><meshStandardMaterial color="#c9aa95" roughness={.95} /></mesh>
+    <group position={[0, 0, -COMPLEX_SETBACK]}>
     <group ref={exterior} dispose={null}>
       <DetailedExterior fallback={<>
         {assets.exterior.map((part, i) => <mesh key={i} geometry={part.geometry} material={part.material} />)}
@@ -152,7 +170,6 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
         <Sign text="RESULTS MATTER" position={[3.8, 7.7, .36]} width={5} color="#f3eee0" />
       </>} />
     </group>
-    <StreetExterior motion={motion} active={active} />
     <EntranceArchitecture motion={motion} />
     <RyanTourGuide motion={motion} active={active} />
     <group ref={interior} position={[0, .31, 0]} dispose={null}>
@@ -162,6 +179,8 @@ function Scene({ progress, active, mobile, onInvalidate, onPresent, onReady, onF
         <Sign text="BEYOND LIMITS" position={[3.8, 5.65, -11.74]} width={3.8} color="#f3eee0" />
       </>} />
       <InteriorContactShading />
+      <InteriorDesign />
+    </group>
     </group>
   </>;
 }

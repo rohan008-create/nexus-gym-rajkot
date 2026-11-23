@@ -3,9 +3,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
-import { clamp, type TourPlayback } from './gymTourConfig';
+import { clamp, COMPLEX_SETBACK, type TourPlayback } from './gymTourConfig';
 import StreetTrees from './StreetTrees';
 import StreetFrontage from './StreetFrontage';
+import { useNightScene } from './useNightScene';
 
 let streetSource: Promise<THREE.Group> | undefined;
 function loadStreet() {
@@ -17,6 +18,8 @@ function loadStreet() {
 
 function StreetSurfaces() {
   const { invalidate } = useThree();
+  const night = useNightScene();
+  useEffect(() => { invalidate(); }, [night, invalidate]);
   // Match the two road heights in the existing models. The apron is lower
   // than the traffic lane so its painted parking stripes remain visible.
   const roadway = useMemo(() => {
@@ -57,7 +60,7 @@ function StreetSurfaces() {
   }, [invalidate]);
   return <>
     {maps.sky && <mesh position={[0,36,-99]}><planeGeometry args={[245,90]}/>
-      <meshBasicMaterial map={maps.sky} toneMapped={false} depthWrite={false}/></mesh>}
+      <meshBasicMaterial map={maps.sky} color={night ? '#10182f' : '#ffffff'} toneMapped={false} depthWrite={false}/></mesh>}
     {maps.asphalt && <mesh geometry={roadway} receiveShadow>
       <meshStandardMaterial map={maps.asphalt} color="#a7b0b7" roughness={.96}/></mesh>}
   </>;
@@ -87,7 +90,7 @@ export default function StreetExterior({ motion, active }: { motion: TourPlaybac
   const autoShadow = useRef<THREE.Group>(null);
   const bikeShadow = useRef<THREE.Group>(null);
   const group = useRef<THREE.Group>(null);
-  const traffic = useRef<{rickshaw:THREE.Object3D; scooter:THREE.Object3D}>();
+  const traffic = useRef<{rickshaw:THREE.Object3D; scooter:THREE.Object3D} | undefined>(undefined);
   useEffect(() => {
     let mounted = true;
     loadStreet().then(source => {
@@ -123,7 +126,7 @@ export default function StreetExterior({ motion, active }: { motion: TourPlaybac
     if (motion.progress < .12) invalidate();
   });
   return <>
-    <StreetFrontage />
+    <group position={[0, 0, -COMPLEX_SETBACK]}><StreetFrontage /></group>
     <group ref={group}>
     {street && <primitive object={street} dispose={null}/>}
     <StreetSurfaces />

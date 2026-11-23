@@ -34,7 +34,7 @@ const base = process.env.ENTRANCE_TEST_URL || 'http://127.0.0.1:3001';
     await page.mouse.move(720, 450); await page.mouse.down(); await page.mouse.move(765, 455, { steps: 6 }); await page.mouse.up();
     assert.equal(await page.locator('.nexus-entrance').getAttribute('data-entrance'), 'waiting', 'drag does not trigger');
     await page.screenshot({ path: 'qa/entrance-idle.png' });
-    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
+    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 10000));
     await trigger(page, false);
     await page.clock.runFor(420);
     await page.screenshot({ path: 'qa/entrance-impact.png' });
@@ -51,21 +51,20 @@ const base = process.env.ENTRANCE_TEST_URL || 'http://127.0.0.1:3001';
     await page.screenshot({ path: 'qa/entrance-revealed.png' });
     assert.equal(await page.evaluate(() => document.body.style.overflow), '');
     assert.equal(await page.evaluate(() => document.activeElement.id), 'hero-title', 'focus moves to the revealed landing');
-    await page.locator('.hero-actions .primary-cta').click();
-    await page.locator('.trial-dialog').waitFor({ state: 'visible' });
-    await page.getByRole('button', { name: 'Close trial enquiry' }).click();
-    await page.locator('.trial-dialog').waitFor({ state: 'hidden' });
-    await page.getByRole('button', { name: 'Replay intro' }).evaluate(el => el.click());
-    await page.locator('[data-entrance="waiting"]').waitFor();
-    await page.waitForTimeout(2000);
-    await page.getByRole('button', { name: 'ENTER NEXUS' }).click();
-    await page.locator('[data-entrance="revealed"]').waitFor();
+    await page.locator('#about .bd-cta').click();
+    await page.getByRole('dialog', { name: /Make it/ }).waitFor({ state: 'visible' });
+    await page.getByRole('button', { name: 'Close dialog' }).click();
+    await page.getByRole('dialog').waitFor({ state: 'hidden' });
     await page.close();
+    const skipped = await open();
+    await skipped.getByRole('button', { name: 'ENTER NEXUS' }).click();
+    await skipped.locator('[data-entrance="revealed"]').waitFor();
+    await skipped.close();
     for (const reduced of [false, true]) {
       const mobile = await open(true, reduced);
       if (!reduced) {
         await mobile.screenshot({ path: 'qa/entrance-mobile-idle.png' });
-        await mobile.clock.pauseAt(await mobile.evaluate(() => Date.now() + 100));
+        await mobile.clock.pauseAt(await mobile.evaluate(() => Date.now() + 10000));
       }
       await trigger(mobile, true);
       if (!reduced) {
@@ -80,7 +79,7 @@ const base = process.env.ENTRANCE_TEST_URL || 'http://127.0.0.1:3001';
       await mobile.close();
     }
     assert.deepEqual(errors, []);
-    fs.writeFileSync('qa/entrance-result.json', JSON.stringify({ passed: true, checks: ['background and drag rejection', 'scroll lock', 'continuous full-page tear and curl', 'intro disposal', 'landing focus and interactivity', 'replay', 'skip', 'mobile tap', 'reduced motion', 'no horizontal overflow'], errors }, null, 2));
+    fs.writeFileSync('qa/entrance-result.json', JSON.stringify({ passed: true, checks: ['background and drag rejection', 'scroll lock', 'continuous full-page tear and curl', 'intro disposal', 'landing focus and interactivity', 'skip', 'mobile tap', 'reduced motion', 'no horizontal overflow'], errors }, null, 2));
     console.log('Entrance checks passed.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

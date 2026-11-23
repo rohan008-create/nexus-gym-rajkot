@@ -80,6 +80,10 @@ function createLeg(avatar: THREE.Object3D, side: string) {
     const settle = smooth(stair - 19);
     target.y += (STAIR.landingY + sole - target.y) * settle;
     target.z += (STAIR.bottomZ - STAIR.count * STAIR.run - target.z) * settle;
+    // Stair coordinates are local to the complex; IK solves in world space.
+    // The guide root's parent carries the same setback as the building.
+    const complex = avatar.parent?.parent;
+    if (complex) complex.localToWorld(target);
     upper.getWorldPosition(a);
     const horizontal = (target.x - a.x) ** 2 + (target.z - a.z) ** 2;
     const reach = Math.sqrt(Math.max(.001, (l1 + l2 - .035) ** 2 - horizontal));
@@ -207,5 +211,5 @@ export default function RyanTourGuide(props: Props) {
     loadGuide().then(value => { if (mounted) setAsset(value); }).catch(() => { if (mounted) { gl.domElement.dataset.guideSource = 'error'; invalidate(); } });
     return () => { mounted = false; };
   }, [gl, invalidate]);
-  return <><ReceptionOffice asset={asset} motion={props.motion} active={props.active} />{asset && <AnimatedRyan {...props} asset={asset} />}</>;
+  return <><ReceptionOffice motion={props.motion} active={props.active} />{asset && <AnimatedRyan {...props} asset={asset} />}</>;
 }

@@ -1,0 +1,77 @@
+{
+  "method": "Built-in image_gen; transparent_background=true",
+  "assets": [
+    {
+      "name": "whey",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A large squat matte charcoal cylindrical whey protein powder tub, black ribbed screw lid, cream paper label with restrained crimson horizontal accent. Exact clear front label typography: 'NEXUS', 'WHEY PROTEIN', 'CHOCOLATE', '1 KG'. No nutrition numbers or certification badges.",
+      "original": "whey-original.png",
+      "delivery": "public/assets/products/whey.webp"
+    },
+    {
+      "name": "isolate",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A tall cream white cylindrical protein supplement tub, white ribbed screw lid, minimalist charcoal label and muted olive accent. Exact front label: 'NEXUS', 'WHEY ISOLATE', 'VANILLA', '1 KG'. No nutrition or certification badges.",
+      "original": "isolate-original.png",
+      "delivery": "public/assets/products/isolate.webp"
+    },
+    {
+      "name": "creatine",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A small premium matte charcoal cylindrical supplement tub with wide black screw lid, light stone label and thin burnt orange accent. Exact front label: 'NEXUS', 'CREATINE', 'UNFLAVOURED', '250 G'. No health claims or certification badges.",
+      "original": "creatine-original.png",
+      "delivery": "public/assets/products/creatine.webp"
+    },
+    {
+      "name": "preworkout",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A medium matte deep burgundy cylindrical supplement jar, black ribbed lid, minimalist cream typography. Exact front label: 'NEXUS', 'PRE WORKOUT', 'BERRY', '250 G'. No health claims or certification badges.",
+      "original": "preworkout-original.png",
+      "delivery": "public/assets/products/preworkout.webp"
+    },
+    {
+      "name": "electrolytes",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A premium white standing resealable foil pouch containing electrolyte powder, realistic crimped seams, subtle pale blue lower panel. Exact front label typography: 'NEXUS', 'ELECTROLYTES', 'CITRUS', '200 G'. No health claims or badges.",
+      "original": "electrolytes-original.png",
+      "delivery": "public/assets/products/electrolytes.webp"
+    },
+    {
+      "name": "gainer",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A large charcoal stand-up resealable sports nutrition pouch with realistic gusset and crimped top, restrained ochre diagonal label accent. Exact front label: 'NEXUS', 'MASS GAINER', 'CHOCOLATE', '2 KG'. No nutritional numbers or badges.",
+      "original": "gainer-original.png",
+      "delivery": "public/assets/products/gainer.webp"
+    },
+    {
+      "name": "peanut",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A clear cylindrical jar filled with natural brown peanut butter, black screw lid, cream wraparound paper label. Exact front label: 'NEXUS', 'PEANUT BUTTER', 'CRUNCHY', '500 G'. No health claims.",
+      "original": "peanut-original.png",
+      "delivery": "public/assets/products/peanut.webp"
+    },
+    {
+      "name": "bar",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A single wrapped rectangular chocolate protein bar, charcoal and cream crinkled foil packaging with restrained crimson accent, lying horizontally in a shallow three-quarter front perspective, foil sealed ends visible. Exact front label: 'NEXUS', 'PROTEIN BAR', 'COCOA'. No nutrition numbers.",
+      "original": "bar-original.png",
+      "delivery": "public/assets/products/bar.webp"
+    },
+    {
+      "name": "shaker",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A premium smoke translucent 700ml sports protein shaker bottle with matte black screw cap, flip spout and dark crimson carrying loop, empty interior with visible stainless steel mixing ball, subtle embossed volume tick marks, simple small 'NEXUS' wordmark vertically on front.",
+      "original": "shaker-original.png",
+      "delivery": "public/assets/products/shaker.webp"
+    },
+    {
+      "name": "straps",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A pair of premium black woven cotton lifting straps with stitched padded wrist loops, laid folded upright in a compact neatly arranged pair, realistic heavy fabric weave, small crimson woven 'NEXUS' tags. Entire pair fully visible.",
+      "original": "straps-original.png",
+      "delivery": "public/assets/products/straps.webp"
+    },
+    {
+      "name": "bands",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A neatly arranged set of three premium fabric resistance loop bands in charcoal, grey and muted burgundy, nested upright slightly staggered showing all three loops, realistic thick woven elastic texture and small matching labels that read 'NEXUS'. Entire set visible.",
+      "original": "bands-original.png",
+      "delivery": "public/assets/products/bands.webp"
+    },
+    {
+      "name": "bag",
+      "prompt": "Create one photorealistic high-end commercial product photography cutout for an elegant gym shop website. Consistent neutral softbox light from upper left, subtle studio reflections, realistic premium materials, clean precise silhouette. Center the single product, entire product fully visible with comfortable margins, front-facing slight three-quarter angle. Genuinely transparent alpha background, no floor, no backdrop, no pedestal, no props, no people, no watermark. Product brief: A premium compact matte black gym duffel bag, natural three-quarter front perspective with shoulder strap neatly draped and two upright handles, textured durable nylon, metallic zipper pulls, small restrained crimson 'NEXUS' wordmark on front, entire product fully visible.",
+      "original": "bag-original.png",
+      "delivery": "public/assets/products/bag.webp"
+    }
+  ]
+}

@@ -12,7 +12,8 @@ import ProgramsSection from '../sections/ProgramsSection';
 import ArmorySection from '../armory/ArmorySection';
 import NexusAdvantageSection from '../advantage/NexusAdvantageSection';
 import NexusTrainersSection from '../trainers/NexusTrainersSection';
-import NexusMembershipPrinter from '../membership/NexusMembershipPrinter';
+import NexusMembershipCards from '../membership/NexusMembershipCards';
+import GymProductsSection from '../products/GymProductsSection';
 import WhatsAppBooking from '../booking/WhatsAppBooking';
 import NexusVoices from '../voices/NexusVoices';
 import RoadToNexus from '../location/RoadToNexus';
@@ -61,7 +62,8 @@ export default function HeroSection({ onReplayIntro, entranceEnabled = true, int
     }} />
     <NexusAdvantageSection />
     <NexusTrainersSection />
-    <NexusMembershipPrinter onEnquire={plan => { setMembershipPlan(plan); setTrial(true); }} />
+    <NexusMembershipCards onEnquire={plan => { setMembershipPlan(plan); setTrial(true); }} />
+    <GymProductsSection />
     <WhatsAppBooking />
     <NexusVoices />
     <RoadToNexus />

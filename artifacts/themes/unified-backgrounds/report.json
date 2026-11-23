@@ -1,0 +1,142 @@
+[
+  {
+    "viewport": "desktop",
+    "sections": [
+      {
+        "id": "home",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "about",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "programs",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "armory",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "advantage",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "trainers",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "membership",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "products",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "booking",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "voices",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "location",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "social",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "footer",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      }
+    ]
+  },
+  {
+    "viewport": "mobile",
+    "sections": [
+      {
+        "id": "home",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "about",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "programs",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "armory",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "advantage",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "trainers",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "membership",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "products",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "booking",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "voices",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "location",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "social",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      },
+      {
+        "id": "footer",
+        "color": "rgb(255, 255, 255)",
+        "image": "none"
+      }
+    ]
+  }
+]

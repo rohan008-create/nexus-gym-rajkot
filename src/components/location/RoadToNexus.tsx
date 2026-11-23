@@ -1,12 +1,13 @@
 'use client';
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Compass, MapPin } from 'lucide-react';
+import { ArrowUpRight, Compass, MapPin, Navigation } from 'lucide-react';
 import gsap from 'gsap';
 import { directionsUrl, nexusLocation } from './globeConfig';
 import type { CesiumGlobeHandle } from './CesiumGlobe';
 import GlobeLoading from './GlobeLoading';
 import './nexusGlobe.css';
+import 'cesium/Build/Cesium/Widgets/widgets.css';
 
 // Lazy-load CesiumGlobe on client-side only
 const CesiumGlobe = dynamic(() => import('./CesiumGlobe'), {
@@ -104,8 +105,6 @@ export default function RoadToNexus() {
       className="nexus-globe-section"
       aria-labelledby="globe-section-title"
     >
-      {/* Load Cesium Widget Stylesheet */}
-      <link rel="stylesheet" href="/cesium/Widgets/widgets.css" />
 
       {/* Section Header */}
       <header ref={headerRef} className="globe-header">
@@ -177,7 +176,7 @@ export default function RoadToNexus() {
             >
               <span className="globe-explore-dot" aria-hidden />
               <span>EXPLORE NEXUS</span>
-              <span className="globe-explore-arrow">↗</span>
+              <span className="globe-explore-arrow"><Navigation size={18} strokeWidth={1.7} aria-hidden /></span>
             </button>
           </div>
         </>

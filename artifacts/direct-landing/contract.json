@@ -1,0 +1,29 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": [
+    "remove-unwanted-building-tour",
+    "reveal-existing-main-site-after-bag"
+  ],
+  "allowed_write_scope": [
+    "src/components/hero/HeroSection.tsx",
+    "src/components/hero/RopeScrollController.ts",
+    "scripts/test-direct-landing.cjs",
+    "artifacts/direct-landing/",
+    "scripts/test-iron-world.cjs"
+  ],
+  "acceptance": [
+    "no 3D building or tour on main landing",
+    "bag burst and skip reveal existing Built Different section directly",
+    "no 650vh tour scroll gap",
+    "entrance focus and scroll unlock preserved",
+    "desktop mobile and reduced motion",
+    "existing products and landing sections remain available"
+  ],
+  "validators": [
+    "npx tsc --noEmit",
+    "node scripts/test-direct-landing.cjs"
+  ]
+}

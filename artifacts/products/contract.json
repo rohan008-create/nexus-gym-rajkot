@@ -1,0 +1,36 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": [
+    "user-requested-pure-white-background",
+    "remove-textured-wall-and-oak-shelves",
+    "neutral-contact-shadows-and-mobile-shelves"
+  ],
+  "allowed_write_scope": [
+    "src/components/products/",
+    "src/components/ui/skincare-product-shelf.tsx",
+    "src/components/hero/HeroSection.tsx",
+    "scripts/test-products.cjs",
+    "assets/imagegen/products/",
+    "public/assets/products/",
+    "artifacts/products/"
+  ],
+  "acceptance": [
+    "12 realistic transparent gym products on floating shelves",
+    "protein powders supplements snacks and accessories",
+    "filtering and accessible detail view with variants and quantity",
+    "saved kit can be reviewed edited and copied without claiming a completed order",
+    "clearly indicative pricing and no fabricated ratings or delivery promises",
+    "keyboard Escape focus restoration and native modal focus containment",
+    "responsive mobile and desktop with reduced motion",
+    "existing page sections remain functional",
+    "two products on each physical mobile shelf",
+    "pure white section and shelf background without texture, rails or wood"
+  ],
+  "validators": [
+    "npx tsc --noEmit",
+    "node scripts/test-products.cjs"
+  ]
+}

@@ -28,10 +28,14 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
   const retry = () => { setAttempt(value => value + 1); setStatus('loading'); onStatus('loading'); };
   useEffect(() => {
     if (status !== 'loading' || reduced || !pageVisible) return;
-    const timeout = window.setTimeout(fail, 20000);
+    const timeout = window.setTimeout(fail, 60000);
     return () => window.clearTimeout(timeout);
   }, [status, reduced, pageVisible, fail, attempt]);
-  useEffect(() => { if (reduced) onStatus('ready'); }, [reduced, onStatus]);
+  useEffect(() => {
+    // The shared hook starts conservatively at true during hydration. Only a
+    // real reduced-motion preference may bypass the detailed-model gate.
+    if (reduced && matchMedia('(prefers-reduced-motion: reduce)').matches) onStatus('ready');
+  }, [reduced, onStatus]);
   useEffect(() => {
     if (!active) { entryFocusDone.current = false; return; }
     const element = root.current;

@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": [
+    "three genuine transparent athlete assets",
+    "star and decorative icons removed",
+    "section order and four features",
+    "hover changes photo and restores selected feature",
+    "persistent click selection and accessible panel links",
+    "keyboard activation",
+    "adjacent equipment gallery selection preserved",
+    "390px touch and transparent image containment",
+    "768px tablet layout",
+    "1920px dark theme compatibility",
+    "reduced motion",
+    "no horizontal overflow"
+  ],
+  "errors": []
+}

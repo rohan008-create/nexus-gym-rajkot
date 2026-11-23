@@ -699,6 +699,44 @@ const stepSimulation = (sim, dt, physics, time) => {
   sim.calm = energy < 2e-4 ? sim.calm + dt : 0;
 };
 
+
+const sharedRacks = new WeakMap();
+function acquireRack(host) {
+  let rack = sharedRacks.get(host);
+  if (rack) { rack.users++; return rack; }
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, powerPreference:'high-performance' });
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(FOV, 1, .1, 200);
+  const environment = buildEnvironment(renderer);
+  scene.environment = environment.texture;
+  const key = new THREE.DirectionalLight(0xffffff,1.6); key.position.set(-2.5,4,6);
+  const fill = new THREE.DirectionalLight(0xffffff,.35); fill.position.set(3,-1,4);
+  const rim = new THREE.DirectionalLight(0xe50914,1.4); rim.position.set(4,2,-3);
+  scene.add(key,fill,rim);
+  const canvas = renderer.domElement;
+  canvas.className = 'lanyard-canvas trainer-shared-canvas';
+  canvas.setAttribute('aria-hidden','true');
+  host.appendChild(canvas);
+  rack = { host, renderer, scene, camera, environment, users:1, frame:0, entries:new Map(), owner:null,
+    draw() {
+      if (rack.frame) return;
+      rack.frame=requestAnimationFrame(()=>{
+        rack.frame=0;
+        if (rack.users && !renderer.getContext().isContextLost()) renderer.render(scene,camera);
+      });
+    },
+    release(localScene, container) {
+      scene.remove(localScene); rack.entries.delete(container);
+      if (rack.owner===container) rack.owner=null;
+      if (--rack.users) return;
+      cancelAnimationFrame(rack.frame); environment.dispose(); renderer.dispose(); renderer.forceContextLoss();
+      canvas.remove(); sharedRacks.delete(host);
+    }
+  };
+  sharedRacks.set(host,rack);
+  return rack;
+}
+
 const Lanyard = ({
   frontImage,
   backImage,
@@ -770,9 +808,12 @@ const Lanyard = ({
     const container = containerRef.current;
     if (!container) return undefined;
 
+    const rackHost = container.closest(".trainers-stage");
+    let rack;
     let renderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+      if (rackHost) rack = acquireRack(rackHost);
+      renderer = rack ? rack.renderer : new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
     } catch {
       callbacks.current.onError();
       return undefined;
@@ -782,23 +823,24 @@ const Lanyard = ({
     renderer.toneMapping = THREE.NeutralToneMapping;
     renderer.toneMappingExposure = 1;
     const canvas = renderer.domElement;
-    canvas.className = 'lanyard-canvas';
+    if (!rack) canvas.className = 'lanyard-canvas';
     canvas.setAttribute('aria-hidden', 'true');
-    container.appendChild(canvas);
+    if (!rack) container.appendChild(canvas);
 
     const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const scene = new THREE.Scene();
-    const environment = buildEnvironment(renderer);
+    const environment = rack ? rack.environment : buildEnvironment(renderer);
     scene.environment = environment.texture;
-    const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 200);
+    if (rack) rack.scene.add(scene);
+    const camera = rack ? rack.camera : new THREE.PerspectiveCamera(FOV, 1, 0.1, 200);
     const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
     keyLight.position.set(-2.5, 4, 6);
     const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
     fillLight.position.set(3, -1, 4);
-    scene.add(keyLight, fillLight);
+    if (!rack) scene.add(keyLight, fillLight);
     const rimLight = new THREE.DirectionalLight(0xe50914, 1.4);
     rimLight.position.set(4, 2, -3);
-    scene.add(rimLight);
+    if (!rack) scene.add(rimLight);
 
     const imageCache = new Map();
     const images = { front: null, back: null, strap: null };
@@ -948,18 +990,25 @@ const Lanyard = ({
       const s = settingsRef.current;
       const aspect = view.width / view.height;
       let viewHeight = layout.height / clamp(s.size, 0.15, 0.9);
-      const minimumWidth = layout.width / 0.72;
+      const minimumWidth = layout.width / 0.8;
       if (viewHeight * aspect < minimumWidth) viewHeight = minimumWidth / aspect;
-      const viewWidth = viewHeight * aspect;
-      camera.aspect = aspect;
-      camera.position.set(0, 0, viewHeight / 2 / Math.tan((FOV * Math.PI) / 360));
-      camera.lookAt(0, 0, 0);
+      const rackWidth = rack ? Math.max(rack.host.clientWidth, window.innerWidth - 32) : view.width;
+      const renderHeight = rack ? view.height + 120 : view.height;
+      const viewWidth = viewHeight * rackWidth / view.height;
+      const projectionHeight = viewHeight * renderHeight / view.height;
+      const cameraY = -viewHeight * (renderHeight - view.height) / (2 * view.height);
+      camera.aspect = rackWidth / renderHeight;
+      camera.position.set(0, cameraY, projectionHeight / 2 / Math.tan((FOV * Math.PI) / 360));
+      camera.lookAt(0, cameraY, 0);
       camera.updateProjectionMatrix();
       camera.updateMatrixWorld();
       foilUniforms.foilKey.value.set(-2.5, 4, 6).normalize().transformDirection(camera.matrixWorldInverse);
       foilUniforms.foilFill.value.set(3, -1, 4).normalize().transformDirection(camera.matrixWorldInverse);
       foilUniforms.foilTop.value.set(0.5, 4.5, 8).normalize().transformDirection(camera.matrixWorldInverse);
-      const anchorX = ((ANCHORS[s.anchor] ?? 0.5) - 0.5) * viewWidth;
+      const slot = container.getBoundingClientRect();
+      const rackRect = rack ? canvas.getBoundingClientRect() : null;
+      const fraction = rack ? (slot.left + slot.width / 2 - rackRect.left) / rackRect.width : (ANCHORS[s.anchor] ?? 0.5);
+      const anchorX = (fraction - .5) * viewWidth;
       const anchorY = viewHeight / 2 + 0.2;
       const cardTop = viewHeight / 2 - viewHeight * mix(0.12, 0.42, clamp(s.strapLength, 0, 1));
       const hangTop = cardTop + (layout.hangY - layout.height / 2);
@@ -1080,7 +1129,13 @@ const Lanyard = ({
       for (let i = 0; i <= guide; i++) controls.push(sim.nodes[i]);
       controls.push(mouth, tuck);
       curve.updateArcLengths();
-      for (let i = 0; i < SAMPLES; i++) curve.getPointAt(i / (SAMPLES - 1), points[i]);
+      for (let i = 0; i < SAMPLES; i++) {
+        const fraction = i / (SAMPLES - 1);
+        const mapped = curve.getUtoTmapping(fraction);
+        // A collapsed arc-length interval can produce NaN or overshoot at the
+        // end of the spline. CatmullRom then indexes a nonexistent control point.
+        curve.getPoint(Number.isFinite(mapped) ? clamp(mapped, 0, 1) : fraction, points[i]);
+      }
       const length = curve.getLength();
       const held = 1 - mouth.distanceTo(tuck) / Math.max(length, 0.001);
       const position = bandGeometry.getAttribute('position');
@@ -1137,8 +1192,9 @@ const Lanyard = ({
       backMaterial.envMapIntensity = hovering ? 1.22 : 1;
       cardGroup.position.copy(sim.body.position);
       cardGroup.quaternion.copy(sim.body.quaternion);
+      if (rack) { container.dataset.worldX=sim.body.position.x.toFixed(3); container.dataset.worldZ=sim.body.position.z.toFixed(3); }
       updateBand();
-      renderer.render(scene, camera);
+      if (rack) rack.draw(); else renderer.render(scene, camera);
     };
 
     const physics = () => {
@@ -1178,7 +1234,8 @@ const Lanyard = ({
       const current = physics();
       if (reducedMotion || time >= introDelay) stepSimulation(sim, dt, current, time);
       const body = sim.body;
-      if (!Number.isFinite(body.position.x + body.position.y + body.position.z + body.quaternion.w)) {
+      if (!Number.isFinite(body.position.x + body.position.y + body.position.z + body.quaternion.w) ||
+          sim.nodes.some(node => !Number.isFinite(node.x + node.y + node.z))) {
         sim.grab = null;
         placeHanging(sim, layout, false);
       }
@@ -1241,6 +1298,17 @@ const Lanyard = ({
       toPointer(event);
       const hit = pickCard();
       if (!hit) return;
+      if (rack) {
+        if (rack.owner && rack.owner !== container) return;
+        let closest = container, distance = hit.distance;
+        for (const [other, pick] of rack.entries) {
+          if (other === container) continue;
+          const candidate = pick(event);
+          if (candidate && candidate.distance < distance) { closest=other; distance=candidate.distance; }
+        }
+        if (closest !== container) return;
+        rack.owner=container;
+      }
       sim.grab = {
         local: hit.point.clone().sub(sim.body.position).applyQuaternion(sim.body.quaternion.clone().invert()),
         rotation: sim.body.quaternion.clone(),
@@ -1260,9 +1328,9 @@ const Lanyard = ({
       toPointer(event);
       if (sim.grab) {
         if (press && Math.hypot(event.clientX - press.x, event.clientY - press.y) > 6) press = null;
-        // Keep dragging inside this badge's lane, so adjacent cards cannot overlap.
-        pointer.x = clamp(pointer.x, -.8, .8);
-        pointer.y = clamp(pointer.y, -.75, .75);
+        // Use the entire rack so neighbouring badges can overlap in depth.
+        pointer.x = clamp(pointer.x, -.98, .98);
+        pointer.y = clamp(pointer.y, -.95, .95);
         raycaster.setFromCamera(pointer, camera);
         raycaster.ray.at(sim.grab.reach, sim.grab.target);
         container.dataset.interaction = 'dragging';
@@ -1279,6 +1347,7 @@ const Lanyard = ({
     const onPointerUp = event => {
       if (!sim.grab) return;
       sim.grab = null;
+      if (rack?.owner === container) rack.owner=null;
       if (press && event.type === 'pointerup' && performance.now() - press.time < 450) flip(press.point);
       container.dataset.interaction = 'released';
       press = null;
@@ -1293,6 +1362,7 @@ const Lanyard = ({
       if (pickCard()) event.preventDefault();
     };
 
+    if (rack) rack.entries.set(container,event => { toPointer(event); return pickCard(); });
     canvas.addEventListener('pointerdown', onPointerDown);
     canvas.addEventListener('pointermove', onPointerMove);
     canvas.addEventListener('pointerup', onPointerUp);
@@ -1304,7 +1374,7 @@ const Lanyard = ({
       view.width = Math.max(1, container.clientWidth);
       view.height = Math.max(1, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
-      renderer.setSize(view.width, view.height, false);
+      renderer.setSize(rack ? Math.max(rack.host.clientWidth, window.innerWidth - 32) : view.width, rack ? view.height + 120 : view.height, false);
       apply();
       render();
     };
@@ -1353,10 +1423,11 @@ const Lanyard = ({
       [bodyMesh, frontMesh, backMesh, ring, clampMesh, eyelet, band].forEach(mesh => mesh.geometry?.dispose());
       [frontMaterial, backMaterial, edgeMaterial, metalMaterial, bandMaterial].forEach(material => material.dispose());
       [frontTexture, backTexture, strapTexture, grain, weave].forEach(texture => texture.dispose());
-      environment.dispose();
-      renderer.dispose();
-      renderer.forceContextLoss();
-      if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      if (rack) rack.release(scene,container);
+      else {
+        environment.dispose(); renderer.dispose(); renderer.forceContextLoss();
+        if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      }
     };
   }, []);
 

@@ -51,54 +51,24 @@ function loadCesium(): Promise<typeof CesiumType> {
 function createNexusPinDataUrl(): string {
   if (typeof document === 'undefined') return '';
   const canvas = document.createElement('canvas');
-  canvas.width = 96;
-  canvas.height = 120;
+  canvas.width = 144;
+  canvas.height = 168;
   const ctx = canvas.getContext('2d');
   if (!ctx) return '';
 
-  // Shadow
-  ctx.shadowColor = 'rgba(229, 9, 20, 0.7)';
-  ctx.shadowBlur = 18;
-  ctx.shadowOffsetY = 6;
-
-  // Pin teardrop path pointing down to (48, 114)
-  ctx.beginPath();
-  ctx.moveTo(48, 114);
-  ctx.bezierCurveTo(24, 76, 10, 54, 10, 38);
-  ctx.arc(48, 38, 38, Math.PI, 0, false);
-  ctx.bezierCurveTo(86, 54, 72, 76, 48, 114);
-  ctx.closePath();
-
-  // Gradient fill
-  const grad = ctx.createLinearGradient(10, 0, 86, 114);
-  grad.addColorStop(0, '#FF1E27');
-  grad.addColorStop(1, '#9B050B');
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // White border
-  ctx.lineWidth = 3.5;
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.stroke();
-
-  // White inner circle
-  ctx.shadowColor = 'transparent';
-  ctx.beginPath();
-  ctx.arc(48, 38, 19, 0, Math.PI * 2);
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fill();
-
-  // Inner red circle
-  ctx.beginPath();
-  ctx.arc(48, 38, 11, 0, Math.PI * 2);
-  ctx.fillStyle = '#E50914';
-  ctx.fill();
-
-  // Center white dot
-  ctx.beginPath();
-  ctx.arc(48, 38, 4, 0, Math.PI * 2);
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fill();
+  // A branded architectural locator: enamel badge, tether and ground chevron.
+  ctx.shadowColor = '#ed203c99'; ctx.shadowBlur = 15;
+  ctx.beginPath(); ctx.moveTo(72, 12); ctx.lineTo(119, 38); ctx.lineTo(119, 88);
+  ctx.lineTo(72, 114); ctx.lineTo(25, 88); ctx.lineTo(25, 38); ctx.closePath();
+  const grad = ctx.createLinearGradient(25, 12, 119, 114);
+  grad.addColorStop(0, '#ff465a'); grad.addColorStop(1, '#a30824');
+  ctx.fillStyle = grad; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.shadowBlur = 0; ctx.font = 'italic 900 57px Arial'; ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('N', 70, 65);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(72, 117); ctx.lineTo(72, 142); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(60, 141); ctx.lineTo(72, 154); ctx.lineTo(84, 141); ctx.stroke();
+  ctx.fillStyle = '#f52643'; ctx.beginPath(); ctx.ellipse(72, 158, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
 
   return canvas.toDataURL();
 }
@@ -158,24 +128,24 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
     isFlyingRef.current = true;
     onFlightStateChangeRef.current?.(true, false);
     setShowLocationCard(false);
+    containerRef.current?.setAttribute('data-destination-state', 'flying');
 
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(
-        destinationView.longitude,
-        destinationView.latitude,
-        destinationView.height
+    // Orbit around the gym itself. Placing a tilted camera directly above the
+    // coordinate aims past the pin and leaves the destination offscreen.
+    const destination = Cesium.Cartesian3.fromDegrees(nexusLocation.longitude, nexusLocation.latitude, 15);
+    viewer.camera.flyToBoundingSphere(new Cesium.BoundingSphere(destination, 85), {
+      offset: new Cesium.HeadingPitchRange(
+        Cesium.Math.toRadians(destinationView.heading),
+        Cesium.Math.toRadians(destinationView.pitch),
+        window.innerWidth < 768 ? 1450 : 1000
       ),
-      orientation: {
-        heading: Cesium.Math.toRadians(destinationView.heading),
-        pitch: Cesium.Math.toRadians(destinationView.pitch),
-        roll: Cesium.Math.toRadians(destinationView.roll),
-      },
       duration: 4.6,
       easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
       complete: () => {
         isFlyingRef.current = false;
         onFlightStateChangeRef.current?.(false, true);
         setShowLocationCard(true);
+        containerRef.current?.setAttribute('data-destination-state', 'arrived');
         if (viewer && !viewer.isDestroyed()) {
           viewer.scene.requestRender();
         }
@@ -197,6 +167,7 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
     isFlyingRef.current = true;
     setShowLocationCard(false);
     onFlightStateChangeRef.current?.(true, false);
+    containerRef.current?.setAttribute('data-destination-state', 'earth');
 
     viewer.camera.flyTo({
       destination: Cesium.Cartesian3.fromDegrees(
@@ -269,6 +240,7 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
     let destroyed = false;
     let handler: CesiumType.ScreenSpaceEventHandler | null = null;
     let postRenderRemove: (() => void) | null = null;
+    let themeObserver: MutationObserver | null = null;
 
     const initCesium = async () => {
       try {
@@ -342,10 +314,20 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
           document.removeEventListener('visibilitychange', syncVisibility);
         };
 
-        // Visual Styling: Deep #050505 Space & Natural Earth
-        viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#050505');
+        // Match the surrounding page, including live theme changes.
+        const syncTheme = () => {
+          if (destroyed || viewer.isDestroyed()) return;
+          const light = document.documentElement.dataset.theme === 'light';
+          viewer.scene.backgroundColor = Cesium.Color.fromCssColorString(light ? '#ffffff' : '#050505');
+          containerRef.current?.setAttribute('data-globe-theme', light ? 'light' : 'dark');
+          viewer.scene.requestRender();
+        };
+        themeObserver = new MutationObserver(syncTheme);
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        syncTheme();
         viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#050505');
-        viewer.scene.globe.enableLighting = true;
+        // Satellite navigation stays legible regardless of the real-world sun.
+        viewer.scene.globe.enableLighting = false;
         viewer.scene.globe.depthTestAgainstTerrain = false;
 
         // Clean space without skybox stars to blend with website background
@@ -435,10 +417,10 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
         viewer.entities.add({
           position: markerPosition,
           ellipse: {
-            semiMinorAxis: 180,
-            semiMajorAxis: 180,
+            semiMinorAxis: 85,
+            semiMajorAxis: 85,
             material: new Cesium.ColorMaterialProperty(
-              Cesium.Color.fromCssColorString('#E50914').withAlpha(0.35)
+              Cesium.Color.fromCssColorString('#E50914').withAlpha(0.12)
             ),
             outline: true,
             outlineColor: Cesium.Color.fromCssColorString('#FF1E27').withAlpha(0.85),
@@ -454,7 +436,7 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
           billboard: {
             image: pinDataUrl,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            scale: 0.85,
+            scale: 0.65,
             scaleByDistance: new Cesium.NearFarScalar(500, 1.0, 15000000, 0.42),
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
           },
@@ -487,6 +469,8 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
         let lastTime = performance.now();
         const spinSpeed = 0.009; // Radians per second
         const autoRotateListener = () => {
+          const projected = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, markerPosition);
+          if (projected && containerRef.current) containerRef.current.dataset.markerScreen = `${projected.x.toFixed(1)},${projected.y.toFixed(1)}`;
           const now = performance.now();
           const dt = Math.min((now - lastTime) / 1000, 0.1);
           lastTime = now;
@@ -528,6 +512,7 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
 
     return () => {
       destroyed = true;
+      themeObserver?.disconnect();
       if (postRenderRemove) postRenderRemove();
       if (handler) handler.destroy();
       if (viewerRef.current && !viewerRef.current.isDestroyed()) {

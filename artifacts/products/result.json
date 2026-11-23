@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "checks": [
+    "12 genuine transparent product photographs",
+    "pure white display without textured wall or rails and continuous white shelves",
+    "12 products, three shelves, correct page placement and image decode",
+    "all four category filters",
+    "native modal focus containment and page scroll lock",
+    "variant pricing, quantity, add to kit and information panels",
+    "drag inspection and release",
+    "Escape, focus restoration and scroll unlock",
+    "kit quantity edits, indicative total and copied enquiry",
+    "kit persistence after reload, removal and empty state",
+    "390px mobile shelf and product controls",
+    "two products per continuous mobile and tablet shelf",
+    "768px tablet layout",
+    "1920px dark theme compatibility",
+    "reduced motion",
+    "invalid saved kit recovery",
+    "no shelf or dialog horizontal overflow"
+  ],
+  "errors": []
+}

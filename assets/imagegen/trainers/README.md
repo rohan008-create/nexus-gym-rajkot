@@ -13,3 +13,8 @@ Use case: ads-marketing. One photorealistic fitness trainer portrait for a ficti
 - 01: an athletic adult man with short dark hair and a trimmed beard, strength coach demo portrait
 - 02: an athletic adult woman with tied-back dark hair, functional training coach demo portrait
 - 03: an athletic adult man with close-cropped hair and darker skin, conditioning coach demo portrait
+## Additional demo portraits (04 and 05)
+Created using the built-in Imagegen tool. These are fictional demo trainers.
+- Saved portrait: trainer-04-original.png. Prompt: Photorealistic chest-up fictional Indian female gym trainer in a plain black athletic shirt, centered against dark charcoal, natural soft face lighting with a subtle crimson rim, no text or logos.
+- Saved portrait: trainer-05-original.png. Prompt: Photorealistic studio portrait for a fictional gym trainer demo profile. Athletic muscular Indian man age 35 with medium brown skin, short styled black hair and neatly trimmed beard. Black plain crew neck gym shirt. Chest-up facing camera, confident approachable neutral expression. Plain dark charcoal studio background with warm soft light on face and subtle crimson rim light. Portrait centered, generous space above head. Realistic skin and fabric texture, premium gym editorial style. No text or logos.
+Derived badge fronts, backs and WebP photos are produced by scripts/prepare-trainers.cjs under public/assets/trainers/.

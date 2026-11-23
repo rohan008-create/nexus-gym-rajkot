@@ -1,0 +1,34 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": [
+    "section-redesign",
+    "webgl-reveal",
+    "transparent-assets",
+    "observed-adjacent-trainer-runtime-crash"
+  ],
+  "allowed_write_scope": [
+    "src/components/armory/",
+    "src/components/ui/cloth-peel-reveal.tsx",
+    "public/assets/armory/",
+    "assets/imagegen/armory/",
+    "scripts/test-armory.cjs",
+    "artifacts/armory-redesign/",
+    "src/components/trainers/Lanyard.jsx"
+  ],
+  "acceptance": [
+    "light equipment gallery with three transparent assets",
+    "viewport-triggered one-shot cloth peel",
+    "keyboard and touch equipment selection",
+    "WebGL fallback and reduced motion reveal",
+    "responsive layout without horizontal overflow",
+    "Programs CTA preserved",
+    "trainer spline cannot crash page when viewport changes"
+  ],
+  "validators": [
+    "npx tsc --noEmit",
+    "node scripts/test-armory.cjs"
+  ]
+}

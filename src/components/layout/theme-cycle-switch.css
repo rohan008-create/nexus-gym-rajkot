@@ -1,0 +1,10 @@
+.gym-theme-switch.gym-cycle-switch{width:118px;height:48px;border-radius:28px;border:1px solid #d5c9b5;background:linear-gradient(145deg,#fffdf6,#ece7da);box-shadow:inset 0 1px 0 #fff,0 5px 20px #181f3026;overflow:hidden;color:#776044}
+.cycle-lens{position:absolute;left:5px;top:5px;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(140deg,#fff,#d9d2c7);border:1px solid #fff;box-shadow:0 3px 7px #312d2640,inset 0 1px 1px #fff;color:#6b5742;transition:transform .4s cubic-bezier(.2,.8,.2,1),color .4s}
+.cycle-lens svg{transform:rotate(-35deg)}
+.cycle-caption{position:absolute;top:17px;right:17px;display:flex;align-items:center;gap:5px;font:700 7px/1 monospace;letter-spacing:.15em}
+.gym-cycle-switch[aria-checked=true]{background:radial-gradient(circle at 25% 20%,#495270 0,transparent 55%),linear-gradient(140deg,#1b263e,#0c1324);border-color:#64708c;color:#e2e8ff;box-shadow:inset 0 1px 0 #a9b9ef26,0 5px 20px #0005}
+.gym-cycle-switch[aria-checked=true] .cycle-lens{transform:translateX(70px);background:linear-gradient(140deg,#526486,#202e49);border-color:#8eadd07a;color:#ffdda4;box-shadow:0 0 15px #9cbfff29,inset 0 1px 0 #d0e0ff44}
+.gym-cycle-switch[aria-checked=true] .cycle-caption{left:13px;right:auto}
+.gym-cycle-switch::after{content:'';position:absolute;right:14px;top:9px;width:3px;height:3px;border-radius:50%;background:#bd8a48;box-shadow:-6px 28px 0 #bd8a4844;pointer-events:none}
+.gym-cycle-switch[aria-checked=true]::after{right:auto;left:17px;background:#bfcff3;box-shadow:28px 5px 0 -1px #bfcff3,34px 27px 0 -1px #bfcff3,5px 28px 0 -1px #bfcff3}
+@media(prefers-reduced-motion:reduce){.cycle-lens{transition:none}}

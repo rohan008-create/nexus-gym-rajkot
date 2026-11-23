@@ -15,20 +15,34 @@ function loadInterior() {
   return cachedInterior;
 }
 export default function DetailedInterior({ active, fallback }: { active: boolean; fallback: React.ReactNode }) {
-  const { gl, invalidate } = useThree();
+  const { gl, scene, camera, invalidate } = useThree();
   const [asset, setAsset] = useState<GLTF | null>(null);
+  const [prepared, setPrepared] = useState(false);
   const clone = useMemo(() => asset?.scene.clone(true), [asset]);
   useEffect(() => {
-    if (!active || asset) return;
+    if (!clone) return;
+    let mounted = true;
+    // Compile against the tour's lights before the doorway reveals this room.
+    // Keep the procedural room mounted until the detailed shaders are ready.
+    gl.compileAsync(clone, camera, scene).then(() => {
+      if (mounted) { setPrepared(true); invalidate(); }
+    }).catch(() => {
+      // The procedural room remains usable if the optional upgrade fails.
+      if (mounted) { gl.domElement.dataset.interiorSource = 'fallback'; gl.domElement.dataset.interiorSettled = 'true'; invalidate(); }
+    });
+    return () => { mounted = false; };
+  }, [clone, camera, gl, scene, invalidate]);
+  useEffect(() => {
+    if (asset) return;
     let mounted = true;
     let idle: number | undefined;
-    // Wait until the hero is interactive; do not parse another GLB during the
-    // punching-bag impact. The procedural interior remains immediately usable.
+    // Prepare behind the intact bag so entering never exposes the placeholder
+    // room or starts parsing a GLB during the impact animation.
     const timer = setTimeout(() => {
       const load = () => {
         if (!mounted) return;
         loadInterior().then(value => { if (mounted) setAsset(value); }).catch(() => {
-          if (mounted) { gl.domElement.dataset.interiorSource = 'fallback'; invalidate(); }
+          if (mounted) { gl.domElement.dataset.interiorSource = 'fallback'; gl.domElement.dataset.interiorSettled = 'true'; invalidate(); }
         });
       };
       if ('requestIdleCallback' in window) idle = window.requestIdleCallback(load, { timeout: 1200 });
@@ -37,8 +51,9 @@ export default function DetailedInterior({ active, fallback }: { active: boolean
     return () => { mounted = false; clearTimeout(timer); if (idle !== undefined) window.cancelIdleCallback(idle); };
   }, [active, asset, gl, invalidate]);
   useEffect(() => {
-    gl.domElement.dataset.interiorSource = clone ? 'detailed' : 'fallback';
+    gl.domElement.dataset.interiorSource = clone && prepared ? 'detailed' : 'fallback';
+    if (clone && prepared) gl.domElement.dataset.interiorSettled = 'true';
     invalidate();
-  }, [clone, gl, invalidate]);
-  return clone ? <primitive object={clone} dispose={null} /> : <>{fallback}</>;
+  }, [clone, prepared, gl, invalidate]);
+  return clone && prepared ? <primitive object={clone} dispose={null} /> : <>{fallback}</>;
 }

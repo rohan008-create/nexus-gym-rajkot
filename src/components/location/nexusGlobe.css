@@ -217,6 +217,13 @@
   transition: transform 0.2s ease;
 }
 
+.globe-explore-btn .globe-explore-arrow { display:grid; place-items:center; width:34px; height:34px; margin:-8px -16px -8px 12px; border:1px solid #ffffff55; border-radius:50%; background:#ffffff16; }
+@media(max-width:899px) {
+  .nexus-globe-section .globe-info-card { max-height:34svh; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+  .nexus-globe-section .globe-card-actions { grid-template-columns:1fr 1fr; }
+  .nexus-globe-section .globe-btn-primary { grid-column:1 / -1; }
+}
+
 .globe-explore-btn:hover .globe-explore-arrow {
   transform: translate(2px, -2px);
 }

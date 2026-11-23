@@ -1,5 +1,5 @@
 import { ArrowUpRight, Pencil } from 'lucide-react';
-import { bookingExperiences, BookingValues, NEXUS_WHATSAPP_NUMBER, NEXUS_WHATSAPP_DEMO } from './bookingConfig';
+import { bookingExperiences, BookingValues, NEXUS_WHATSAPP_NUMBER } from './bookingConfig';
 import { bookingMessage, bookingWhatsAppUrl, formatBookingDate, normalizeRecipient } from './bookingUtils';
 
 export function WhatsAppIcon() {
@@ -15,7 +15,7 @@ export default function BookingReview({ values, onEdit, onValidate }: { values: 
     <div className="booking-review-group"><div className="booking-review-label"><span>PREFERRED VISIT</span><button type="button" onClick={() => onEdit(1)} aria-label="Edit date and time"><Pencil size={12} aria-hidden />Edit</button></div><p>{formatBookingDate(values.date)}<span className="booking-review-time">{values.time}</span></p></div>
     <div className="booking-review-group"><div className="booking-review-label"><span>YOUR DETAILS</span><button type="button" onClick={() => onEdit(2)} aria-label="Edit personal details"><Pencil size={12} aria-hidden />Edit</button></div><dl><div><dt>Name</dt><dd>{values.name.trim()}</dd></div><div><dt>Mobile</dt><dd>{values.mobile.trim()}</dd></div><div><dt>Fitness goal</dt><dd>{values.goal || 'Not specified'}</dd></div></dl></div>
     <details className="booking-message-preview"><summary>Preview your WhatsApp message</summary><pre>{bookingMessage(values)}</pre></details>
-    <p className="booking-confirmation-note">{NEXUS_WHATSAPP_DEMO ? 'Demo preview: this uses a fictional number. Enquiries will not reach NEXUS. The official gym number must be connected before live use.' : 'WhatsApp opens with your prepared message. Press Send there to make your request. Our team will confirm your visit separately.'}</p>
+    <p className="booking-confirmation-note">WhatsApp opens with your prepared message to the club’s published contact. Press Send there to make your request. The team will confirm availability separately.</p>
     {url ? <a className="booking-whatsapp" href={url} target="_blank" rel="noopener noreferrer" onClick={onValidate}><WhatsAppIcon /><span>CONTINUE TO WHATSAPP</span><ArrowUpRight size={18} aria-hidden /></a> : <><button type="button" className="booking-whatsapp" disabled aria-describedby="booking-whatsapp-notice"><WhatsAppIcon /><span>CONTINUE TO WHATSAPP</span><ArrowUpRight size={18} aria-hidden /></button><div id="booking-whatsapp-notice" className="booking-configuration" role="status">{connected ? 'Please review your details before continuing.' : <><strong>WhatsApp setup pending.</strong> The club’s official number has not been connected. Your enquiry stays here.<small>Site configuration requires NEXT_PUBLIC_NEXUS_WHATSAPP_NUMBER.</small></>}</div></>}
   </div>;
 }

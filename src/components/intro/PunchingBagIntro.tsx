@@ -35,7 +35,7 @@ export default function PunchingBagIntro({ asset = {}, animationState = 'intact'
   const reduced = useReducedMotion();
   const [phase, setPhase] = useState<ExplosionState>('IDLE');
   const [run, setRun] = useState(0);
-  const audio = useRef<ExplosionAudio>();
+  const audio = useRef<ExplosionAudio | undefined>(undefined);
   if (!audio.current) audio.current = new ExplosionAudio();
   useEffect(() => () => audio.current?.dispose(), []);
   const complete = phase === 'COMPLETE';

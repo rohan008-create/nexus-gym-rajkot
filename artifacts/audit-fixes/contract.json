@@ -1,0 +1,10 @@
+{
+  "planning": "deep",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "reason_codes": ["security-upgrade", "multiple-flows", "asset-optimization"],
+  "scope": ["dependencies", "booking", "trial-modal", "tour-readiness", "theme-surfaces", "avatar-delivery", "metadata", "regression-checks"],
+  "acceptance": ["dependency audit has no critical or high alerts", "noninteractive lint passes", "production build and typecheck pass", "trial and booking use consistent explicit recipient", "dialog focus is contained and restored", "failed optional models retain interactive tour", "light and dark surfaces match their theme", "reception model delivery is under 5 MiB", "membership checks target current design", "reduced-motion night poster is available"],
+  "constraints": ["do not invent club data or silently send enquiries", "preserve existing user work", "preserve React Three Fiber compatibility"]
+}

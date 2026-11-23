@@ -1,14 +1,14 @@
 const fs = require('node:fs/promises');
 const sharp = require('sharp');
-const names = ['trainer-01', 'trainer-02', 'trainer-03'];
-const specializations = ['STRENGTH &amp; CONDITIONING', 'FUNCTIONAL FITNESS', 'PERFORMANCE &amp; CONDITIONING'];
-const focuses = [['STRENGTH FOUNDATIONS', 'CONTROLLED TECHNIQUE', 'PROGRESSIVE TRAINING'], ['MOVEMENT QUALITY', 'FULL-BODY STRENGTH', 'EVERYDAY FITNESS'], ['CONDITIONING', 'TRAINING CONSISTENCY', 'WORK CAPACITY']];
-const biographies = [['Purposeful strength sessions.', 'Steady progress, one rep at a time.'], ['Move with confidence.', 'Build balanced full-body strength.'], ['Train with intention.', 'Develop consistent training habits.']];
+const names = ['trainer-01', 'trainer-02', 'trainer-03', 'trainer-04', 'trainer-05'];
+const specializations = ['STRENGTH &amp; CONDITIONING', 'FUNCTIONAL FITNESS', 'PERFORMANCE &amp; CONDITIONING', 'MOBILITY &amp; RECOVERY', 'STRENGTH &amp; TECHNIQUE'];
+const focuses = [['STRENGTH FOUNDATIONS', 'CONTROLLED TECHNIQUE', 'PROGRESSIVE TRAINING'], ['MOVEMENT QUALITY', 'FULL-BODY STRENGTH', 'EVERYDAY FITNESS'], ['CONDITIONING', 'TRAINING CONSISTENCY', 'WORK CAPACITY'], ['MOBILITY PRACTICE', 'MOVEMENT CONTROL', 'RECOVERY HABITS'], ['LIFTING FOUNDATIONS', 'TECHNIQUE PRACTICE', 'STEADY PROGRESS']];
+const biographies = [['Purposeful strength sessions.', 'Steady progress, one rep at a time.'], ['Move with confidence.', 'Build balanced full-body strength.'], ['Train with intention.', 'Develop consistent training habits.'], ['Move freely, train confidently.', 'Build sustainable movement habits.'], ['Build strength with purpose.', 'Practice technique, rep by rep.']];
 const svg = body => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="768" height="1080"><defs><linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#090909"/></linearGradient></defs><style>text{font-family:Arial,sans-serif;fill:#fff}.muted{fill:#a1a1aa}.red{fill:#ff1728}</style>${body}</svg>`);
 (async () => {
   await fs.mkdir('public/assets/trainers', { recursive: true });
   const logo = await sharp('public/assets/nexus-logo.png').resize({ width: 340, height: 76, fit: 'inside' }).png().toBuffer();
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < names.length; i++) {
     const id = names[i]; const number = String(i + 1).padStart(2, '0');
     const photo = await sharp(`assets/imagegen/trainers/${id}-original.png`).resize(720, 680, { fit: 'cover', position: 'attention' }).png().toBuffer();
     await sharp(`assets/imagegen/trainers/${id}-original.png`).resize({ width: 640 }).webp({ quality: 85 }).toFile(`public/assets/trainers/${id}-photo.webp`);
@@ -19,5 +19,5 @@ const svg = body => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="
   }
   const strap = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="128"><rect width="1024" height="128" fill="#111111"/><path d="M0 8H1024M0 120H1024" stroke="#393939" stroke-width="2" stroke-dasharray="8 6"/><text x="512" y="78" text-anchor="middle" font-family="Arial" font-weight="900" font-size="46" letter-spacing="6" fill="#e50914">NEXUS FITNESS CLUB</text></svg>`);
   await sharp(strap).png().toFile('public/assets/trainers/nexus-lanyard-strap.png');
-  console.log('Created three front/back pairs, three photo assets and repeating strap texture.');
+  console.log('Created five front/back pairs, five photo assets and repeating strap texture.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

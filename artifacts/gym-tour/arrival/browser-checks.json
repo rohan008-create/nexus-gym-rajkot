@@ -1,0 +1,122 @@
+{
+  "checks": [
+    "desktop: Ryan greets with Wave",
+    "desktop: navbar and old footer removed",
+    "desktop: stage fills viewport",
+    "desktop: entry hint advances camera",
+    "desktop: feet reach treads at 0.2",
+    "desktop: feet reach treads at 0.26",
+    "desktop: feet reach treads at 0.32",
+    "desktop: feet reach treads at 0.41",
+    "desktop: feet reach treads at 0.5",
+    "desktop: feet reach treads at 0.52",
+    "desktop: walking freezes when scrolling stops",
+    "desktop: end-of-tour enquiry and Escape work",
+    "desktop: reverse scroll restores greeter",
+    "desktop: no horizontal overflow",
+    "native wheel drives the tour",
+    "desktop: skip reaches existing About",
+    "desktop: offscreen guide stops",
+    "mobile: Ryan greets with Wave",
+    "mobile: navbar and old footer removed",
+    "mobile: stage fills viewport",
+    "mobile: entry hint advances camera",
+    "mobile: feet reach treads at 0.2",
+    "mobile: feet reach treads at 0.26",
+    "mobile: feet reach treads at 0.32",
+    "mobile: feet reach treads at 0.41",
+    "mobile: feet reach treads at 0.5",
+    "mobile: feet reach treads at 0.52",
+    "mobile: walking freezes when scrolling stops",
+    "mobile: end-of-tour enquiry and Escape work",
+    "mobile: reverse scroll restores greeter",
+    "mobile: no horizontal overflow",
+    "touch swipe drives the tour",
+    "mobile: skip reaches existing About",
+    "mobile: offscreen guide stops",
+    "reduced motion has a short readable hero with enquiry",
+    "main homepage intro still unlocks landing and hands focus to hero",
+    "context loss leaves a short usable fallback",
+    "fallback enquiry still works",
+    "no uncaught runtime or shader errors"
+  ],
+  "errors": [],
+  "stairs": [
+    {
+      "label": "desktop",
+      "value": 0.2,
+      "footError": "0.0000",
+      "position": "8.050,0.560,8.557"
+    },
+    {
+      "label": "desktop",
+      "value": 0.26,
+      "footError": "0.0000",
+      "position": "8.050,1.191,7.461"
+    },
+    {
+      "label": "desktop",
+      "value": 0.32,
+      "footError": "0.0000",
+      "position": "8.050,2.126,5.839"
+    },
+    {
+      "label": "desktop",
+      "value": 0.41,
+      "footError": "0.0000",
+      "position": "8.050,3.599,3.281"
+    },
+    {
+      "label": "desktop",
+      "value": 0.5,
+      "footError": "0.0000",
+      "position": "8.050,4.474,1.763"
+    },
+    {
+      "label": "desktop",
+      "value": 0.52,
+      "footError": "0.0000",
+      "position": "8.050,4.510,1.700"
+    },
+    {
+      "label": "mobile",
+      "value": 0.2,
+      "footError": "0.0000",
+      "position": "8.050,0.560,8.558"
+    },
+    {
+      "label": "mobile",
+      "value": 0.26,
+      "footError": "0.0000",
+      "position": "8.050,1.192,7.460"
+    },
+    {
+      "label": "mobile",
+      "value": 0.32,
+      "footError": "0.0000",
+      "position": "8.050,2.124,5.842"
+    },
+    {
+      "label": "mobile",
+      "value": 0.41,
+      "footError": "0.0000",
+      "position": "8.050,3.597,3.285"
+    },
+    {
+      "label": "mobile",
+      "value": 0.5,
+      "footError": "0.0000",
+      "position": "8.050,4.474,1.763"
+    },
+    {
+      "label": "mobile",
+      "value": 0.52,
+      "footError": "0.0000",
+      "position": "8.050,4.510,1.700"
+    }
+  ],
+  "limits": [
+    "Headless Chrome with explicit D3D11 ANGLE and touch emulation; no physical-device or FPS guarantee."
+  ],
+  "passed": true
+}

@@ -30,4 +30,24 @@ for (const fps of [30, 60, 120]) {
   stepSuspension(sim, end, 1 / fps, 20, true);
   sim.nodes.forEach((p, i) => assert.ok(p.distanceTo(anchor.clone().lerp(end, i / 9)) < 1e-10, 'reduced motion stays still'));
 }
-console.log('VERDICT: PASS -- fixed anchor, bag attachment, elastic bend, frame stalls, settling, reduced motion at 30/60/120fps');
+const { createBagMotion, stepBagMotion } = loaded.exports;
+const outcomes = [];
+for (const fps of [30, 60, 120]) {
+  const m = createBagMotion();
+  const pull = { held: true, x: .9, y: -.65, yaw: 1.8, pitch: .15 };
+  for (let i = 0; i < fps; i++) stepBagMotion(m, 1 / fps, false, pull);
+  assert.ok(m.x > .8 && m.y < -.55, 'bag follows a held pull');
+  pull.held = false;
+  let crossed = false;
+  for (let i = 0; i < fps * 8; i++) {
+    stepBagMotion(m, 1 / fps, false, pull);
+    crossed ||= m.x < -.1;
+    assert.ok(Number.isFinite(m.x + m.y + m.yaw) && Math.abs(m.x) < 1.5, 'release remains bounded');
+  }
+  assert.ok(crossed, 'released load swings through centre with momentum');
+  outcomes.push(m.x);
+  for (let i = 0; i < fps * 12; i++) stepBagMotion(m, 1 / fps, false, pull);
+  assert.ok(Math.abs(m.x) < .005 && Math.abs(m.y) < .005 && Math.abs(m.yaw) < .005, 'load settles after release');
+}
+assert.ok(Math.max(...outcomes) - Math.min(...outcomes) < 1e-9, 'refresh rates produce identical physics');
+console.log('VERDICT: PASS -- fixed anchor, attached strap, bend, stalls, reduced motion, load pull/release/settling and identical 30/60/120fps physics');

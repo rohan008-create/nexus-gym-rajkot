@@ -1,22 +1,24 @@
-/* The scene, photography and physical product displays keep their own lighting.
-   Editorial surfaces use a separate, warm light palette with the Nexus accent. */
+/* All light-mode page sections share one white canvas. */
 :root { --theme-page:#000; --theme-surface:#111215; --theme-ink:#f7f5ef; --theme-muted:#a1a1aa; --theme-line:#ffffff24; }
-html[data-theme="light"] { color-scheme:light; --theme-page:#f8f7f4; --theme-surface:#fff; --theme-ink:#20242b; --theme-muted:#565f6c; --theme-line:#20242b29; background:var(--theme-page); }
+html[data-theme="light"] { color-scheme:light; --theme-page:#fff; --theme-surface:#fff; --theme-ink:#20242b; --theme-muted:#565f6c; --theme-line:#20242b29; background:var(--theme-page); }
 html[data-theme="dark"] { color-scheme:dark; }
+html[data-theme="dark"] .armory-section.armory-gallery { --ag-paper:#101215; --ag-ink:#f4f2ec; --ag-muted:#a6abb4; --ag-line:#ffffff24; background:var(--ag-paper); }
+html[data-theme="dark"] .advantage-section.nexus-standard { --ns-paper:#101215; --ns-ink:#f4f2ec; --ns-muted:#a6abb4; --ns-line:#ffffff24; --ns-accent:#f04455; }
+html[data-theme="dark"] :is(.nexus-products,.ps-dialog) { --ps-paper:#101215; --ps-ink:#f4f2ec; --ps-muted:#a6abb4; --ps-line:#ffffff24; --ps-red:#f04455; }
+html[data-theme="dark"] :is(.nexus-products .ps-shelves,.ps-dialog .ps-modal-shell) { background:var(--ps-paper); }
+html[data-theme="dark"] .ps-dialog .ps-detail-stage { background:radial-gradient(ellipse,#ffffff08,transparent 70%); }
 html[data-theme="light"] body, html[data-theme="light"] .site-shell { background:var(--theme-page); color:var(--theme-ink); }
-
-.theme-switch { position:fixed; z-index:10001; top:max(16px,env(safe-area-inset-top)); right:max(18px,env(safe-area-inset-right)); display:flex; gap:3px; padding:4px; border:1px solid var(--theme-line); border-radius:30px; background:var(--theme-surface); color:var(--theme-ink); box-shadow:0 5px 24px #0002; }
-.theme-switch button { display:flex; align-items:center; justify-content:center; gap:7px; min-height:40px; min-width:76px; padding:9px 13px; border:0; border-radius:24px; background:transparent; color:var(--theme-muted); font:600 11px/1 Arial,sans-serif; cursor:pointer; }
-.theme-switch button[aria-pressed="true"] { background:#d91425; color:#fff; }
-.theme-switch button:focus-visible { outline:2px solid #e50914; outline-offset:4px; }
-.theme-switch button:hover:not([aria-pressed="true"]) { background:#8882; color:var(--theme-ink); }
-@media(max-width:600px) { .theme-switch { top:max(12px,env(safe-area-inset-top)); right:12px; } .theme-switch button { min-width:44px; min-height:44px; padding:10px; } .theme-switch button span { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); } }
 
 html[data-theme="light"] .site-shell :is(h2,h3) { color:var(--theme-ink); }
 html[data-theme="light"] .site-shell p { color:var(--theme-muted); }
 html[data-theme="light"] :is(.programs-section,.advantage-section,.membership-print-section,.nexus-voices) { background:#fff; color:var(--theme-ink); border-color:var(--theme-line); }
-html[data-theme="light"] :is(.armory-section,.trainers-section,.booking-section,.social-section,.nexus-simple-footer) { background:#f1f0ec; color:var(--theme-ink); border-color:var(--theme-line); }
-html[data-theme="light"] .rope-experience .about-section:has(.nexus-story) { background:#eeede6; color:var(--theme-ink); }
+html[data-theme="light"] :is(.armory-section,.trainers-section,.booking-section,.social-section,.nexus-simple-footer) { background:var(--theme-page); color:var(--theme-ink); border-color:var(--theme-line); }
+html[data-theme="light"] .rope-experience .about-section:has(.nexus-story) { background:var(--theme-page); color:var(--theme-ink); }
+/* IDs keep section-specific styles from reintroducing independent paper shades. */
+html[data-theme="light"] .site-shell :is(#home,#about,#programs,#armory,#advantage,#trainers,#membership,#products,#booking,#voices,#location,#social,#footer) {
+  --ag-paper:var(--theme-page); --ns-paper:var(--theme-page); --nf-paper:var(--theme-page); --ps-paper:var(--theme-page);
+  background:var(--theme-page); border-color:var(--theme-line);
+}
 html[data-theme="light"] :is(.nexus-story-meta,.nexus-story-footer,.nexus-story-pillars,.nexus-story-pillar,.trainers-selector,.membership-print-index,.membership-auto-label,.nsf-bottom) { border-color:var(--theme-line); }
 html[data-theme="light"] :is(.nexus-story-meta,.nexus-story-meta > span:first-child,.nexus-story-heading > span:last-child,.nexus-story-pillar.is-selected button,.nexus-story-panel,.trainers-subtitle,.trainers-selector button[aria-pressed=true],.membership-auto-label > span:first-child,.nsf-links a,.nsf-links address) { color:var(--theme-ink); }
 html[data-theme="light"] :is(.nexus-story-eyebrow,.nexus-story-pillar button,.nexus-story-number,.nexus-story-cta-note,.nexus-story-footer,.programs-description,.programs-bottom,.trainers-eyebrow,.trainers-introduction,.trainers-instruction,.trainers-demo-note,.trainers-selector button,.trainers-selector button > span,.trainer-badge-label,.trainer-profile-role,.trainer-profile-description,.membership-print-description,.membership-print-index,.membership-print-eyebrow,.membership-print-note,.membership-auto-label,.social-eyebrow,.social-sub,.nsf-links h2,.nsf-bottom) { color:var(--theme-muted); }
@@ -41,7 +43,7 @@ html[data-theme="light"] :is(.advantage-item,.armory-spec-item,.armory-progress-
 html[data-theme="light"] .armory-spec-item { background:#ffffffb3; }
 html[data-theme="light"] .trainer-profile li { color:var(--theme-muted); }
 html[data-theme="light"] :is(.armory-programs-cta,.text-link,.membership-print-enquire) { color:var(--theme-ink); }
-html[data-theme="light"] .armory-visual-shade { background:linear-gradient(90deg,#f1f0ec,transparent 30%),linear-gradient(180deg,#f1f0ec,transparent 18%,transparent 82%,#f1f0ec); }
+html[data-theme="light"] .armory-visual-shade { background:linear-gradient(90deg,var(--theme-page),transparent 30%),linear-gradient(180deg,var(--theme-page),transparent 18%,transparent 82%,var(--theme-page)); }
 html[data-theme="light"] .membership-print-plans { background:#eeede9; border-color:var(--theme-line); }
 html[data-theme="light"] .membership-print-plans > button { color:var(--theme-muted); }
 html[data-theme="light"] .membership-print-plans > button[aria-pressed=true] { background:#fbe8e9; color:#a6111e; }
@@ -74,7 +76,31 @@ html[data-theme="light"] .voices-fade-vertical { background:linear-gradient(to b
 html[data-theme="light"] .voices-fade-horizontal { background:linear-gradient(to right,#fff,transparent 13%,transparent 85%,#fff); }
 html[data-theme="light"] .nsf-rule { background:var(--theme-line); }
 html[data-theme="light"] .nsf-wordmark { background-image:linear-gradient(180deg,#20242b,#55535a 65%,#b88e93); }
-html[data-theme="light"] .nsf-brand img { background:#20242b; padding:10px; border-radius:8px; }
-/* The map is a space visualization, not an editorial page background. */
-html[data-theme="light"] .nexus-globe-section :is(h2,h3,p), html[data-theme="light"] .nexus-globe-section { color:#f7f5ef; }
-html[data-theme="light"] .nexus-globe-section .globe-subtitle { color:#b9bac4; }
+/* The globe's canvas, loading state and fallback blend into the same page. */
+html[data-theme="light"] .nexus-globe-section { color:var(--theme-ink); }
+html[data-theme="light"] .nexus-globe-section :is(.cesium-globe-wrapper,.globe-loading-overlay,.globe-fallback-view) { background:var(--theme-page); }
+html[data-theme="light"] .nexus-globe-section :is(h2,h3,.globe-loading-text) { color:var(--theme-ink); }
+html[data-theme="light"] .nexus-globe-section :is(.globe-subtitle,.globe-coords-hud,.globe-credit-container,.globe-credit-container a,.globe-imagery-badge,.globe-loading-sub) { color:var(--theme-muted); }
+html[data-theme="light"] .nexus-globe-section .globe-fallback-box { background:var(--theme-surface); border-color:var(--theme-line); box-shadow:0 16px 48px #20242b12; }
+html[data-theme="light"] .nexus-globe-section .globe-ring.ring-2 { border-top-color:var(--theme-line); }
+html[data-theme="light"] .nexus-globe-section :is(.globe-info-card,.globe-ctrl-btn) { background:var(--theme-surface); color:var(--theme-ink); border-color:var(--theme-line); box-shadow:0 12px 35px #20242b18; }
+html[data-theme="light"] .nexus-globe-section :is(.globe-card-coordinates,.globe-pill,.globe-btn-secondary,.globe-btn-call,.globe-btn-reset,.globe-card-close) { color:var(--theme-muted); border-color:var(--theme-line); }
+.gym-theme-switch { position:fixed; z-index:10001; top:max(16px,env(safe-area-inset-top)); right:max(18px,env(safe-area-inset-right)); width:88px; height:46px; padding:0; border:1px solid #777d87; border-radius:25px; background:linear-gradient(#eef0f3,#cbd0d7); box-shadow:inset 0 2px 5px #0005,0 4px 16px #0004; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:background .3s,border-color .3s; }
+.gym-theme-rail { position:absolute; top:20px; left:12px; right:12px; height:4px; border-radius:4px; background:#858b94; box-shadow:inset 0 1px 2px #0008; }
+.gym-theme-weight { position:absolute; left:5px; top:5px; width:40px; height:34px; transform:rotate(-12deg); transition:transform .35s cubic-bezier(.2,.8,.2,1); filter:drop-shadow(0 3px 2px #0008); }
+.gym-theme-bar { position:absolute; left:0; top:14px; width:40px; height:6px; border:1px solid #8c939e; border-radius:2px; background:repeating-linear-gradient(110deg,#bbc2cc 0 1px,#616975 1px 3px); box-shadow:inset 0 1px 0 #eff3f8; }
+.gym-theme-plate { position:absolute; top:3px; width:9px; height:28px; border:1px solid #949aa4; border-radius:3px; background:linear-gradient(90deg,#30343b,#a1a9b5 28%,#444b56 48%,#20242b 85%); box-shadow:inset 0 1px 0 #e0e5ed88,1px 1px 1px #0009; }
+.gym-theme-plate.inner.left { left:8px; }
+.gym-theme-plate.inner.right { right:8px; }
+.gym-theme-plate.outer { top:7px; height:20px; width:7px; }
+.gym-theme-plate.outer.left { left:2px; }
+.gym-theme-plate.outer.right { right:2px; }
+.gym-theme-switch[aria-checked="true"] { border-color:#a72c38; background:linear-gradient(#44151d,#1c0c10); }
+.gym-theme-switch[aria-checked="true"] .gym-theme-rail { background:#ec1834; box-shadow:0 0 8px #e5091466; }
+.gym-theme-switch[aria-checked="true"] .gym-theme-weight { transform:translateX(36px) rotate(12deg); }
+.gym-theme-switch[aria-checked="true"] .gym-theme-plate.inner { border-color:#ff6676; background:linear-gradient(90deg,#7b0a19,#ff4c61 28%,#d01932 48%,#650815 85%); }
+.gym-theme-switch:hover .gym-theme-weight { filter:drop-shadow(0 3px 3px #000b) brightness(1.15); }
+
+.gym-theme-switch:focus-visible { outline:2px solid var(--theme-ink); outline-offset:4px; }
+@media(max-width:600px) { .gym-theme-switch { top:max(12px,env(safe-area-inset-top)); right:12px; } }
+@media(prefers-reduced-motion:reduce) { .gym-theme-switch,.gym-theme-weight { transition:none; } }

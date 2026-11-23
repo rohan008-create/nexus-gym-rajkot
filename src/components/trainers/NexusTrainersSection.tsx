@@ -13,8 +13,9 @@ function TrainerBadge({ index }: { index: number }) {
   const [back, setBack] = useState(false);
   const [status, setStatus] = useState('loading');
   return <div className="trainer-installation" data-trainer={trainer.id} data-status={status}>
+    <span className="trainer-rail-hook" aria-hidden="true" />
     <div className="trainer-lanyard-slot">
-      <Lanyard frontImage={trainer.frontImage} backImage={trainer.backImage} strapImage="/assets/trainers/nexus-lanyard-strap.png" imageFit="contain" orientation="portrait" finish="metallic" metal="graphite" cardColor="#101010" strapColor="#111111" strapWidth={.7} size={.53} cornerRadius={.15} anchor="center" strapLength={trainer.strapLength} gravity={1} damping={.45} elasticity={.55} breeze={.2} interactive intro introDelay={index * .16} flipSignal={flipSignal} onFlip={setBack} onReady={() => setStatus('ready')} onError={() => setStatus('error')} />
+      <Lanyard frontImage={trainer.frontImage} backImage={trainer.backImage} strapImage="/assets/trainers/nexus-lanyard-strap.png" imageFit="contain" orientation="portrait" finish="metallic" metal="graphite" cardColor="#101010" strapColor="#111111" strapWidth={.7} size={.62} cornerRadius={.15} anchor="center" strapLength={trainer.strapLength} gravity={1} damping={.45} elasticity={.55} breeze={.2} interactive intro introDelay={index * .16} flipSignal={flipSignal} onFlip={setBack} onReady={() => setStatus('ready')} onError={() => setStatus('error')} />
       {status !== 'ready' && <div className="trainer-render-fallback"><img src={trainer.frontImage} alt={`${trainer.name} illustrative badge`} width={768} height={1080} /><span>{status === 'error' ? '3D preview unavailable. Profile details are below.' : 'Preparing interactive badge…'}</span></div>}
     </div>
     <div className="trainer-badge-label"><span>{String(index + 1).padStart(2, '0')} / ELITE TEAM</span><button type="button" onClick={() => setFlipSignal(signal => signal + 1)} disabled={status !== 'ready'} aria-label={`Flip ${trainer.name} badge`} aria-pressed={back}><RotateCw size={13} aria-hidden />{back ? 'FRONT' : 'FLIP'}</button></div>
@@ -54,6 +55,7 @@ export default function NexusTrainersSection() {
     <header className="trainers-header"><p className="eyebrow trainers-eyebrow"><span aria-hidden />06 / THE NEXUS TEAM</p><h2 id="trainers-title" className="trainers-heading"><span>MEET THE <em>ELITE.</em></span></h2><p className="trainers-subtitle">THE PEOPLE BEHIND YOUR PROGRESS.</p><p className="trainers-introduction">Meet the people dedicated to helping you move forward.</p></header>
     <p className="trainers-demo-note">DEMO PROFILES · Illustrative portraits and sample training focuses. Actual Nexus team details coming soon.</p>
     <div className="trainers-stage" aria-label="Interactive trainer badges">
+      <span className="trainers-support-rail" aria-hidden="true"><span /><span /></span>
       {mounted && nearby ? (mobile ? <TrainerBadge key={selected} index={selected} /> : trainers.map((item, index) => <TrainerBadge key={item.id} index={index} />)) : <div className="trainers-stage-placeholder" aria-hidden />}
     </div>
     <p className="trainers-instruction"><MousePointer2 size={13} aria-hidden /><span>DRAG TO INTERACT <i>•</i> CLICK TO FLIP</span></p>

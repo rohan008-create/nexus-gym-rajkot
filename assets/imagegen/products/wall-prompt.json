@@ -1,0 +1,6 @@
+{
+  "method": "Built-in image_gen, opaque material texture",
+  "prompt": "A perfectly front-facing flat material photograph of warm light ivory limewashed plaster wall, subtle fine mineral texture, very gentle warm grey mottling, high-end minimalist retail interior wall material, uniform diffuse lighting without baked directional shadows. Seamless-looking understated texture, no objects, no shelves, no cracks, no text, no fixtures, no people, no vignette. Neutral warm stone white, low contrast, realistic macro surface detail, square composition. This is a subtle repeating website background material, not a scene.",
+  "original": "assets/imagegen/products/plaster-wall-original.png",
+  "delivery": "public/assets/products/plaster-wall.webp"
+}

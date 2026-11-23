@@ -1,6 +1,6 @@
 /* BUILT DIFFERENT — an editorial training studio. */
 .rope-experience .about-section:has(.built-different) { display:block; height:auto; min-height:0; max-height:none; padding:0; background:#101215; color:#f4f2ec; overflow:hidden; scroll-margin-top:40px; }
-html[data-theme="light"] .rope-experience .about-section:has(.built-different) { background:#f5f3ee; }
+html[data-theme="light"] .rope-experience .about-section:has(.built-different) { background:var(--theme-page); }
 .rope-experience .about-copy.nexus-story.built-different { --bd-ink:#f4f2ec; --bd-muted:#a3a8b1; --bd-line:#ffffff20; --bd-tile:#171b20; --bd-stage:#12171b; position:relative; width:100%; max-width:1600px; margin:auto; padding:50px 5% 28px; }
 html[data-theme="light"] .rope-experience .about-copy.nexus-story.built-different { --bd-ink:#20242b; --bd-muted:#5a626e; --bd-line:#20242b26; --bd-tile:#fff; --bd-stage:#eeede7; }
 .bd-topline { display:flex; align-items:center; justify-content:space-between; gap:18px; padding-bottom:22px; border-bottom:1px solid var(--bd-line); font:9px/1.7 monospace; letter-spacing:.12em; color:var(--bd-muted); }

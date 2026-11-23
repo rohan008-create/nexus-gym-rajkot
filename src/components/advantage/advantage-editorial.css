@@ -1,0 +1,89 @@
+﻿.advantage-section.nexus-standard {
+  --ns-paper:#f2f1ed; --ns-ink:#232522; --ns-muted:#73766f; --ns-accent:#b9362e; --ns-line:#23252226;
+  padding:52px clamp(24px,5vw,96px) 26px; background:var(--ns-paper); color:var(--ns-ink); border-top:1px solid var(--ns-line); scroll-margin-top:0;
+}
+html[data-theme] .site-shell .advantage-section.nexus-standard { background:var(--ns-paper); color:var(--ns-ink); }
+.nexus-standard .ns-topline { display:flex; justify-content:space-between; gap:20px; padding-bottom:23px; border-bottom:1px solid var(--ns-line); }
+.nexus-standard :is(.ns-topline,.ns-kicker,.ns-photo-caption > span,.ns-feature-number,.ns-image-edition,.ns-footer) { font-family:'Courier New',monospace; font-size:9px; letter-spacing:.1em; }
+.nexus-standard .ns-topline > span:last-child { color:var(--ns-muted); }
+.nexus-standard .ns-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:30px; padding:40px 0 25px; }
+html[data-theme] .site-shell .nexus-standard .ns-heading h2 { margin:0; font-family:'Arial Black',Arial,sans-serif; font-size:clamp(52px,6.5vw,112px); font-weight:900; letter-spacing:-.065em; line-height:.92; color:var(--ns-ink); }
+.nexus-standard .ns-heading h2 > span { display:block; font-family:Arial,sans-serif; font-size:11px; letter-spacing:.14em; font-weight:500; color:var(--ns-muted); margin-bottom:20px; }
+.nexus-standard .ns-heading h2 em { color:var(--ns-accent); font-style:normal; }
+html[data-theme] .site-shell .nexus-standard .ns-heading > p { font-size:12px; line-height:1.85; color:var(--ns-ink); margin:0 0 7px; }
+.nexus-standard .ns-heading > p > span { display:block; color:var(--ns-muted); font-size:10px; margin-top:9px; }
+.nexus-standard .ns-layout { display:grid; grid-template-columns:1.1fr 1fr; gap:clamp(35px,6vw,110px); align-items:center; }
+.nexus-standard .ns-photo-column { min-width:0; }
+.nexus-standard .ns-photo-frame { position:relative; height:565px; overflow:hidden; background:transparent; }
+.nexus-standard .ns-backdrop-word { position:absolute; left:50%; top:41%; transform:translate(-50%,-50%); font-family:'Arial Black',Arial,sans-serif; font-size:clamp(95px,11vw,190px); font-weight:900; line-height:1; letter-spacing:-.085em; color:#e1dfd7; user-select:none; }
+.nexus-standard .ns-photo-picture { position:absolute; inset:10px 0 25px; animation:ns-photo-reveal .45s ease both; }
+.nexus-standard .ns-photo { display:block; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 13px 12px #27251e12); }
+.nexus-standard .ns-ground-shadow { position:absolute; left:27%; right:27%; bottom:29px; height:16px; border-radius:50%; background:#302d2424; filter:blur(12px); }
+.nexus-standard .ns-image-edition { position:absolute; bottom:0; left:0; font-size:7px; color:var(--ns-muted); }
+.nexus-standard .ns-photo-caption { padding-top:22px; margin-top:17px; border-top:1px solid var(--ns-line); }
+.nexus-standard .ns-photo-caption > span { font-size:8px; color:var(--ns-accent); }
+html[data-theme] .site-shell .nexus-standard .ns-photo-caption p { color:var(--ns-ink); font-size:clamp(18px,2vw,30px); font-weight:500; line-height:1.15; letter-spacing:-.04em; margin:10px 0 0; }
+.nexus-standard .ns-kicker { color:var(--ns-accent); font-size:8px; }
+html[data-theme] .site-shell .nexus-standard .ns-detail-intro h3 { margin:16px 0 15px; font-size:clamp(28px,3vw,46px); font-weight:650; line-height:1.04; letter-spacing:-.05em; color:var(--ns-ink); }
+.nexus-standard .ns-detail-intro h3 em { font-style:normal; color:var(--ns-muted); font-weight:400; }
+html[data-theme] .site-shell .nexus-standard .ns-detail-intro > p { font-size:12px; line-height:1.8; max-width:350px; color:var(--ns-muted); margin:0 0 26px; }
+.nexus-standard .ns-feature { border-top:1px solid var(--ns-line); }
+.nexus-standard .ns-feature:last-child { border-bottom:1px solid var(--ns-line); }
+.nexus-standard .ns-feature-button { width:100%; min-height:73px; padding:19px 0; display:flex; align-items:center; gap:23px; border:0; background:transparent; color:var(--ns-ink); cursor:pointer; text-align:left; }
+.nexus-standard .ns-feature-number { color:var(--ns-muted); font-size:9px; }
+.nexus-standard .ns-feature-title { font-size:clamp(15px,1.5vw,23px); letter-spacing:-.045em; font-weight:500; }
+.nexus-standard .ns-feature-toggle { margin-left:auto; color:var(--ns-muted); font-size:23px; line-height:1; font-weight:300; }
+.nexus-standard .ns-feature.is-active .ns-feature-number { color:var(--ns-accent); }
+.nexus-standard .ns-feature.is-active { border-top-color:var(--ns-accent); }
+.nexus-standard .ns-feature-panel { display:grid; grid-template-rows:0fr; visibility:hidden; opacity:0; transition:grid-template-rows .3s,opacity .3s,visibility .3s; }
+.nexus-standard .ns-feature-panel > div { overflow:hidden; min-height:0; }
+.nexus-standard .ns-feature.is-active .ns-feature-panel { grid-template-rows:1fr; visibility:visible; opacity:1; }
+html[data-theme] .site-shell .nexus-standard .ns-feature-panel p { color:var(--ns-muted); font-size:11px; line-height:1.8; margin:0 24px 21px 36px; max-width:340px; }
+.nexus-standard .ns-feature-button:focus-visible { outline:2px solid var(--ns-accent); outline-offset:4px; }
+html[data-theme] .site-shell .nexus-standard .ns-bottom-note { margin:25px 0 0; color:var(--ns-muted); font-size:11px; line-height:1.7; }
+.nexus-standard .ns-bottom-note strong { color:var(--ns-ink); font-weight:500; }
+.nexus-standard .ns-footer { display:flex; justify-content:space-between; gap:20px; padding-top:24px; margin-top:43px; border-top:1px solid var(--ns-line); color:var(--ns-muted); font-size:7px; }
+.nexus-standard[data-visible=false] .ns-enter { opacity:0; transform:translateY(20px); }
+.nexus-standard .ns-enter { transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1); }
+.nexus-standard .ns-heading { transition-delay:.05s; }
+.nexus-standard .ns-photo-column { transition-delay:.1s; }
+.nexus-standard .ns-detail-column { transition-delay:.15s; }
+@keyframes ns-photo-reveal { from { opacity:.2; transform:translateY(9px); } to { opacity:1; transform:none; } }
+@media(min-width:1600px) { .nexus-standard .ns-photo-frame { height:630px; } }
+@media(max-width:1023px) {
+  .nexus-standard .ns-heading { align-items:flex-start; }
+  html[data-theme] .site-shell .nexus-standard .ns-heading h2 { font-size:clamp(43px,6.5vw,66px); }
+  html[data-theme] .site-shell .nexus-standard .ns-heading > p { max-width:205px; font-size:10px; margin-top:32px; }
+  .nexus-standard .ns-layout { gap:35px; grid-template-columns:1fr 1fr; }
+  .nexus-standard .ns-photo-frame { height:540px; }
+  .nexus-standard .ns-feature-button { gap:16px; }
+  html[data-theme] .site-shell .nexus-standard .ns-feature-panel p { margin-left:29px; }
+}
+@media(max-width:600px) {
+  .advantage-section.nexus-standard { padding:32px 23px 24px; }
+  .nexus-standard .ns-topline { font-size:7px; padding-bottom:19px; }
+  .nexus-standard .ns-topline > span:last-child { display:none; }
+  .nexus-standard .ns-heading { display:block; padding:28px 0 10px; }
+  .nexus-standard .ns-heading h2 > span { font-size:8px; margin-bottom:15px; }
+  html[data-theme] .site-shell .nexus-standard .ns-heading h2 { font-size:clamp(37px,10.4vw,61px); }
+  html[data-theme] .site-shell .nexus-standard .ns-heading > p { font-size:11px; max-width:none; margin:19px 0 0; }
+  .nexus-standard .ns-heading > p br { display:none; }
+  .nexus-standard .ns-heading > p > span { margin-top:4px; }
+  .nexus-standard .ns-layout { grid-template-columns:1fr; gap:32px; }
+  .nexus-standard .ns-photo-frame { height:395px; }
+  .nexus-standard .ns-photo-picture { inset:8px -2% 21px; }
+  .nexus-standard .ns-backdrop-word { font-size:23vw; }
+  .nexus-standard .ns-photo-caption { padding-top:17px; margin-top:13px; }
+  .nexus-standard .ns-photo-caption > span { font-size:7px; }
+  html[data-theme] .site-shell .nexus-standard .ns-photo-caption p { font-size:21px; }
+  html[data-theme] .site-shell .nexus-standard .ns-detail-intro h3 { font-size:33px; }
+  html[data-theme] .site-shell .nexus-standard .ns-detail-intro > p { font-size:11px; margin-bottom:23px; }
+  .nexus-standard .ns-feature-button { gap:19px; min-height:69px; }
+  .nexus-standard .ns-feature-title { font-size:18px; }
+  html[data-theme] .site-shell .nexus-standard .ns-feature-panel p { margin-left:32px; margin-right:8px; }
+  .nexus-standard .ns-footer { margin-top:31px; flex-direction:column; gap:13px; font-size:6px; line-height:1.6; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .nexus-standard *, .nexus-standard *::before { animation:none!important; transition:none!important; }
+  .nexus-standard[data-visible=false] .ns-enter { opacity:1; transform:none; }
+}

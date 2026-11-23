@@ -6,6 +6,7 @@ import { Html, OrbitControls, useAnimations, useGLTF } from '@react-three/drei';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { Box3, Euler, Quaternion, Vector3 } from 'three';
 import './preview.css';
+import Link from 'next/link';
 
 const RYAN_ANIMATIONS = ['Idle', 'Walk', 'Wave', 'Talk', 'Confident', 'Argue', 'Cheer', 'Laugh', 'Drink', 'Clap', 'Think', 'Shrug', 'Phone'];
 
@@ -112,7 +113,7 @@ export default function AvatarPreview() {
         <button type="button" aria-pressed={follow} onClick={() => setFollow(value => !value)}>Mouse follow: {follow ? 'On' : 'Off'}</button>
         </>}
         <button type="button" onClick={() => setView(value => value + 1)}>Reset view</button>
-        <a href="/">Back to website ↗</a>
+        <Link href="/">Back to website ↗</Link>
       </div>
     </header>
     <div className="avatar-stage">

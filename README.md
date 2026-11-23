@@ -1,5 +1,11 @@
 # Nexus Fitness Club — Interactive 3D intro
 
+The current runtime is Next.js 15.5.29, React 19 and React Three Fiber 9. Run `npm install`, then `npm run dev` for port 3000. `npm run lint` runs noninteractive lint checks; `npm run build` verifies the production build. The browser and build checks were run with Node.js 24.
+
+Booking and trial enquiries open WhatsApp with a prepared message to the club's published contact; visitors must press Send themselves. Configure `NEXT_PUBLIC_SITE_URL` with the real deployment URL to enable canonical URLs and absolute share images. Actual membership prices, trainer profiles and approved testimonials still need club-provided data.
+
+The reception delivery model is `public/models/nexus-gym/priya-reception.glb`. `npm run assets:priya` rebuilds it from the original user asset in `assets/vendor/`; the source is preserved outside the public delivery directory. `node scripts/gym-tour/capture-night-poster.cjs` captures reduced-motion night posters from a running local tour. `npm run check:membership` checks the current book-card interface; the former printer test delegates to it.
+
 ## Break through entrance
 
 The main `/` route warms the landing underneath a transparent intro canvas. The front page carries the official logo and oversized BREAK / THROUGH lettering. Tapping the bag compresses it, bursts its leather, and sends branching faults across the entire page. A continuous jagged seam then opens into two bending sheets: the printed graphics move and curl with the page as the actual landing appears behind it. The hero entry starts 720ms after the tap, and the intro is disposed at 2.4 seconds. Audio and optional supported-device haptics share the impact timing. Reduced motion uses a short dissolve with no camera shake or haptics.
@@ -80,7 +86,7 @@ The shared suspension pivot contains separate chains and body groups. `animation
 
 ## Dependency note
 
-The pre-existing manifest pins Next.js 14.2.15. Installation reports security advisories in Next.js and its nested PostCSS dependency. This implementation preserves the requested framework version; a supported framework upgrade should be handled before production hosting. No external model, texture, font or HDRI is fetched at runtime.
+The framework, React rendering packages and PostCSS were upgraded together; the current dependency audit reports zero vulnerabilities. Model and scene textures are local assets. The location globe loads satellite imagery from external providers and requires network access.
 
 ## Section 05: The Nexus Advantage
 

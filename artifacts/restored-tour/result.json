@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "desktop bag burst reveals building tour",
+    "mobile bag tap reveals building tour",
+    "direct landing override removed",
+    "products and footer retained"
+  ],
+  "errors": []
+}

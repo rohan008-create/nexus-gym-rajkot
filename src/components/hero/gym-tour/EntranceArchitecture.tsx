@@ -2,7 +2,7 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { smooth, type TourPlayback } from './gymTourConfig';
+import { COMPLEX_SETBACK, smooth, type TourPlayback } from './gymTourConfig';
 
 /** The original exterior is merged by material. Carve its portal in world space
  * without mutating shared geometry or removing the rest of the facade. */
@@ -14,9 +14,9 @@ export function openEntrance(material: THREE.Material) {
     shader.fragmentShader = shader.fragmentShader.replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
       if (vEntranceWorld.x > 7.12 && vEntranceWorld.x < 8.98 &&
           vEntranceWorld.y > 4.515 && vEntranceWorld.y < 6.44 &&
-          vEntranceWorld.z > -0.85 && vEntranceWorld.z < 1.2) discard;`);
+          vEntranceWorld.z > ${-.85 - COMPLEX_SETBACK} && vEntranceWorld.z < ${1.2 - COMPLEX_SETBACK}) discard;`);
   };
-  material.customProgramCacheKey = () => 'nexus-open-entrance-v1';
+  material.customProgramCacheKey = () => `nexus-open-entrance-v2-${COMPLEX_SETBACK}`;
 }
 
 export default function EntranceArchitecture({ motion }: { motion: TourPlayback }) {

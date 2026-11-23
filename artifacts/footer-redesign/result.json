@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "checks": [
+    "genuinely transparent light-mode logo",
+    "light and dark logos switch without a background badge",
+    "1440px light and dark layouts",
+    "320px and 390px mobile layouts",
+    "768px tablet layout",
+    "booking and seven section links",
+    "real configured phone and directions",
+    "keyboard focus and reduced motion",
+    "no horizontal overflow or footer WebGL",
+    "main-site booking CTA and back-to-top navigation"
+  ],
+  "errors": []
+}

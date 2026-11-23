@@ -1,0 +1,12 @@
+{
+  "planning": "compact",
+  "context_depth": "dependency",
+  "verification_depth": "impact",
+  "delegation": "none",
+  "acceptance": [
+    "pin centred after flight on desktop and mobile",
+    "marker not covered by location card",
+    "live day/night lighting",
+    "theme switch persists"
+  ]
+}

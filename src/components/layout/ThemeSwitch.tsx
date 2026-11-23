@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { Dumbbell, Moon, Sun } from 'lucide-react';
+import './theme-cycle-switch.css';
 
 type Theme = 'dark' | 'light';
 export default function ThemeSwitch() {
@@ -23,8 +24,8 @@ export default function ThemeSwitch() {
     setTheme(next);
     try { localStorage.setItem('nexus-theme', next); } catch { /* Session theme still works when storage is unavailable. */ }
   };
-  return <div className="theme-switch" role="group" aria-label="Color theme">
-    <button type="button" aria-label="Light mode" aria-pressed={theme === 'light'} onClick={() => choose('light')}><Sun size={15} aria-hidden /><span>Light</span></button>
-    <button type="button" aria-label="Dark mode" aria-pressed={theme === 'dark'} onClick={() => choose('dark')}><Moon size={15} aria-hidden /><span>Dark</span></button>
-  </div>;
+  return <button className="gym-theme-switch gym-cycle-switch" type="button" role="switch" aria-label="Dark mode" aria-checked={theme === 'dark'} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={() => choose(theme === 'dark' ? 'light' : 'dark')}>
+    <span className="cycle-lens" aria-hidden="true"><Dumbbell size={21} strokeWidth={1.5} /></span>
+    <span className="cycle-caption" aria-hidden="true">{theme === 'dark' ? <Moon size={10} /> : <Sun size={10} />}{theme === 'dark' ? 'NIGHT' : 'DAY'}</span>
+  </button>;
 }

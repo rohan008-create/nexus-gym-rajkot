@@ -1,17 +1,9 @@
-# Simple Nexus footer
+﻿# Nexus footer
 
-The previous stone wall, extruded letters, rocks, textures, typeface subset, and 3D renderer have been removed from the footer. The main navbar and other site sections remain unchanged.
+The footer closes the site with a large booking invitation, the Nexus brand, local section links, the configured club address/phone, directions and a back-to-top link. It uses the existing Outfit font and CSS entrance transitions; no canvas or WebGL renderer is mounted.
 
-`NexusFooter.tsx` renders the official logo, six local navigation anchors, configured address and phone, booking CTA, and copyright. The main site passes `linkBase=""` to keep navigation within the current page. `/footer-preview` defaults to `/hero` destinations.
+Light mode uses `public/assets/nexus-logo-light.webp`, a transparent light-background adaptation of the supplied official logo. It retains the red emblem and lettering, with charcoal X and subtitle. Dark mode keeps the original `nexus-logo.png`. Neither logo has a backing panel, padding or a badge background. The source edit and prompt are in `assets/imagegen/footer/`.
 
-`RisingHorizon.tsx` is an **original custom Canvas 2D implementation**, selected by the user after the React Bits Pro license key was found to be unavailable. It is not the licensed React Bits Pro Rising Lines component and contains no copied Pro source. The public visual reference is https://pro.reactbits.dev/docs/components/rising-lines. No Pro install or shadcn initialization is required for this custom version, and no paid registry requests are made.
+The main site passes `linkBase=""`; the standalone `/footer-preview` uses `/hero` links. Address, telephone and map destination come from `location/globeConfig.ts`. Reduced motion disables transitions and keeps content visible.
 
-The animation uses a fixed line field (78 desktop / 42 coarse pointer) and 24 reusable volley slots. Hover increases the updraft beneath the pointer. Click or tap launches a bounded volley; movement during touch scrolling does not trigger it. Links retain native navigation. Motion runs in one owned animation loop, draws at a lower cadence while idle, pauses offscreen/in a hidden tab, and becomes a still frame for reduced motion. DPR is capped at 1.5 desktop / 1.25 coarse pointer. All observers, listeners, and the animation loop are cleaned up.
-
-The CSS supplies a static horizon glow when Canvas 2D is unavailable, and reserves layout dimensions before initialization. The footer reuses the site's crimson token and existing self-hosted Outfit font. It adds no dependencies and uses no WebGL context.
-
-## Preview and checks
-
-Run `npm run dev` and open `/footer-preview`, or scroll to the bottom of the main landing page. Move over the horizon panel, then click/tap away from the booking link.
-
-Run `npx tsc --noEmit`, `npm run build`, and `node scripts/test-footer.cjs`. Set `FOOTER_TEST_URL` to select another server. Browser checks cover animation, bounded volleys, mobile taps, responsive widths, reduced motion, offscreen pause, real anchors, and fallback rendering. Artifacts go to `qa/footer-simple`.
+Run `npx tsc --noEmit` and `node scripts/test-footer.cjs`. Browser checks and screenshots are saved to `artifacts/footer-redesign/`.

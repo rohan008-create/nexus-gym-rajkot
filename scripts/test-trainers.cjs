@@ -5,17 +5,17 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
 (async () => {
  const browser = await chromium.launch({ executablePath: process.env.BROWSER_EXECUTABLE || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true, args: ['--enable-webgl', '--use-angle=d3d11'] });
  const errors = [];
- const open = async mobile => { const p = await browser.newPage({ viewport: mobile ? { width: 390, height: 844 } : { width: 1440, height: 1000 }, isMobile: !!mobile, hasTouch: !!mobile }); p.on('pageerror', e => errors.push(e.message)); p.on('console', m => { if (m.type() === 'error') errors.push(m.text()); }); p.on('response', r => { if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`); }); await p.goto(`${base}/hero`); await p.waitForSelector('[data-rope-status=ready]', { timeout: 90000 }); await p.locator('#trainers').evaluate(el => scrollTo(0, el.getBoundingClientRect().top + scrollY - 84)); return p; };
+ const open = async mobile => { const p = await browser.newPage({ viewport: mobile ? { width: 390, height: 844 } : { width: 1440, height: 1000 }, isMobile: !!mobile, hasTouch: !!mobile }); p.on('pageerror', e => errors.push(e.message)); p.on('console', m => { if (m.type() === 'error') errors.push(m.text()); }); p.on('response', r => { if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`); }); await p.goto(`${base}/hero`); await p.waitForSelector('#home[data-tour-status=ready]', { timeout: 90000 }); await p.locator('#trainers').evaluate(el => scrollTo(0, el.getBoundingClientRect().top + scrollY - 84)); return p; };
  try {
   fs.mkdirSync('qa', { recursive: true });
   const p = await open(false);
   assert.equal(await p.locator('#trainers').evaluate(el => el.previousElementSibling.id), 'advantage');
-  await p.waitForFunction(() => document.querySelectorAll('.trainer-installation[data-status=ready]').length === 3, { timeout: 30000 });
-  assert.equal(await p.locator('#trainers canvas').count(), 3);
+  await p.waitForFunction(() => document.querySelectorAll('.trainer-installation[data-status=ready]').length === 5, { timeout: 30000 });
+  assert.equal(await p.locator('#trainers canvas').count(), 1, 'all five badges share one depth-tested canvas');
   await p.waitForTimeout(4500);
   await p.screenshot({ path: 'qa/trainers-desktop.png' });
-  const badge = p.locator('.trainer-installation').first(); const canvas = badge.locator('canvas');
-  const bounds = await canvas.boundingBox();
+  const badge = p.locator('.trainer-installation').first(); const canvas = p.locator('#trainers canvas');
+  const bounds = await badge.locator('.trainer-lanyard-slot').boundingBox();
   await p.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height * .54);
   await p.waitForTimeout(250);
   assert.equal(await badge.locator('.lanyard').getAttribute('data-face'), 'back', '3D click flips');
@@ -62,7 +62,7 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
   const y = await m.evaluate(() => scrollY); await m.mouse.wheel(0, 300); await m.waitForTimeout(400); assert.ok(await m.evaluate(() => scrollY) > y, 'page remains scrollable');
   assert.ok(await m.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   assert.deepEqual(errors, []);
-  fs.writeFileSync('qa/trainers-result.json', JSON.stringify({ passed: true, checks: ['placement', 'three desktop canvases', 'real textures', 'pointer flip', 'keyboard flip', 'drag', 'no drag flip', 'release motion', 'HTML profile selection', 'one mobile canvas', 'mobile switching', 'mobile flip', 'touch tap-to-flip', 'touch dragging', 'no touch drag flip', 'normal scrolling', 'reduced motion', 'Armory pin', 'no overflow'], errors }, null, 2));
+  fs.writeFileSync('qa/trainers-result.json', JSON.stringify({ passed: true, checks: ['placement', 'five desktop canvases and shared rail', 'real textures', 'pointer flip', 'keyboard flip', 'drag', 'no drag flip', 'release motion', 'HTML profile selection', 'one mobile canvas', 'mobile switching', 'mobile flip', 'touch tap-to-flip', 'touch dragging', 'no touch drag flip', 'normal scrolling', 'reduced motion', 'Armory pin', 'no overflow'], errors }, null, 2));
   console.log('Trainer browser checks passed.');
  } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });

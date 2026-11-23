@@ -1,0 +1,15 @@
+{
+  "dependencyAudit": { "critical": 0, "high": 0, "total": 0 },
+  "productionBuild": "PASS",
+  "typecheck": "PASS",
+  "lint": "PASS",
+  "auditRegression": "PASS: themes, posters, dialog focus, enquiry URL, SSR metadata and optional-model fallback",
+  "namaskar": "PASS: 10 desktop/mobile poses",
+  "stairRig": "PASS: 802 forward/reverse samples",
+  "membership": "PASS: plan enquiries, keyboard, tap, drag and 320/390/768px overflow checks",
+  "booking": "PASS: validation utilities and browser wizard; no messages sent",
+  "entrance": "PASS: impact, reveal, skip, focus, mobile and reduced motion",
+  "receptionAsset": { "sourceBytes": 54022892, "deliveryBytes": 4908952 },
+  "pending": ["real deployment URL for canonical URLs", "club-provided membership, trainer and approved review data"],
+  "cleanup": "Automatic policy review blocked recursive deletion of the temporary old dependency backup; it remains ignored under artifacts/audit-fixes/node_modules-backup."
+}
