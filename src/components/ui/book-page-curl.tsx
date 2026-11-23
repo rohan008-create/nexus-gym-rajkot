@@ -54,9 +54,8 @@ const HIDDEN = "polygon(0px 0px, 0px 0px, 0px 0px)";
 const OPEN_THRESHOLD = 0.5;
 const HINT: [number, number] = [W - 44, H - 30];
 
-const turnEase = { duration: 0.7, ease: [0.3, 0.1, 0.2, 1] } as const;
-const hintSpring = { type: "spring", stiffness: 260, damping: 22 } as const;
-const shiftSpring = { type: "spring", stiffness: 140, damping: 22 } as const;
+const turnEase = { duration: 1, ease: [0.4, 0, 0.2, 1] } as const;
+const hintSpring = { duration: 0.4, ease: [0.4, 0, 0.2, 1] } as const;
 const tween = { duration: 0.2, ease: "easeOut" } as const;
 
 type Point = [number, number];
@@ -188,7 +187,7 @@ export default function BookPageCurl({ book = defaultBook, open, onOpenChange }:
   const reduce = useReducedMotion() ?? false;
   const stageRef = useRef<HTMLDivElement>(null);
   const drag = useRef<DragState | null>(null);
-  const interacted = useRef(false);
+  const animatedOpen = useRef(false);
   const [localOpen, setIsOpen] = useState(false);
   const isOpen = open ?? localOpen;
 
@@ -220,6 +219,7 @@ export default function BookPageCurl({ book = defaultBook, open, onOpenChange }:
   };
 
   const settle = (open: boolean, lift = false) => {
+    animatedOpen.current = open;
     setIsOpen(open);
     onOpenChange?.(open);
     moveCorner(
@@ -227,38 +227,22 @@ export default function BookPageCurl({ book = defaultBook, open, onOpenChange }:
       reduce ? tween : turnEase,
       lift && !reduce ? H * 0.72 : undefined,
     );
-    animate(shift, open ? 0 : -W / 2, reduce ? tween : shiftSpring);
+    animate(shift, open ? 0 : -W / 2, reduce ? tween : turnEase);
   };
 
   useEffect(() => {
-    if (reduce) return;
-    const timer = setTimeout(() => {
-      if (interacted.current) return;
-      animate(px, [W, HINT[0], HINT[0], W], {
-        duration: 1.6,
-        times: [0, 0.3, 0.6, 1],
-      });
-      animate(py, [H, HINT[1], HINT[1], H], {
-        duration: 1.6,
-        times: [0, 0.3, 0.6, 1],
-      });
-    }, 700);
-    return () => clearTimeout(timer);
-  }, [reduce, px, py]);
-
-  useEffect(() => {
-    if (open === undefined) return;
+    if (open === undefined || open === animatedOpen.current) return;
+    animatedOpen.current = open;
     px.stop(); py.stop();
     animate(px, open ? -W : W, reduce ? tween : turnEase);
     animate(py, H, reduce ? tween : turnEase);
-    animate(shift, open ? 0 : -W / 2, reduce ? tween : shiftSpring);
+    animate(shift, open ? 0 : -W / 2, reduce ? tween : turnEase);
   }, [open, reduce, px, py, shift]);
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (!event.isPrimary || event.button !== 0) return;
     const stage = stageRef.current;
     if (!stage) return;
-    interacted.current = true;
     stage.setPointerCapture(event.pointerId);
     const [x, y] = constrain(px.get(), py.get());
     px.stop();
@@ -269,7 +253,7 @@ export default function BookPageCurl({ book = defaultBook, open, onOpenChange }:
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      origin: isOpen ? [-W, H] : [x, y],
+      origin: [x, y],
       scale: stage.getBoundingClientRect().width / (W * 2),
       startOpen: isOpen,
     };
@@ -292,7 +276,7 @@ export default function BookPageCurl({ book = defaultBook, open, onOpenChange }:
     const open = tapped ? !state.startOpen : state.startOpen
       ? x < -W * OPEN_THRESHOLD
       : x < W * OPEN_THRESHOLD;
-    settle(open);
+    settle(open, tapped);
   };
 
   const handleHover = (
@@ -308,7 +292,6 @@ export default function BookPageCurl({ book = defaultBook, open, onOpenChange }:
     else if (event.key === "ArrowLeft" && !isOpen) settle(true, true);
     else if (event.key === "ArrowRight" && isOpen) settle(false, true);
     else return;
-    interacted.current = true;
     event.preventDefault();
   };
 

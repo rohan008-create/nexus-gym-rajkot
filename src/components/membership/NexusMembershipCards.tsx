@@ -24,7 +24,7 @@ export default function NexusMembershipCards({ onEnquire }: { onEnquire: (plan: 
       const left = card.getBoundingClientRect().left - element.getBoundingClientRect().left + element.scrollLeft;
       element.scrollTo({ left:left + card.offsetWidth / 2 - element.clientWidth / 2, behavior:reduced ? "instant" : "smooth" });
     };
-    const timer = window.setTimeout(center, reduced ? 0 : 600);
+    const timer = window.setTimeout(center, reduced ? 0 : 1020);
     window.addEventListener("resize", center);
     return () => { clearTimeout(timer); window.removeEventListener("resize", center); };
   }, [openPlan]);

@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUp, ArrowUpRight } from 'lucide-react';
 import { directionsUrl, nexusLocation } from '../location/globeConfig';
+import NexusWordmark from '../ui/nexus-wordmark';
 import './footer.css';
 
 const explore = [['Our story', 'about'], ['Programs', 'programs'], ['Meet the trainers', 'trainers'], ['The essentials', 'products']] as const;
@@ -51,5 +52,6 @@ export default function NexusFooter({ linkBase = '/hero' }: { linkBase?: string 
       <div className="nf-signoff"><span>SHOW UP.<br /><strong>GO BEYOND.</strong></span><a href={`${linkBase}#home`} className="nf-back-top" aria-label="Back to top"><span>BACK TO TOP</span><ArrowUp size={19} strokeWidth={1.4} aria-hidden /></a></div>
       <div className="nf-bottom"><p>© {new Date().getFullYear()} Nexus Fitness Club.</p><p>Programs and membership shown are illustrative.</p><span>BUILT FOR WHAT'S NEXT.</span></div>
     </div>
+    <NexusWordmark />
   </footer>;
 }

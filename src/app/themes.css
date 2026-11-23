@@ -1,13 +1,13 @@
-/* All light-mode page sections share one white canvas. */
-:root { --theme-page:#000; --theme-surface:#111215; --theme-ink:#f7f5ef; --theme-muted:#a1a1aa; --theme-line:#ffffff24; }
+/* Page surfaces use the same canvas throughout each theme. */
+:root { --theme-page:#000; --theme-surface:#000; --theme-ink:#f7f5ef; --theme-muted:#a1a1aa; --theme-line:#ffffff24; }
 html[data-theme="light"] { color-scheme:light; --theme-page:#fff; --theme-surface:#fff; --theme-ink:#20242b; --theme-muted:#565f6c; --theme-line:#20242b29; background:var(--theme-page); }
 html[data-theme="dark"] { color-scheme:dark; }
-html[data-theme="dark"] .armory-section.armory-gallery { --ag-paper:#101215; --ag-ink:#f4f2ec; --ag-muted:#a6abb4; --ag-line:#ffffff24; background:var(--ag-paper); }
-html[data-theme="dark"] .advantage-section.nexus-standard { --ns-paper:#101215; --ns-ink:#f4f2ec; --ns-muted:#a6abb4; --ns-line:#ffffff24; --ns-accent:#f04455; }
-html[data-theme="dark"] :is(.nexus-products,.ps-dialog) { --ps-paper:#101215; --ps-ink:#f4f2ec; --ps-muted:#a6abb4; --ps-line:#ffffff24; --ps-red:#f04455; }
+html[data-theme="dark"] .armory-section.armory-gallery { --ag-paper:var(--theme-page); --ag-ink:#f4f2ec; --ag-muted:#a6abb4; --ag-line:#ffffff24; background:var(--ag-paper); }
+html[data-theme="dark"] .advantage-section.nexus-standard { --ns-paper:var(--theme-page); --ns-ink:#f4f2ec; --ns-muted:#a6abb4; --ns-line:#ffffff24; --ns-accent:#f04455; }
+html[data-theme="dark"] :is(.nexus-products,.ps-dialog) { --ps-paper:var(--theme-page); --ps-ink:#f4f2ec; --ps-muted:#a6abb4; --ps-line:#ffffff24; --ps-red:#f04455; }
 html[data-theme="dark"] :is(.nexus-products .ps-shelves,.ps-dialog .ps-modal-shell) { background:var(--ps-paper); }
 html[data-theme="dark"] .ps-dialog .ps-detail-stage { background:radial-gradient(ellipse,#ffffff08,transparent 70%); }
-html[data-theme="light"] body, html[data-theme="light"] .site-shell { background:var(--theme-page); color:var(--theme-ink); }
+html[data-theme] body, html[data-theme] .site-shell { background:var(--theme-page); color:var(--theme-ink); }
 
 html[data-theme="light"] .site-shell :is(h2,h3) { color:var(--theme-ink); }
 html[data-theme="light"] .site-shell p { color:var(--theme-muted); }
@@ -15,7 +15,7 @@ html[data-theme="light"] :is(.programs-section,.advantage-section,.membership-pr
 html[data-theme="light"] :is(.armory-section,.trainers-section,.booking-section,.social-section,.nexus-simple-footer) { background:var(--theme-page); color:var(--theme-ink); border-color:var(--theme-line); }
 html[data-theme="light"] .rope-experience .about-section:has(.nexus-story) { background:var(--theme-page); color:var(--theme-ink); }
 /* IDs keep section-specific styles from reintroducing independent paper shades. */
-html[data-theme="light"] .site-shell :is(#home,#about,#programs,#armory,#advantage,#trainers,#membership,#products,#booking,#voices,#location,#social,#footer) {
+html[data-theme] .site-shell :is(#home,#about,#programs,#armory,#advantage,#trainers,#membership,#products,#booking,#voices,#location,#social,#footer) {
   --ag-paper:var(--theme-page); --ns-paper:var(--theme-page); --nf-paper:var(--theme-page); --ps-paper:var(--theme-page);
   background:var(--theme-page); border-color:var(--theme-line);
 }
@@ -104,3 +104,19 @@ html[data-theme="light"] .nexus-globe-section :is(.globe-card-coordinates,.globe
 .gym-theme-switch:focus-visible { outline:2px solid var(--theme-ink); outline-offset:4px; }
 @media(max-width:600px) { .gym-theme-switch { top:max(12px,env(safe-area-inset-top)); right:12px; } }
 @media(prefers-reduced-motion:reduce) { .gym-theme-switch,.gym-theme-weight { transition:none; } }
+
+/* Photo, equipment and map imagery retain their own colors. */
+html[data-theme] .site-shell :is(.gym-tour-stage,.bd-studio,.bd-stage,.cesium-globe-wrapper,.globe-loading-overlay,.globe-fallback-view),
+html[data-theme] .ps-dialog :is(.ps-modal-shell,.ps-copy-fallback textarea) {
+  background:var(--theme-page);
+}
+html[data-theme] :is(.voices-card,.voices-card:hover,.voices-controls button,.voices-avatar) {
+  background:var(--theme-page);
+  border-color:var(--theme-line);
+}
+html[data-theme] .voices-stage { background:var(--theme-page); }
+html[data-theme] .voices-fade-vertical { background:linear-gradient(to bottom,var(--theme-page),transparent 17%,transparent 77%,var(--theme-page)); }
+html[data-theme] .voices-fade-horizontal { background:linear-gradient(to right,var(--theme-page),transparent 13%,transparent 85%,var(--theme-page)); }
+html[data-theme] :is(.ps-kit-button > span,.ps-add-button) { color:var(--theme-page); }
+html[data-theme="dark"] .ps-add-button:hover { background:#ddd; }
+html[data-theme] .ps-options label.is-selected { background:color-mix(in srgb,var(--theme-ink) 8%,transparent); }

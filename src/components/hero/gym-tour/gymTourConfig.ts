@@ -4,12 +4,30 @@ export type Point = [number, number, number];
 // Keep the full stair flight behind the forecourt curb (world Z = 4.9).
 export const COMPLEX_SETBACK = 4.8;
 export type CameraStop = { at: number; position: Point; target: Point; fov: number };
-export const TOUR_BEATS = [
-  { id: 'exterior' as TourBeat, label: 'THE ARRIVAL', title: ['WELCOME TO', 'NEXUS.'], description: 'Meet Ryan. Your journey starts at the steps.', detail: 'RAJKOT, GUJARAT' },
-  { id: 'entry' as TourBeat, label: 'COME ON IN', title: ['YOUR NEXT', 'LEVEL.'], description: 'Follow Ryan up the stairs and into Nexus.', detail: 'WELCOME TO NEXUS' },
-  { id: 'strength' as TourBeat, label: 'THE STRENGTH FLOOR', title: ['BUILT BY', 'EFFORT.'], description: 'Free weights, focused training and your next personal best.', detail: 'STRENGTH · FREE WEIGHTS' },
-  { id: 'cardio' as TourBeat, label: 'FIND YOUR RHYTHM', title: ['GO A', 'LITTLE FURTHER.'], description: 'Build your endurance. Find your pace.', detail: 'CARDIO · CONDITIONING' },
-];
+export const TOUR_CHAPTERS = [
+  { id: 'arrival', at: 0, label: 'Nexus Fitness Club · Rajkot', lead: 'Welcome to', highlight: 'Nexus.', description: 'Follow Ryan inside and see where you’ll train.' },
+  { id: 'stairs', at: .12, label: 'The entrance', lead: 'Come on', highlight: 'in.', description: 'Head up the stairs with Ryan.' },
+  { id: 'reception', at: .74, label: 'Reception', lead: 'Welcome to', highlight: 'the club.', description: 'Walk in with a goal. Walk out stronger.' },
+  { id: 'strength', at: .863, label: 'Strength floor', lead: 'Build your', highlight: 'strength.', description: 'Free weights, benches and room for your next personal best.' },
+  { id: 'cardio', at: .935, label: 'Cardio floor', lead: 'Find your', highlight: 'pace.', description: 'Warm up, build endurance or finish with an easy run.' },
+] as const;
+
+export const TOUR_MARKER_SPACING = .9 / (TOUR_CHAPTERS.length - 1);
+
+export function tourRailProgress(progress: number, chapter: number) {
+  const from = TOUR_CHAPTERS[chapter].at;
+  const to = TOUR_CHAPTERS[chapter + 1]?.at ?? 1;
+  const start = chapter * TOUR_MARKER_SPACING;
+  const end = chapter === TOUR_CHAPTERS.length - 1 ? 1 : start + TOUR_MARKER_SPACING;
+  return start + (end - start) * (progress - from) / (to - from);
+}
+
+export function tourChapterAt(progress: number) {
+  for (let i = TOUR_CHAPTERS.length - 1; i > 0; i--) {
+    if (progress >= TOUR_CHAPTERS[i].at) return i;
+  }
+  return 0;
+}
 
 // One continuous eye-level route. Coordinates: metres, Y up, +Z street.
 export const DESKTOP_CAMERAS: CameraStop[] = [

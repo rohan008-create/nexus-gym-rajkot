@@ -1,4 +1,4 @@
-﻿@font-face { font-family:'Nexus Display'; src:url('/fonts/Outfit-Variable.ttf') format('truetype'); font-weight:100 900; font-style:normal; font-display:swap; }
+@font-face { font-family:'Nexus Display'; src:url('/fonts/Outfit-Variable.ttf') format('truetype'); font-weight:100 900; font-style:normal; font-display:swap; }
 .nexus-simple-footer.nexus-footer { --nf-paper:#101113; --nf-ink:#f5f4ef; --nf-muted:#9b9b95; --nf-line:#f5f4ef25; --nf-red:#eb253b; position:relative; overflow:hidden; background:var(--nf-paper); color:var(--nf-ink); font-family:'Nexus Display',Arial,sans-serif; border-top:1px solid var(--nf-line); }
 html[data-theme="light"] .nexus-simple-footer.nexus-footer { --nf-paper:#fff; --nf-ink:#222622; --nf-muted:#72776f; --nf-line:#22262224; --nf-red:#bd3029; background:var(--nf-paper); color:var(--nf-ink); }
 .nf-inner { max-width:1800px; margin:auto; padding:36px clamp(24px,6.3vw,110px) 22px; }
@@ -91,4 +91,216 @@ html[data-theme=light] .footer-preview-bar { border-color:#22262224; color:#7277
 @media(prefers-reduced-motion:reduce) {
   .nexus-footer *, .nexus-footer *::before { transition:none!important; animation:none!important; }
   .nexus-footer[data-animate=true][data-revealed=false] .nf-reveal { opacity:1; transform:none; }
+}
+
+/* Cinematic composition follows the active site theme. */
+
+
+/* Scoped styles for the NEXUS Fitness Club footer section */
+.nexus-footer-stage {
+  container-type: inline-size;
+}
+
+.nexus-display-font {
+  font-family: var(--font-nexus-display), "Anton", Impact, "Arial Narrow", sans-serif;
+}
+
+.nexus-subtitle-font {
+  font-family: var(--font-nexus-subtitle), "Barlow", system-ui, sans-serif;
+}
+
+.nexus-accent-bar {
+  clip-path: polygon(0.28cqw 0, 100% 0, calc(100% - 0.28cqw) 100%, 0 100%);
+}
+
+.nexus-letter-surface {
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 74%, #eaecef 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.nexus-bar-left {
+  background: linear-gradient(90deg, #a60008 0%, #e50914 62%, #ff2632 100%);
+}
+
+.nexus-bar-right {
+  background: linear-gradient(270deg, #a60008 0%, #e50914 62%, #ff2632 100%);
+}
+
+@font-face { font-family:'Nexus Anton'; src:url('/fonts/nexus-anton.ttf') format('truetype'); font-weight:400; font-display:swap; }
+@font-face { font-family:'Nexus Barlow'; src:url('/fonts/nexus-barlow-italic.ttf') format('truetype'); font-weight:700; font-style:italic; font-display:swap; }
+.nexus-cinematic-stage { isolation:isolate; color:#fff; background:#000; }
+.nexus-cinematic-stage .nexus-display-font { font-family:'Nexus Anton',Impact,'Arial Narrow',sans-serif; margin:0; }
+.nexus-cinematic-stage .nexus-subtitle-font { font-family:'Nexus Barlow',Arial,sans-serif; color:#fff; margin:0; }
+html[data-theme] .site-shell .nexus-cinematic-stage h2 { font-family:'Nexus Anton',Impact,sans-serif; font-weight:400; line-height:1; color:inherit; }
+html[data-theme] .site-shell .nexus-cinematic-stage p { color:#fff; line-height:1; }
+
+.nexus-cinematic-stage { --cinematic-paper:#000; --cinematic-ink:#fff; --cinematic-edge:0,0,0; background:var(--cinematic-paper); color:var(--cinematic-ink); }
+.nexus-cinematic-veil { background:var(--cinematic-paper); }
+.nexus-cinematic-vignette { background:radial-gradient(ellipse 72% 78% at 50% 56%,rgba(var(--cinematic-edge),0) 56%,rgba(var(--cinematic-edge),.85) 100%); }
+html[data-theme="light"] .nexus-cinematic-stage { --cinematic-paper:#fff; --cinematic-ink:#20242b; --cinematic-edge:255,255,255; }
+html[data-theme="light"] .nexus-cinematic-stage .nexus-letter-surface { background-image:linear-gradient(180deg,#20242b 0%,#20242b 74%,#424955 100%); }
+html[data-theme] .site-shell .nexus-cinematic-stage .nexus-subtitle-font,
+.nexus-cinematic-stage .nexus-subtitle-font { color:var(--cinematic-ink); }
+
+/* One rigid assembly: the hands and letters never animate independently. */
+.nexus-held-assembly { transform-origin:50% 65%; }
+.nexus-held-wordmark { position:absolute; inset:13% 10.8% auto; height:65%; display:flex; align-items:center; justify-content:space-between; font-size:35cqw; font-weight:400; line-height:1; letter-spacing:-.008em; z-index:1; }
+.nexus-held-athlete { position:absolute; left:5%; width:90%; top:24%; height:76%; z-index:2; }
+.nexus-held-athlete img { filter:drop-shadow(0 .45cqw .6cqw #0005); }
+.nexus-held-glow { position:absolute; left:33%; top:31%; width:34%; height:60%; background:radial-gradient(ellipse,#e509142e,transparent 70%); }
+.nexus-held-subtitle { position:absolute; top:87%; left:7%; right:7%; display:flex; justify-content:space-between; font-size:clamp(8px,2.1cqw,36px); letter-spacing:.32em; font-weight:700; font-style:italic; line-height:1; z-index:3; pointer-events:none; }
+.nexus-held-subtitle > span { display:flex; align-items:center; gap:1.7cqw; }
+.nexus-held-subtitle i { display:block; width:7cqw; height:max(2px,.35cqw); }
+
+/* The letter face sits in front of each palm, with fingertips wrapping its edge. */
+.nexus-grip-occlusion { position:absolute; inset:0; z-index:3; pointer-events:none; }
+.nexus-grip-occlusion-left { clip-path:polygon(12.2% 34%,18% 34%,18% 55%,12.2% 55%); }
+/* Cover the complete S silhouette: a rectangular wrist patch cuts the forearm.
+   The glyph itself now supplies the curved occlusion edge; finger pads sit above it. */
+.nexus-grip-occlusion-right { clip-path:inset(0 0 0 76%); }
+
+/* Shallow solid lettering with localized pressure shadows where fingers wrap. */
+.nexus-cinematic-stage { --grip-face-top:#fff; --grip-face-bottom:#d7dbe1; --grip-depth:#868c97; --grip-contact:#15182099; --grip-rim:#f0444440; }
+html[data-theme="light"] .nexus-cinematic-stage { --grip-face-top:#272c33; --grip-face-bottom:#383f49; --grip-depth:#101318; --grip-contact:#000b; --grip-rim:#ef44444d; }
+.nexus-cinematic-stage .nexus-held-stage .nexus-held-wordmark .nexus-letter-surface { background-image:linear-gradient(150deg,var(--grip-face-top) 8%,var(--grip-face-bottom) 100%); }
+.nexus-held-wordmark:is(h2) { filter:drop-shadow(.12cqw .08cqw 0 var(--grip-depth)) drop-shadow(.12cqw .12cqw .08cqw #0002); }
+/* Repeated soft shadows define the finger pads, rather than a hard rectangular cut. */
+.nexus-cinematic-stage .nexus-held-stage .nexus-held-wordmark .nexus-letter-surface:first-child {
+  background-image:radial-gradient(ellipse 16% 3% at 0% 43%,var(--grip-contact),transparent),radial-gradient(ellipse 18% 3% at 0% 49%,var(--grip-contact),transparent),radial-gradient(ellipse 16% 3% at 0% 55%,var(--grip-contact),transparent),radial-gradient(ellipse 13% 3% at 0% 61%,var(--grip-contact),transparent),linear-gradient(90deg,var(--grip-rim),transparent 5%),linear-gradient(150deg,var(--grip-face-top) 8%,var(--grip-face-bottom));
+}
+.nexus-cinematic-stage .nexus-held-stage .nexus-held-wordmark .nexus-letter-surface:last-child {
+  background-image:radial-gradient(ellipse 18% 3% at 100% 43%,var(--grip-contact),transparent),radial-gradient(ellipse 18% 3% at 100% 49%,var(--grip-contact),transparent),radial-gradient(ellipse 16% 3% at 100% 55%,var(--grip-contact),transparent),radial-gradient(ellipse 13% 3% at 100% 61%,var(--grip-contact),transparent),linear-gradient(270deg,var(--grip-rim),transparent 5%),linear-gradient(150deg,var(--grip-face-top) 8%,var(--grip-face-bottom));
+}
+.nexus-grip-occlusion .nexus-letter-surface { -webkit-text-stroke:.035cqw var(--grip-depth); }
+.nexus-held-athlete img { filter:drop-shadow(0 .18cqw .22cqw #0006); }
+
+/* Curved finger contours cross the S edge instead of ending at the palm's clip line. */
+.nexus-grip-fingers-right {
+  position:absolute; inset:0; z-index:4; pointer-events:none;
+  mask-image:radial-gradient(ellipse 1.9% 2.6% at 88.4% 39.8%,#000 75%,transparent 100%),radial-gradient(ellipse 1.65% 1.9% at 89.4% 44%,#000 80%,transparent 100%),radial-gradient(ellipse 1.65% 1.9% at 89.5% 47.5%,#000 80%,transparent 100%),radial-gradient(ellipse 1.55% 1.8% at 89.5% 50.8%,#000 80%,transparent 100%),radial-gradient(ellipse 1.4% 1.7% at 89.4% 53.6%,#000 80%,transparent 100%);
+}
+.nexus-grip-fingers-right .nexus-held-athlete img { filter:drop-shadow(-.08cqw .08cqw .07cqw #0007); }
+
+/* Condensation beads grow, stretch under gravity, detach and disperse. */
+.nexus-drips { position:absolute; inset:0; pointer-events:none; z-index:5; }
+.nexus-drip-source { position:absolute; top:75%; width:0; height:0; }
+.nexus-water-drop { position:absolute; width:calc(clamp(4px,.5cqw,9px) * var(--drip-size)); height:calc(clamp(7px,.85cqw,15px) * var(--drip-size)); border-radius:48% 48% 55% 55%; transform-origin:50% 0; background:radial-gradient(ellipse at 28% 24%,#fff 0 9%,#e5f7ffb3 14%,#a5c5d45e 42%,#edfaffbd 68%,#172f425e 100%); box-shadow:inset -.08cqw -.08cqw .1cqw #18384d80,inset .06cqw .06cqw .06cqw #fff,0 .1cqw .14cqw #0004; animation:nexus-water-fall var(--drip-duration) var(--drip-delay) infinite both; }
+.nexus-water-splash { position:absolute; top:7.4cqw; left:-.3cqw; width:.8cqw; height:.22cqw; min-width:6px; border:1px solid #abc2cb99; border-radius:50%; animation:nexus-water-impact var(--drip-duration) var(--drip-delay) infinite both; }
+.nexus-drips[data-running=false] i { animation-play-state:paused; }
+@keyframes nexus-water-fall {
+  0%,8% { opacity:0; transform:translateY(-.35cqw) scale(.2,.15); }
+  16% { opacity:.95; transform:translateY(-.2cqw) scale(.75,.6); }
+  28% { opacity:1; transform:translateY(0) scale(1,.95); }
+  33% { opacity:1; transform:translateY(.25cqw) scale(.7,1.5); animation-timing-function:cubic-bezier(.55,.05,.9,.45); }
+  48% { opacity:.85; transform:translateY(7cqw) scale(.6,1.2); }
+  51% { opacity:0; transform:translateY(7.5cqw) scale(1.5,.2); }
+  100% { opacity:0; transform:translateY(7.5cqw) scale(0); }
+}
+@keyframes nexus-water-impact {
+  0%,47% { opacity:0; transform:scale(.1); }
+  50% { opacity:.65; transform:scale(.7); }
+  61% { opacity:0; transform:scale(2.4,.6); }
+  100% { opacity:0; transform:scale(2.4,.6); }
+}
+@media(prefers-reduced-motion:reduce) { .nexus-drips { display:none; } }
+
+/* Reference composition: dark steel, red edge lighting, a luminous ring and flowing smoke. */
+.nexus-smoke { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.nexus-smoke-rear { z-index:0; }
+.nexus-smoke-floor { z-index:6; mask-image:linear-gradient(90deg,#000 0%,#000 32%,transparent 43%,transparent 58%,#000 70%); }
+.nexus-held-assembly { z-index:2; }
+.nexus-energy-ring { position:absolute; z-index:1; width:48%; aspect-ratio:1; border: max(1px,.2cqw) solid #fff1dc; border-radius:50%; left:26%; top:1%; box-shadow:0 0 .4cqw #fff,0 0 1.1cqw #ff0719,0 0 3cqw #f00016,inset 0 0 1.2cqw #ff1420; background:radial-gradient(ellipse,#16000080 48%,#e5091429 67%,transparent 71%); pointer-events:none; }
+.nexus-floor-light { position:absolute; left:7%; right:7%; bottom:6%; height:14%; background:radial-gradient(ellipse,#ff142538,transparent 65%); filter:blur(.8cqw); }
+.nexus-cinematic-stage { --grip-face-top:#343337; --grip-face-bottom:#0b0d10; --grip-depth:#b50010; }
+html[data-theme="light"] .nexus-cinematic-stage { --grip-face-top:#333135; --grip-face-bottom:#101114; --grip-depth:#bb0712; }
+.nexus-cinematic-stage .nexus-held-stage .nexus-held-wordmark .nexus-letter-surface,
+.nexus-cinematic-stage .nexus-held-stage .nexus-held-wordmark .nexus-letter-surface:is(:first-child,:last-child) {
+  background-image:url('/assets/nexus-steel-grain.svg'),radial-gradient(ellipse at 30% 15%,#ffffff25,transparent 55%),linear-gradient(135deg,var(--grip-face-top),var(--grip-face-bottom));
+  background-size:100px 100px,100% 100%,100% 100%;
+  -webkit-text-stroke:.045cqw #ff3441;
+}
+.nexus-held-wordmark:is(h2) { filter:drop-shadow(.12cqw .08cqw 0 #ff6b6b) drop-shadow(.45cqw .3cqw 0 #690009) drop-shadow(.16cqw .12cqw .75cqw #f30019a0); }
+.nexus-grip-occlusion .nexus-letter-surface { -webkit-text-stroke:.045cqw #ff3441; }
+.nexus-effects-toggle { position:absolute; z-index:8; right:3%; bottom:2%; width:44px; height:44px; border:1px solid #ef334855; background:var(--cinematic-paper); color:var(--cinematic-ink); border-radius:50%; cursor:pointer; font:16px Arial,sans-serif; transition:border-color .2s,transform .2s; }
+.nexus-effects-toggle:hover { border-color:#ef3348; transform:translateY(-2px); }
+.nexus-effects-toggle:focus-visible { outline:2px solid #ef3348; outline-offset:4px; }
+[data-effects-paused=true] .nexus-drips i { animation-play-state:paused; }
+@media(max-width:600px) { .nexus-effects-toggle { bottom:0; right:1%; width:44px; height:44px; min-width:44px; font-size:13px; } }
+@media(prefers-reduced-motion:reduce) { .nexus-effects-toggle { display:none; } }
+
+.nexus-energy-ring { mask-image:linear-gradient(#000 0%,#000 48%,transparent 79%); }
+
+/* Impact composition. The floor extends below the shared athlete and wordmark. */
+.nexus-held-stage { aspect-ratio: 2 / 1.12; }
+.nexus-held-assembly { bottom: 12%; }
+.nexus-energy-ring { opacity:.46; }
+.nexus-impact-ground {
+  position:absolute; inset:63% 0 0; z-index:1; pointer-events:none;
+  background:url('/assets/nexus-impact-ground.webp') center 55% / 100% 100% no-repeat;
+  mask-image:linear-gradient(transparent, #000 17%, #000 84%, transparent);
+}
+.nexus-cinematic-stage[data-animation-phase="revealing"] .nexus-impact-ground { opacity:0; }
+.nexus-cinematic-stage[data-impact="landed"] .nexus-impact-ground { animation:nexus-ground-land 850ms ease-out both; }
+.nexus-held-athlete > img { mask-image:linear-gradient(#000 92%, transparent 100%); }
+.nexus-grip-fingers-right .nexus-held-athlete > img { mask-image:none; }
+.nexus-athlete-look {
+  position:absolute; z-index:1; width:15%; height:46%; left:42.6%; top:-3%;
+  background:url('/assets/nexus-athlete-look.webp') center / contain no-repeat;
+  opacity:0; transform:translateY(9%) scaleY(.87); transform-origin:50% 88%;
+  pointer-events:none;
+}
+[data-impact="landed"] .nexus-athlete-look { animation:nexus-look-up 850ms 460ms ease-in-out both; }
+.nexus-impact-flash {
+  position:absolute; z-index:1; inset:45% 4% 4%; pointer-events:none; opacity:0;
+  background:radial-gradient(ellipse at 50% 74%, #ff392c85, #ce050f40 37%, transparent 71%);
+}
+[data-impact="landed"] .nexus-impact-flash { animation:nexus-impact-flash 730ms ease-out; }
+.nexus-impact-debris { position:absolute; z-index:7; inset:0; pointer-events:none; }
+.nexus-impact-debris span {
+  position:absolute; top:74%; aspect-ratio:1; opacity:0;
+  background:url('/assets/nexus-impact-rock.webp') center / contain no-repeat;
+}
+[data-impact="landed"] .nexus-impact-debris span {
+  animation:nexus-rubble-throw 1.16s var(--debris-delay) both;
+}
+@keyframes nexus-ground-land {
+  from { opacity:0; transform:scaleX(.94) translateY(.8cqw); }
+  to { opacity:1; transform:none; }
+}
+@keyframes nexus-look-up {
+  0% { opacity:0; transform:translateY(9%) scaleY(.87); }
+  55% { opacity:1; }
+  100% { opacity:1; transform:none; }
+}
+@keyframes nexus-impact-flash {
+  12% { opacity:.9; }
+  100% { opacity:0; }
+}
+@keyframes nexus-rubble-throw {
+  0% { opacity:0; transform:scale(.65); animation-timing-function:cubic-bezier(.12,.6,.2,1); }
+  12% { opacity:1; }
+  42% { opacity:1; transform:translate(calc(var(--debris-x) * .66),var(--debris-y)) rotate(calc(var(--debris-spin) * .55)); animation-timing-function:cubic-bezier(.6,.05,1,.9); }
+  85% { opacity:.85; }
+  100% { opacity:0; transform:translate(var(--debris-x),6cqw) rotate(var(--debris-spin)) scale(.72); }
+}
+[data-effects-paused=true] :is(.nexus-impact-debris span,.nexus-impact-flash,.nexus-impact-ground,.nexus-athlete-look) { animation-play-state:paused; }
+@media(prefers-reduced-motion:reduce) {
+  [data-impact="landed"] :is(.nexus-athlete-look,.nexus-impact-debris span,.nexus-impact-flash,.nexus-impact-ground) { animation:none; }
+}
+
+.nexus-cinematic-stage .nexus-held-stage .nexus-held-wordmark .nexus-letter-surface:nth-child(n) {
+  background-image:url('/assets/nexus-stone-fissures.svg'),url('/assets/nexus-steel-grain.svg'),radial-gradient(ellipse at 30% 15%,#fff3,transparent 55%),linear-gradient(135deg,var(--grip-face-top),var(--grip-face-bottom));
+  background-size:100% 100%, 100px 100px, 100% 100%, 100% 100%;
+}
+.nexus-held-wordmark .nexus-letter-surface:nth-child(2n) { background-position:0 1.3cqw, 0 0, 0 0, 0 0; }
+.nexus-held-wordmark .nexus-letter-surface:nth-child(3n) { background-position:0 -2.2cqw, 0 0, 0 0, 0 0; }
+.nexus-held-wordmark .nexus-letter-surface { background-repeat:no-repeat, repeat, no-repeat, no-repeat; }
+
+/* Keep the club label clear of the brightest floor reflections. */
+.nexus-held-stage .nexus-held-subtitle { top:91%; z-index:7; text-shadow:0 1px 5px var(--cinematic-paper); }
+.nexus-athlete-look { mask-image:linear-gradient(#000 84%,transparent 100%); }
+@media (max-width:600px) {
+  .nexus-held-stage .nexus-held-subtitle { right:14%; }
 }
