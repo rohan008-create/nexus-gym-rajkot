@@ -1,63 +1,69 @@
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const out = 'artifacts/built-different';
-fs.mkdirSync(out, { recursive: true });
+const path = require('node:path');
+
+const output = process.env.BUILT_DIFFERENT_OUTPUT || 'artifacts/built-different';
+const url = process.env.BUILT_DIFFERENT_URL || 'http://localhost:3000/hero';
+const pillars = [
+  ['Strength', 'Make the next rep count.', 'program-strength.webp'],
+  ['Endurance', 'Go a little further.', 'program-cardio.webp'],
+  ['Confidence', 'Train with confidence.', 'program-personal.webp'],
+];
+fs.mkdirSync(output, { recursive: true });
+
+async function check(page, theme, width) {
+  const root = page.locator('.built-different');
+  const toggle = page.getByRole('switch', { name: 'Dark mode' });
+  if ((await toggle.getAttribute('aria-checked') === 'true') !== (theme === 'dark')) await toggle.click();
+  await root.evaluate(element => element.scrollIntoView({ block: 'start', behavior: 'instant' }));
+
+  const layout = await root.evaluate(element => {
+    const title = element.querySelector('h2').getBoundingClientRect();
+    const bounds = element.getBoundingClientRect();
+    return {
+      fits: title.left >= 0 && title.right <= innerWidth && document.documentElement.scrollWidth <= innerWidth,
+      fillsScreen: bounds.height >= innerHeight - 1,
+    };
+  });
+  assert.ok(layout.fits && layout.fillsScreen, JSON.stringify(layout));
+
+  for (const [name, headline, file] of [...pillars.slice(1), pillars[0]]) {
+    const button = root.getByRole('button', { name: 'Explore ' + name });
+    await button.click();
+    assert.equal(await button.getAttribute('aria-pressed'), 'true');
+    assert.equal(await root.getByRole('heading', { level: 3 }).textContent(), headline);
+    const photo = root.locator('.bd-room img[data-current=true]');
+    assert.ok((await photo.getAttribute('src')).endsWith(file));
+    assert.ok(await photo.evaluate(async element => { await element.decode(); return element.naturalWidth > 0; }));
+  }
+  if ([390, 1440].includes(width)) {
+    await root.evaluate(element => element.scrollIntoView({ block: 'start', behavior: 'instant' }));
+    await page.screenshot({ path: path.join(output, width + '-' + theme + '.png') });
+    await root.getByRole('button', { name: 'Book a trial' }).click();
+    await page.locator('#trial-enquiry-form').waitFor({ state: 'visible' });
+    await page.keyboard.press('Escape');
+    await page.locator('#trial-enquiry-form').waitFor({ state: 'hidden' });
+  }
+  assert.equal(await root.locator('canvas').count(), 0);
+  assert.equal(await root.locator('.bd-room img[data-current=true]').evaluate(element => getComputedStyle(element).transitionProperty), 'none');
+  console.log(width + ' ' + theme + ': layout, photo switching, and reduced motion PASS');
+}
+
 (async () => {
-  const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--use-angle=d3d11'] });
-  const errors = [], checks = [];
+  const browser = await chromium.launch({ channel: 'chrome', headless: true });
   try {
-    for (const mobile of [false, true]) {
-      const label = mobile ? 'mobile' : 'desktop';
-      const page = await browser.newPage({ viewport: mobile ? { width: 390, height: 844 } : { width: 1440, height: 1000 }, reducedMotion: 'reduce', isMobile: mobile, hasTouch: mobile });
-      page.on('pageerror', e => errors.push(e.message));
-      await page.goto('http://localhost:3000/hero', { waitUntil: 'domcontentloaded', timeout: 90000 });
-      await page.locator('.built-different').waitFor();
-      for (const theme of ['dark', 'light']) {
-        await page.getByRole('button', { name: `${theme === 'dark' ? 'Dark' : 'Light'} mode`, exact: true }).click();
-        await page.locator('.bd-header').scrollIntoViewIfNeeded();
-        await page.waitForTimeout(500);
-        assert.ok(await page.locator('.bd-heading').isVisible());
-        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no horizontal overflow');
-        await page.screenshot({ path: `${out}/${label}-${theme}-header.png` });
-        await page.locator('.bd-studio').scrollIntoViewIfNeeded();
-        await page.waitForFunction(() => document.querySelector('.bd-sculpture canvas')?.dataset.aboutFrame !== undefined, null, { timeout: 30000 });
-        await page.screenshot({ path: `${out}/${label}-${theme}-studio.png` });
-        for (const pillar of ['Endurance', 'Confidence', 'Strength']) {
-          await page.getByRole('button', { name: `Explore ${pillar}`, exact: true }).click();
-          assert.equal(await page.locator('.built-different').getAttribute('data-selected-pillar'), pillar.toLowerCase());
-          await page.waitForFunction(i => document.querySelector('.bd-sculpture canvas')?.dataset.aboutSelected === String(i), ['Strength','Endurance','Confidence'].indexOf(pillar));
-          assert.equal(await page.getByRole('button', { name: `Explore ${pillar}`, exact: true }).getAttribute('aria-pressed'), 'true');
-        }
-        await page.screenshot({ path: `${out}/${label}-${theme}-cards.png` });
-        await page.locator('.bd-cta').click();
-        await page.locator('#trial-enquiry-form').waitFor({ state: 'visible' });
-        await page.keyboard.press('Escape');
-        await page.locator('#trial-enquiry-form').waitFor({ state: 'hidden' });
-        assert.equal(await page.locator('.built-different').getAttribute('data-about-motion'), 'reduced');
-        checks.push(`${label} ${theme}: responsive layout, three pillars, 3D selection, enquiry and reduced motion`);
-        console.log('PASS:', checks.at(-1));
-      }
+    for (const [width, height] of [[1440, 900], [1024, 768], [768, 1024], [390, 844], [320, 640]]) {
+      const page = await browser.newPage({ viewport: { width, height }, reducedMotion: 'reduce', hasTouch: width < 500, isMobile: width < 500 });
+      const errors = [];
+      page.on('pageerror', error => errors.push(error.message));
+      await page.goto(url, { waitUntil: 'domcontentloaded' });
+      for (const theme of ['dark', 'light']) await check(page, theme, width);
+      assert.deepEqual(errors, []);
       await page.close();
     }
-    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-    page.on('pageerror', e => errors.push(e.message));
-    await page.goto('http://localhost:3000/hero', { waitUntil: 'domcontentloaded', timeout: 90000 });
-    await page.locator('.bd-studio').scrollIntoViewIfNeeded();
-    await page.waitForFunction(() => Number(document.querySelector('.bd-sculpture canvas')?.dataset.aboutFrame) > .2, null, { timeout: 60000 });
-    const canvas = page.locator('.bd-sculpture canvas');
-    const before = await canvas.getAttribute('data-about-frame');
-    await page.waitForTimeout(400);
-    assert.notEqual(await canvas.getAttribute('data-about-frame'), before, 'sculpture animates at rest');
-    await page.screenshot({ path: `${out}/animated-studio.png` });
-    await page.locator('.nexus-simple-footer').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
-    const stopped = await canvas.getAttribute('data-about-frame');
-    await page.waitForTimeout(400);
-    assert.equal(await canvas.getAttribute('data-about-frame'), stopped, 'offscreen sculpture pauses');
-    checks.push('ambient 3D motion and offscreen pause');
-    assert.deepEqual(errors, []);
-    fs.writeFileSync(`${out}/checks.json`, JSON.stringify({ checks, errors }, null, 2));
     console.log('VERDICT: PASS');
-  } finally { await browser.close(); }
-})().catch(e => { console.error('VERDICT: FAIL --', e); process.exitCode = 1; });
+  } finally {
+    await browser.close();
+  }
+})().catch(error => { console.error('VERDICT: FAIL', error); process.exitCode = 1; });
