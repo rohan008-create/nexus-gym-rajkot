@@ -2,7 +2,7 @@ export type Point = { x: number; z: number };
 export const EYE_HEIGHT = 2.15;
 export const TOUR_STOPS = [
   { label: 'Welcome area', position: [0, EYE_HEIGHT, 7.6], target: [0, 2.4, -4] },
-  { label: 'Central collection', position: [0, EYE_HEIGHT, 3.4], target: [0, 1.65, 0] },
+  { label: 'Central collection', position: [.65, EYE_HEIGHT, 4.45], target: [0, 1.88, -.18] },
   { label: 'Supplements', position: [-3.15, EYE_HEIGHT, 2.7], target: [-5.25, 2.4, 0] },
   { label: 'Nutrition', position: [3.15, EYE_HEIGHT, 2.7], target: [5.25, 2.4, 0] },
   { label: 'Accessories', position: [2.9, EYE_HEIGHT, -3.6], target: [5.25, 2.4, -3.8] },

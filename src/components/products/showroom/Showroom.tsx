@@ -1,8 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Compass, Minus, Plus, RotateCcw, ShoppingBag } from 'lucide-react';
-import { Component, useState, type ReactNode } from 'react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Compass, Maximize, Minimize, Minus, Plus, RotateCcw, ShoppingBag } from 'lucide-react';
+import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useReducedMotion } from '../../../hooks/useReducedMotion';
 import type { Product } from '../products';
 import { TOUR_STOPS } from './navigation';
@@ -39,6 +39,11 @@ export default function Showroom({ products, onAdd, onFailure }: Props) {
   const [variant, setVariant] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [notice, setNotice] = useState('');
+  const roomRef = useRef<HTMLDivElement>(null);
+  const fullscreenButton = useRef<HTMLButtonElement>(null);
+  const [nativeFullscreen, setNativeFullscreen] = useState(false);
+  const [inlineHeight, setInlineHeight] = useState<number | null>(null);
+  const fullscreen = nativeFullscreen || inlineHeight !== null;
   const [command, setCommand] = useState<CameraCommand>({ serial: 0, stop: defaultStop });
   const product = products.find(item => item.id === selected);
   const option = product?.variants[variant];
@@ -57,13 +62,75 @@ export default function Showroom({ products, onAdd, onFailure }: Props) {
     issue({ productId: id, productPosition: position });
   };
   const closeProduct = () => { setInspecting(false); issue({ restore: true }); };
+  const enterRoom = () => {
+    setFree(true);
+    setHover(null);
+    if (stop === 0) go(defaultStop);
+    else issue({ move: 1.4 });
+  };
+  const exitFullscreen = () => {
+    if (document.fullscreenElement === roomRef.current) {
+      void document.exitFullscreen().catch(() => {});
+    } else {
+      setInlineHeight(null);
+      fullscreenButton.current?.focus({ preventScroll: true });
+    }
+  };
+  const enterFullscreen = async () => {
+    const room = roomRef.current;
+    if (!room) return;
+    if (document.fullscreenEnabled && room.requestFullscreen) {
+      try {
+        await room.requestFullscreen();
+        return;
+      } catch { /* Use the viewport layout when fullscreen permission is unavailable. */ }
+    }
+    if (room.isConnected) setInlineHeight(room.offsetHeight);
+  };
+
+  useEffect(() => {
+    const syncFullscreen = () => {
+      const active = document.fullscreenElement === roomRef.current;
+      setNativeFullscreen(active);
+      if (active || roomRef.current?.contains(document.activeElement)) {
+        fullscreenButton.current?.focus({ preventScroll: true });
+      }
+    };
+    document.addEventListener('fullscreenchange', syncFullscreen);
+    return () => document.removeEventListener('fullscreenchange', syncFullscreen);
+  }, []);
+
+  useEffect(() => {
+    if (inlineHeight === null) return;
+    const siblings: HTMLElement[] = [];
+    for (let node: HTMLElement | null = roomRef.current; node?.parentElement && node !== document.body; node = node.parentElement) {
+      for (const sibling of node.parentElement.children) {
+        if (sibling instanceof HTMLElement && sibling !== node && !sibling.inert) {
+          sibling.inert = true;
+          siblings.push(sibling);
+        }
+      }
+    }
+    fullscreenButton.current?.focus({ preventScroll: true });
+    return () => { siblings.forEach(sibling => { sibling.inert = false; }); };
+  }, [inlineHeight]);
   const add = (item: Product, option: number, amount: number) => {
     onAdd(item, option, amount);
     setNotice(`${item.name} added to Your Kit.`);
   };
 
-  return <div className="nexus-room" data-room-ready={ready} onKeyDown={event => {
-    if (event.key === 'Escape' && inspecting) closeProduct();
+  return <>
+  {inlineHeight !== null && <div aria-hidden style={{ height: inlineHeight }} />}
+  <div ref={roomRef} className="nexus-room" data-room-ready={ready} data-fullscreen={fullscreen}
+    data-viewport-mode={inlineHeight !== null} data-inspecting={inspecting}
+    role={fullscreen ? 'dialog' : undefined} aria-modal={fullscreen || undefined}
+    aria-label={fullscreen ? '3D product studio' : undefined} data-lenis-prevent={fullscreen ? '' : undefined}
+    onKeyDown={event => {
+    if (event.key !== 'Escape') return;
+    if (inlineHeight !== null) {
+      event.stopPropagation();
+      exitFullscreen();
+    } else if (!nativeFullscreen && inspecting) closeProduct();
   }}>
     <div className="nexus-studio-viewer">
       <div className="nexus-room-main">
@@ -74,11 +141,21 @@ export default function Showroom({ products, onAdd, onFailure }: Props) {
         <div className="nexus-room-live" data-ready={ready}>
           <RoomBoundary onFailure={onFailure}>
             <VirtualShowroom command={command} free={free && !inspecting} reduced={reduced} lowQuality={lightweight}
-              onReady={() => setReady(true)} onFailure={onFailure} onTourStop={go} onHover={setHover} onSelect={select}
+              fullscreen={fullscreen} onReady={() => setReady(true)} onFailure={onFailure} onTourStop={go} onHover={setHover} onSelect={select}
               onAdd={id => { const item = products.find(entry => entry.id === id); if (item) add(item, 0, 1); }} />
           </RoomBoundary>
         </div>
         {ready && hover && !inspecting && <p className="nexus-room-hover">{products.find(item => item.id === hover)?.name}</p>}
+        {ready && <button type="button" className="nexus-room-fullscreen"
+          aria-label={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} title={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          ref={fullscreenButton} onClick={fullscreen ? exitFullscreen : enterFullscreen}>
+          {fullscreen ? <Minimize size={19} aria-hidden /> : <Maximize size={19} aria-hidden />}
+        </button>}
+        {ready && !inspecting && (free
+          ? <div className="nexus-room-wayfinding">Swipe to look · Tap the floor to walk</div>
+          : <button type="button" className="nexus-room-enter" onClick={enterRoom}>
+            <span className="nexus-room-beacon"><Compass size={18} aria-hidden /></span> Enter room
+          </button>)}
         {ready && inspecting && <button type="button" className="nexus-room-return nexus-glass-control" onClick={closeProduct}>
           <ArrowLeft size={16} aria-hidden /> Back to room
         </button>}
@@ -98,7 +175,7 @@ export default function Showroom({ products, onAdd, onFailure }: Props) {
           setFree(value => !value);
         }}><Compass size={17} aria-hidden /> Free Explore</button>
       </nav>
-      {free && <div className="nexus-room-motion" role="group" aria-label="Move around showroom">
+      {free && !inspecting && <div className="nexus-room-motion" role="group" aria-label="Move around showroom">
         <button type="button" aria-label="Turn left" onClick={() => issue({ turn: .35 })}><ArrowLeft size={17} aria-hidden /></button>
         <button type="button" aria-label="Move forward" onClick={() => issue({ move: 1 })}><ArrowUp size={17} aria-hidden /></button>
         <button type="button" aria-label="Move backward" onClick={() => issue({ move: -1 })}><ArrowDown size={17} aria-hidden /></button>
@@ -136,5 +213,5 @@ export default function Showroom({ products, onAdd, onFailure }: Props) {
       </div>
     </section>}
     <p className="nexus-room-notice ps-sr-only" role="status">{notice}</p>
-  </div>;
+  </div></>;
 }

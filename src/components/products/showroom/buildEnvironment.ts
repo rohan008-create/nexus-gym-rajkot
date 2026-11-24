@@ -13,8 +13,9 @@ export function buildEnvironment(mobile: boolean, invalidate: () => void) {
   const mat = (color: string, roughness = .5, metalness = .1) => {
     const material = new THREE.MeshStandardMaterial({ color, roughness, metalness }); materials.add(material); return material;
   };
-  const black = mat('#27292d', .56), olive = mat('#42454d', .58), stone = mat('#babcc2', .38), metal = mat('#717681', .26, .55);
-  const warm = new THREE.MeshBasicMaterial({ color: '#ffbaa8', toneMapped: false }); materials.add(warm);
+  const black = mat('#27292d', .72), olive = mat('#42454d', .64), stone = mat('#eef0ee', .46), metal = mat('#85888d', .28, .58);
+  const warm = new THREE.MeshBasicMaterial({ color: '#f4dbc3', toneMapped: false }); materials.add(warm);
+  const routeMaterial = new THREE.MeshBasicMaterial({ color: '#cf625e', toneMapped: false }); materials.add(routeMaterial);
   const boxGeo = new THREE.BoxGeometry(1, 1, 1); geometries.add(boxGeo);
   const cylinderGeo = new THREE.CylinderGeometry(1, 1, 1, mobile ? 24 : 48); geometries.add(cylinderGeo);
   function mesh(geometry: THREE.BufferGeometry, material: THREE.Material, parent = room) {
@@ -33,14 +34,17 @@ export function buildEnvironment(mobile: boolean, invalidate: () => void) {
   let seed = 42;
   const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
   const floorTexture = textureCanvas(512, 512, ctx => {
-    ctx.fillStyle = '#aaa28e'; ctx.fillRect(0, 0, 512, 512);
-    for (let i = 0; i < 6000; i++) {
-      ctx.fillStyle = ['#655f51', '#d2c7ae', '#8d8778', '#e0d5bf'][i % 4];
-      ctx.beginPath(); ctx.ellipse(random() * 512, random() * 512, .3 + random() * 1.1, .3 + random() * .7, random() * 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#cac8c3'; ctx.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 4400; i++) {
+      ctx.fillStyle = ['#b4b1ac', '#e1dfd8', '#c1beb8', '#d7d4ce'][i % 4];
+      ctx.beginPath(); ctx.ellipse(random() * 512, random() * 512, .3 + random() * .85, .2 + random() * .6, random() * 3, 0, Math.PI * 2); ctx.fill();
     }
+    ctx.strokeStyle = '#a39f99';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, 512, 512);
   });
   floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; floorTexture.repeat.set(5, 7);
-  const floorMat = mat('#E8DDC8', .29, .15); floorMat.map = floorTexture;
+  const floorMat = mat('#e8e6e0', .68, .03); floorMat.map = floorTexture; floorMat.bumpMap = floorTexture; floorMat.bumpScale = .006;
   box(0, -.1, 0, 12, .2, 18, floorMat);
   box(-6, 3, 0, .2, 6, 18, black); box(6, 3, 0, .2, 6, 18, black);
   box(0, 3, -8, 12, 6, .2, black); box(0, 6, 0, 12, .15, 18, black);
@@ -56,7 +60,7 @@ export function buildEnvironment(mobile: boolean, invalidate: () => void) {
   const archPoints = [new THREE.Vector3(-1.325, .85, .25), new THREE.Vector3(-1.325, 4.325, .25)];
   for (let i = 0; i <= 32; i++) { const a = Math.PI - i / 32 * Math.PI; archPoints.push(new THREE.Vector3(Math.cos(a) * 1.325, 4.325 + Math.sin(a) * 1.325, .25)); }
   archPoints.push(new THREE.Vector3(1.325, .85, .25));
-  const archLight = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(archPoints), 64, .022, 5, false);
+  const archLight = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(archPoints), 64, .014, 5, false);
   const shelfProducts: { product: Product; position: [number, number, number]; rotation: number }[] = [];
   function shelf(x: number, z: number, rotation: number) {
     const group = new THREE.Group(); group.position.set(x, 0, z); group.rotation.y = rotation; room.add(group);
@@ -83,11 +87,14 @@ export function buildEnvironment(mobile: boolean, invalidate: () => void) {
 
   // Back-wall signature is original typography, not a modified official logo.
   const signTexture = textureCanvas(1024, 1024, ctx => {
-    ctx.fillStyle = '#26272d'; ctx.fillRect(0, 0, 1024, 1024); ctx.textAlign = 'center'; ctx.fillStyle = '#f5f1e8';
-    ctx.font = '108px Georgia'; ctx.fillText('NEXUS', 512, 290); ctx.font = '24px sans-serif'; ctx.fillText('F I T N E S S   C L U B', 512, 340);
-    ctx.font = '72px Georgia'; ctx.fillText('TRAINING', 512, 490); ctx.fillText('ESSENTIALS', 512, 575);
-    ctx.font = '25px sans-serif'; ctx.fillText('Nutrition and training gear', 512, 655);
-    ctx.font = '18px sans-serif'; ctx.fillText('V I R T U A L   C O L L E C T I O N', 512, 795);
+    ctx.fillStyle = '#222329'; ctx.fillRect(0, 0, 1024, 1024);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#f5f1e8';
+    ctx.font = '900 155px Arial'; ctx.fillText('NEXUS', 512, 387);
+    ctx.font = '600 30px Arial'; ctx.fillText('F I T N E S S   C L U B', 512, 454);
+    ctx.fillStyle = '#be4c4d'; ctx.fillRect(455, 505, 114, 5);
+    ctx.fillStyle = '#ddd9d2';
+    ctx.font = '600 38px Arial'; ctx.fillText('PRODUCT STUDIO', 512, 585);
   });
   const signMat = new THREE.MeshStandardMaterial({ map: signTexture, emissiveMap: signTexture, emissive: '#E8DDC8', emissiveIntensity: .28 }); materials.add(signMat);
   const sign = mesh(new THREE.ShapeGeometry(arch(4.7, 5.1)), signMat); sign.position.set(0, .15, -7.82);
@@ -97,22 +104,38 @@ export function buildEnvironment(mobile: boolean, invalidate: () => void) {
   const backOutline: THREE.Vector3[] = [new THREE.Vector3(-2.35, 0, -7.75), new THREE.Vector3(-2.35, 2.9, -7.75)];
   for (let i = 0; i <= 48; i++) { const a = Math.PI - i / 48 * Math.PI; backOutline.push(new THREE.Vector3(Math.cos(a) * 2.35, 2.9 + Math.sin(a) * 2.35, -7.75)); }
   backOutline.push(new THREE.Vector3(2.35, 0, -7.75));
-  mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(backOutline), 80, .035, 6, false), warm);
+  mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(backOutline), 80, .02, 6, false), warm);
   const islandOlive = mat('#672928', .45), islandRibs = mat('#422326', .42);
+  const displayStone = mat('#f1efea', .43, .04);
+  const shadowTexture = textureCanvas(128, 128, ctx => {
+    const gradient = ctx.createRadialGradient(64, 64, 25, 64, 64, 64);
+    gradient.addColorStop(0, 'rgba(14, 15, 18, .58)');
+    gradient.addColorStop(1, 'rgba(14, 15, 18, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 128, 128);
+  });
+  const contactMaterial = new THREE.MeshBasicMaterial({ map: shadowTexture, transparent: true, depthWrite: false });
+  materials.add(contactMaterial);
+  const contact = mesh(new THREE.PlaneGeometry(5, 4.7), contactMaterial);
+  contact.rotation.x = -Math.PI / 2;
+  contact.position.y = .008;
   cylinder(0, .64, 0, 1.65, 1.22, islandOlive);
   for (let i = 0; i < (mobile ? 64 : 100); i++) {
     const angle = i / (mobile ? 64 : 100) * Math.PI * 2;
     cylinder(Math.cos(angle) * 1.66, .64, Math.sin(angle) * 1.66, .026, 1.16, islandRibs);
   }
-  cylinder(0, 1.3, 0, 1.78, .12, stone); cylinder(0, .05, 0, 1.7, .035, warm); cylinder(0, 1.22, 0, 1.71, .025, warm);
-  cylinder(0, 1.52, -.45, .64, .36, stone);
+  cylinder(0, 1.3, 0, 1.78, .12, displayStone); cylinder(0, 1.22, 0, 1.71, .025, metal);
+  cylinder(0, 1.52, -.45, .64, .36, displayStone);
   const ring = mesh(new THREE.TorusGeometry(2.1, .065, 8, 96), metal); ring.rotation.x = Math.PI / 2; ring.position.set(0, 4.85, 0);
   const ringGlow = mesh(new THREE.TorusGeometry(2.1, .033, 8, 96), warm); ringGlow.rotation.x = Math.PI / 2; ringGlow.position.set(0, 4.8, 0);
   [-1.5, 1.5].forEach(x => box(x, 5.43, 0, .018, 1.1, .018, metal));
-  const islandLight = new THREE.PointLight('#ffe6ba', 35, 9, 2); islandLight.position.set(0, 4.3, 0); room.add(islandLight);
-  const key = new THREE.SpotLight('#fff0d6', 140, 20, .75, .7, 1.7); key.position.set(0, 5.5, 5); key.target.position.set(0, 0, 0);
-  key.castShadow = !mobile; key.shadow.mapSize.set(1024, 1024); key.shadow.bias = -.001; room.add(key, key.target);
-  room.add(new THREE.HemisphereLight('#fff5ea', '#8c97ae', 1.65));
+  const islandLight = new THREE.PointLight('#f4eee3', 26, 9, 2); islandLight.position.set(0, 4.3, 0); room.add(islandLight);
+  const key = new THREE.SpotLight('#fff4e8', 106, 18, .74, .82, 1.65);
+  key.position.set(-2.8, 5.5, 4.5); key.target.position.set(0, 1.2, 0);
+  key.castShadow = !mobile; key.shadow.mapSize.set(1024, 1024); key.shadow.normalBias = .025; room.add(key, key.target);
+  const rim = new THREE.PointLight('#cedcf0', 17, 8, 2); rim.position.set(3.5, 3.8, -2.8); room.add(rim);
+  const fill = new THREE.HemisphereLight('#f4f6fc', '#8a8f9c', 1.65);
+  room.add(fill);
   [-4.2, 4.2].forEach(x => {
     box(x, 5.85, 0, .08, .08, 14, metal);
     [-4, 0, 4].forEach(z => { cylinder(x, 5.7, z, .14, .22, black); cylinder(x, 5.57, z, .1, .015, warm); });
@@ -141,11 +164,11 @@ export function buildEnvironment(mobile: boolean, invalidate: () => void) {
   });
   staticMeshes.forEach((entries, material) => {
     const merged = mergeGeometries(entries.map(entry => entry.geometry));
-    if (merged) { entries.forEach(entry => entry.source.removeFromParent()); const batch = mesh(merged, material); batch.receiveShadow = true; batch.castShadow = material !== warm; }
+    if (merged) { entries.forEach(entry => entry.source.removeFromParent()); const batch = mesh(merged, material); batch.receiveShadow = true; batch.castShadow = material !== warm && material !== contactMaterial; }
     entries.forEach(entry => entry.geometry.dispose());
   });
   const navigationPoints = TOUR_STOPS.map((stop, index) => {
-    const ring = mesh(new THREE.RingGeometry(.2, .26, 32), warm);
+    const ring = mesh(new THREE.RingGeometry(.18, .204, 32), routeMaterial);
     ring.rotation.x = -Math.PI / 2; ring.position.set(stop.position[0], .015, stop.position[2]);
     ring.userData.tourStop = index; return ring;
   });
@@ -153,11 +176,13 @@ export function buildEnvironment(mobile: boolean, invalidate: () => void) {
   return {
     room, placements, navigationPoints,
     setTheme(dark: boolean) {
-      black.color.set(dark ? '#26282d' : '#f2eee9');
-      olive.color.set(dark ? '#42454d' : '#e0d8d0');
-      stone.color.set(dark ? '#b1b4bd' : '#f5f3ef');
-      floorMat.color.set(dark ? '#807b78' : '#ddd5cb');
-      islandOlive.color.set(dark ? '#672928' : '#9b3837');
+      black.color.set(dark ? '#34363e' : '#efeee9');
+      olive.color.set(dark ? '#484b55' : '#dad6ce');
+      stone.color.set(dark ? '#898c95' : '#f1f0eb');
+      floorMat.color.set(dark ? '#85858a' : '#e3ded6');
+      islandOlive.color.set(dark ? '#682d33' : '#8a3538');
+      islandRibs.color.set(dark ? '#54262b' : '#6d2c2f');
+      fill.intensity = dark ? 1.48 : 1.8;
     },
     dispose() {
       productFactory.dispose();

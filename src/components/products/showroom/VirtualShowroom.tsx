@@ -9,7 +9,7 @@ import { EYE_HEIGHT, moveSafely, safePosition, TOUR_STOPS } from './navigation';
 export interface CameraCommand { serial: number; stop?: number; productId?: string; productPosition?: [number, number, number]; restore?: boolean; move?: number; turn?: number; zoom?: number }
 export type ShowroomFailure = 'unsupported' | 'context-lost' | 'load-error';
 interface Props {
-  command: CameraCommand; free: boolean; reduced: boolean;
+  command: CameraCommand; free: boolean; reduced: boolean; fullscreen: boolean;
   onAdd: (id: string, origin: { x: number; y: number }) => void;
   onSelect: (id: string, position?: [number, number, number]) => void; onHover: (id: string | null) => void; onReady: () => void; onFailure: (reason: ShowroomFailure) => void;
   lowQuality: boolean;
@@ -78,12 +78,13 @@ function Room(props: Props) {
       if (pointer && pointer.id === event.pointerId) {
         const dx = event.clientX - pointer.x, dy = event.clientY - pointer.y;
         if (Math.hypot(event.clientX - pointer.startX, event.clientY - pointer.startY) > 4) pointer.moved = true;
-        if (pointer.moved && (event.pointerType !== 'touch' || Math.abs(event.clientX - pointer.startX) > Math.abs(event.clientY - pointer.startY))) {
+        const canLookVertically = event.pointerType !== 'touch' || latest.current.fullscreen;
+        if (pointer.moved && (canLookVertically || Math.abs(event.clientX - pointer.startX) > Math.abs(event.clientY - pointer.startY))) {
           yawGoal.current -= dx * .004;
-          if (event.pointerType !== 'touch') pitchGoal.current = THREE.MathUtils.clamp(pitchGoal.current - dy * .003, -.48, .65);
+          if (canLookVertically) pitchGoal.current = THREE.MathUtils.clamp(pitchGoal.current - dy * .003, -.48, .65);
         }
         pointer.x = event.clientX; pointer.y = event.clientY; invalidate();
-      } else {
+      } else if (event.pointerType !== 'touch') {
         const hit = hitAt(event); const id = hit?.object.userData.productId || null;
         latest.current.onHover(id); highlight(id); canvas.style.cursor = id || hit?.object.userData.tourStop !== undefined ? 'pointer' : 'grab';
       }
@@ -206,7 +207,7 @@ export default function VirtualShowroom(props: Props) {
   // Fiber mounts fallback inside <canvas> even when WebGL works. Keep it passive:
   // reporting failure from a fallback effect would close every supported showroom.
   return <Canvas className="nexus-room-canvas" camera={{ fov: props.lowQuality ? 69 : 62, near: .1, far: 40 }} dpr={props.lowQuality ? [1, 1.25] : [1, 2]} shadows={!props.lowQuality}
-    frameloop={visible ? 'demand' : 'never'} gl={{ antialias: !props.lowQuality, powerPreference: 'default' }} onCreated={({ gl }) => { gl.shadowMap.type = THREE.PCFSoftShadowMap; }} fallback={<p>3D requires a browser with WebGL 2 support. Use the product list to browse.</p>}>
+    frameloop={visible ? 'demand' : 'never'} gl={{ antialias: true, powerPreference: 'default' }} onCreated={({ gl }) => { gl.shadowMap.type = THREE.PCFSoftShadowMap; }} fallback={<p>3D requires a browser with WebGL 2 support. Use the product list to browse.</p>}>
     <Room {...props} />
   </Canvas>;
 }

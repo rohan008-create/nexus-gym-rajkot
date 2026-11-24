@@ -10,7 +10,6 @@ import { useHeroTransition } from './RopeScrollController';
 import AboutNexus, { AboutPanel } from '../sections/AboutNexus';
 import type { RopeLayout } from './ropeGeometry';
 import ProgramsSection from '../sections/ProgramsSection';
-import ArmorySection from '../armory/ArmorySection';
 import NexusAdvantageSection from '../advantage/NexusAdvantageSection';
 import NexusTrainersSection from '../trainers/NexusTrainersSection';
 import NexusMembershipCards from '../membership/NexusMembershipCards';
@@ -50,14 +49,6 @@ export default function HeroSection() {
       </section>
     </div>
     <ProgramsSection onTrial={() => setTrial(true)} />
-    <ArmorySection onExplorePrograms={() => {
-      const programs = document.getElementById('programs');
-      if (!programs) return;
-      setActive('Programs');
-      // Use a document coordinate: scrollIntoView can include the currently
-      // fixed showcase's pin offset when navigating back out of the Armory.
-      window.scrollTo({ top: programs.getBoundingClientRect().top + window.scrollY - 80, behavior: reduced ? 'instant' : 'smooth' });
-    }} />
     <NexusAdvantageSection />
     <NexusTrainersSection />
     <NexusVoices />

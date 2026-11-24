@@ -27,12 +27,13 @@
 #nexus-product-catalogue { padding:0 clamp(10px,2vw,20px); }
 .nexus-room {
   display:grid; grid-template-columns:minmax(0,2.2fr) minmax(285px,1fr);
-  align-items:start; gap:clamp(12px,2vw,30px); color:var(--theme-ink);
+  align-items:start; gap:clamp(14px,2vw,28px); color:var(--theme-ink);
 }
 .nexus-studio-viewer,.nexus-room-product { min-width:0; }
+.nexus-studio-viewer { border:1px solid var(--theme-line); border-radius:12px; overflow:hidden; }
 .nexus-room-main {
-  position:relative; isolation:isolate; overflow:hidden; height:clamp(385px,38vw,610px);
-  border-radius:4px; background:#191a1e;
+  position:relative; isolation:isolate; overflow:hidden; height:clamp(385px,37vw,585px);
+  background:#191a1e;
 }
 html[data-theme='light'] .nexus-room-main { background:#c4beb6; }
 .nexus-room-live,.nexus-room-poster { position:absolute; inset:0; width:100%; height:100%; }
@@ -46,6 +47,30 @@ html[data-theme='light'] .nexus-room-main { background:#c4beb6; }
   position:absolute; z-index:1; top:12px; left:12px; margin:0; padding:8px 12px;
   border-radius:100px; background:#151518dc; color:#fff; font-size:13px; pointer-events:none;
 }
+.nexus-room-fullscreen,.nexus-room-enter,.nexus-room-wayfinding {
+  position:absolute; z-index:1; display:flex; align-items:center; justify-content:center;
+  border:1px solid #ffffff42; border-radius:8px; background:#141416ed; color:#fff;
+}
+.nexus-room-fullscreen { top:12px; right:12px; width:44px; height:44px; padding:0; }
+.nexus-room-enter {
+  display:none; left:12px; bottom:12px; min-height:44px; gap:9px; padding:0 12px;
+  font-size:13px; font-weight:700; touch-action:manipulation;
+}
+.nexus-room-beacon { position:relative; display:grid; place-items:center; color:#ffaaa5; }
+.nexus-room-beacon::after {
+  content:''; position:absolute; inset:-3px; border:1px solid currentColor; border-radius:50%;
+  pointer-events:none; animation:nexus-room-beacon 1.5s ease-out 3;
+}
+@keyframes nexus-room-beacon {
+  from { transform:scale(.8); opacity:.85; }
+  to { transform:scale(1.55); opacity:0; }
+}
+@media (prefers-reduced-motion:reduce) { .nexus-room-beacon::after { animation:none; } }
+.nexus-room-wayfinding {
+  display:none; top:12px; left:12px; max-width:calc(100% - 76px); padding:7px 10px;
+  font-size:12px; pointer-events:none;
+}
+.nexus-room-fullscreen:active,.nexus-room-enter:active { background:#41252a; }
 .nexus-room-camera,.nexus-room-return {
   position:absolute; z-index:1; bottom:12px; display:flex; align-items:center;
   border:1px solid #ffffff36; border-radius:100px; background:#141416e8; color:#fff;
@@ -62,7 +87,7 @@ html[data-theme='light'] .nexus-room-main { background:#c4beb6; }
 }
 .nexus-room-route {
   display:flex; align-items:center; justify-content:space-between; gap:8px;
-  flex-wrap:wrap; padding:9px 0 0;
+  flex-wrap:wrap; padding:6px 12px; border-top:1px solid var(--theme-line);
 }
 .nexus-room-stops,.nexus-room-motion,.nexus-room-products { display:flex; align-items:center; gap:4px; }
 .nexus-room :is(.nexus-room-stops button,.nexus-room-explore,.nexus-room-motion button) {
@@ -73,10 +98,10 @@ html[data-theme='light'] .nexus-room-main { background:#c4beb6; }
 .nexus-room :is(.nexus-room-stops button,.nexus-room-explore):hover { color:var(--theme-ink); }
 .nexus-room .nexus-room-explore { display:flex; gap:6px; align-items:center; }
 .nexus-room .nexus-room-explore[aria-pressed='true'] { color:var(--ps-red); }
-.nexus-room-motion { justify-content:flex-end; }
-.nexus-room .nexus-room-motion button { min-width:44px; border:1px solid var(--theme-line); }
+.nexus-room-motion { justify-content:flex-end; padding:6px 12px; border-top:1px solid var(--theme-line); }
+.nexus-room .nexus-room-motion button { min-width:44px; border:1px solid var(--theme-line); border-radius:7px; }
 .nexus-room-product {
-  display:grid; border:1px solid var(--theme-line); border-radius:4px; overflow:hidden;
+  display:grid; border:1px solid var(--theme-line); border-radius:12px; overflow:hidden;
   background:var(--theme-page);
 }
 .nexus-room-packshot { height:clamp(195px,23vw,320px); background:#f4f3f1; }
@@ -88,27 +113,54 @@ html[data-theme='light'] .nexus-room-main { background:#c4beb6; }
 .nexus-room-product-head small { display:block; margin-top:4px; color:var(--theme-muted); font-size:10px; }
 .nexus-room-info select {
   width:100%; min-height:44px; margin-top:16px; padding:8px 10px; font:inherit; font-size:13px;
-  border:1px solid var(--theme-line); background:var(--theme-page); color:var(--theme-ink);
+  border:1px solid var(--theme-line); border-radius:7px; background:var(--theme-page); color:var(--theme-ink);
 }
 .nexus-room-add { display:flex; align-items:stretch; gap:7px; margin-top:8px; }
-.nexus-room-quantity { display:flex; align-items:center; border:1px solid var(--theme-line); }
+.nexus-room-quantity { display:flex; align-items:center; border:1px solid var(--theme-line); border-radius:7px; }
 .nexus-room-quantity button,.nexus-room-add > button {
   display:inline-flex; align-items:center; justify-content:center; gap:7px; border:0; min-height:44px; cursor:pointer;
 }
-.nexus-room-quantity button { width:34px; color:var(--theme-ink); background:transparent; }
+.nexus-room-quantity button { width:34px; border-radius:6px; color:var(--theme-ink); background:transparent; }
 .nexus-room-quantity button:disabled { opacity:.36; cursor:default; }
 .nexus-room-quantity output { min-width:14px; text-align:center; font-size:13px; }
 .nexus-room-add > button {
-  flex:1; padding:3px 8px; background:var(--theme-ink); color:var(--theme-page); font-size:12px; font-weight:700;
+  flex:1; padding:3px 8px; border-radius:7px; background:var(--theme-ink); color:var(--theme-page); font-size:12px; font-weight:700;
 }
 .nexus-room-add > button:hover { opacity:.86; }
 .nexus-room-products { grid-column:1 / -1; flex-wrap:wrap; gap:6px; padding:0 clamp(13px,1.8vw,24px) 16px; }
 .nexus-room-products button {
   width:44px; height:44px; padding:0; border:1px solid var(--theme-line);
-  background:#f4f3f1; cursor:pointer; border-radius:3px; overflow:hidden;
+  background:#f4f3f1; cursor:pointer; border-radius:7px; overflow:hidden;
 }
+.ps-dialog :is(.ps-modal-top button,.ps-options label,.ps-quantity,.ps-quantity button,.ps-add-button) { border-radius:7px; }
 .nexus-room-products button[aria-pressed='true'] { border-color:var(--ps-red); }
 .nexus-room-products img { width:100%; height:100%; object-fit:contain; }
+.nexus-room[data-viewport-mode='true'],.nexus-room:fullscreen {
+  width:100%; height:100%; height:100dvh; max-width:none; max-height:none; margin:0;
+  box-sizing:border-box; align-items:stretch; gap:0; background:var(--theme-page); overflow:hidden;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.nexus-room[data-viewport-mode='true'] { position:fixed; inset:0; z-index:11000; }
+:is(.site-shell,.nexus-products):has(.nexus-room[data-viewport-mode='true']) { position:relative; z-index:11000; }
+html:has(.nexus-room[data-fullscreen='true']) { overflow:hidden; }
+.nexus-room[data-fullscreen='true'] { grid-template-columns:minmax(0,1fr); }
+.nexus-room[data-fullscreen='true'][data-inspecting='true'] {
+  grid-template-columns:minmax(0,1fr) minmax(285px,25vw);
+}
+.nexus-room[data-fullscreen='true'] .nexus-studio-viewer {
+  display:flex; flex-direction:column; min-height:0; border:0; border-radius:0;
+}
+.nexus-room[data-fullscreen='true'] .nexus-room-main { flex:1; height:auto; }
+.nexus-room[data-fullscreen='true'] .nexus-room-canvas canvas { touch-action:none; }
+.nexus-room[data-fullscreen='true'] .nexus-room-product { display:none; }
+.nexus-room[data-fullscreen='true'][data-inspecting='true'] .nexus-room-product {
+  display:grid; align-content:start; overflow:auto; overscroll-behavior:contain; border-radius:0;
+}
+.nexus-room[data-fullscreen='true'] .nexus-room-enter { display:flex; }
+@media (pointer:coarse), (max-width:720px) {
+  .nexus-room-enter,.nexus-room-wayfinding { display:flex; }
+  .nexus-room-hover { display:none; }
+}
 @media (max-width:900px) and (min-width:721px) {
   .nexus-room { grid-template-columns:minmax(0,1.45fr) minmax(255px,1fr); }
 }
@@ -116,13 +168,32 @@ html[data-theme='light'] .nexus-room-main { background:#c4beb6; }
   .ps-studio-bar button { padding-inline:9px; font-size:12px; }
   .ps-studio-bar button > svg { display:none; }
   .nexus-room { grid-template-columns:minmax(0,1fr); }
-  .nexus-room-main { height:clamp(300px,46svh,420px); }
-  .nexus-room-route { padding-top:4px; }
+  .nexus-room-main { height:clamp(290px,42svh,390px); }
+  .nexus-room-camera,.nexus-room-return { bottom:6px; border:0; background:transparent; isolation:isolate; }
+  .nexus-room-camera::before,.nexus-room-return::before {
+    content:''; position:absolute; z-index:-1; inset:6px 0; pointer-events:none;
+    border:1px solid #ffffff36; border-radius:100px; background:#141416e8;
+  }
+  .nexus-room-camera { right:8px; }
+  .nexus-room-enter { left:8px; bottom:6px; }
+  .nexus-room[data-fullscreen='true'][data-inspecting='true'] {
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr) auto;
+  }
+  .nexus-room[data-fullscreen='true'] .nexus-room-product { max-height:42dvh; }
+  .nexus-room-camera button { min-width:36px; padding:0; }
+  .nexus-room-return { left:8px; gap:4px; padding:0 9px; font-size:10px; }
+  .nexus-room-camera svg,.nexus-room-return svg { width:13px; height:13px; }
+  .nexus-room-route { padding:3px 7px; gap:2px; }
   .nexus-room-stops { gap:2px; flex-wrap:wrap; }
   .nexus-room :is(.nexus-room-stops button,.nexus-room-explore) { padding:0 6px; }
   .nexus-room-product { grid-template-columns:minmax(90px,.75fr) minmax(0,1.25fr); }
   .nexus-room-packshot { height:100%; min-height:150px; }
   .nexus-room-products { padding-top:10px; border-top:1px solid var(--theme-line); }
+  .nexus-room-add { gap:5px; }
+  .nexus-room-quantity button,.nexus-room-add > button { min-height:36px; }
+  .nexus-room-quantity button { width:28px; }
+  .nexus-room-quantity output,.nexus-room-add > button { font-size:11px; }
   .nexus-room-add > button svg { display:none; }
   .nexus-room-product h3 { font-size:22px; }
 }
