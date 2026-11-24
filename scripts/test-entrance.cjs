@@ -1,96 +1,98 @@
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const base = process.env.ENTRANCE_TEST_URL || 'http://127.0.0.1:3001';
+
+const base = process.env.ENTRANCE_TEST_URL || 'http://127.0.0.1:3000';
+const executablePath = process.env.BROWSER_EXECUTABLE;
+const screenshotDir = process.env.ENTRANCE_SCREENSHOT_DIR;
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: process.env.BROWSER_EXECUTABLE || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true, args: ['--enable-webgl', '--use-angle=d3d11'] });
+  // The 2D intro and its handoff must work even when WebGL is unavailable.
+  const browser = await chromium.launch({ executablePath, args: ['--disable-3d-apis'] });
   const errors = [];
-  fs.mkdirSync('qa', { recursive: true });
-  async function open(mobile = false, reduced = false) {
-    const page = await browser.newPage({ viewport: mobile ? { width: 390, height: 844 } : { width: 1440, height: 900 }, isMobile: mobile, hasTouch: mobile, reducedMotion: reduced ? 'reduce' : 'no-preference' });
-    page.on('pageerror', e => errors.push(e.message));
-    await page.clock.install();
-    await page.goto(base, { timeout: 90000 });
-    await page.locator('.entrance-skip:not(:disabled)').waitFor({ timeout: 60000 });
-    await page.locator('.intro[data-ready="true"]').waitFor({ timeout: 60000 });
-    await page.waitForTimeout(2500);
+  const desktop = { viewport: { width: 1440, height: 900 } };
+  const mobile = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
+
+  async function open(layout, reducedMotion = 'no-preference', path = '/') {
+    const page = await browser.newPage({ ...layout, reducedMotion });
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(new URL(path, base).href, { waitUntil: 'domcontentloaded' });
+    await page.locator('#home').waitFor();
+    await page.waitForFunction(() => document.documentElement.classList.contains('lenis'));
     return page;
   }
-  async function trigger(page, mobile) {
-    const canvas = page.locator('.intro canvas');
-    const box = await canvas.boundingBox();
-    const x = box.x + box.width / 2, y = box.y + box.height * .51;
-    if (mobile) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
-    await page.locator('[data-entrance="breaking"]').waitFor();
-  }
+
   try {
-    const page = await open();
-    assert.equal(await page.locator('.entrance-landing').evaluate(el => el.inert), true);
-    await page.mouse.wheel(0, 500); await page.waitForTimeout(100);
-    assert.equal(await page.evaluate(() => scrollY), 0, 'intro scroll is locked');
-    await page.mouse.click(50, 200);
-    assert.equal(await page.locator('.nexus-entrance').getAttribute('data-entrance'), 'waiting', 'background does not trigger');
-    await page.mouse.move(720, 450); await page.mouse.down(); await page.mouse.move(765, 455, { steps: 6 }); await page.mouse.up();
-    assert.equal(await page.locator('.nexus-entrance').getAttribute('data-entrance'), 'waiting', 'drag does not trigger');
-    await page.screenshot({ path: 'qa/entrance-idle.png' });
-    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 10000));
-    await trigger(page, false);
-    await page.clock.runFor(420);
-    await page.screenshot({ path: 'qa/entrance-impact.png' });
-    await page.clock.runFor(500);
-    await page.screenshot({ path: 'qa/entrance-fracture.png' });
-    await page.clock.runFor(420);
-    await page.screenshot({ path: 'qa/entrance-curl.png' });
-    assert.equal(await page.locator('.intro').count(), 1, 'intro stays mounted during reveal');
-    await page.clock.runFor(1800); await page.clock.resume();
-    await page.locator('[data-entrance="revealed"]').waitFor();
-    assert.equal(await page.locator('.intro').count(), 0, 'intro canvas removed');
-    assert.equal(await page.locator('.entrance-landing').evaluate(el => el.inert), false);
-    await page.waitForTimeout(500);
-    await page.screenshot({ path: 'qa/entrance-revealed.png' });
-    assert.equal(await page.evaluate(() => document.body.style.overflow), '');
-    assert.equal(await page.evaluate(() => document.activeElement.id), 'hero-title', 'focus moves to the revealed landing');
-    await page.locator('#about .bd-cta').click();
-    await page.getByRole('dialog', { name: /Make it/ }).waitFor({ state: 'visible' });
-    await page.getByRole('button', { name: 'Close dialog' }).click();
-    await page.getByRole('dialog').waitFor({ state: 'hidden' });
-    await page.close();
-    const skipped = await browser.newPage();
-    skipped.on('pageerror', e => errors.push(e.message));
-    const tourModels = [];
-    await skipped.route('**/models/nexus-gym/*.glb', route => {
-      tourModels.push(route.request().url());
-      return route.abort();
-    });
-    await skipped.goto(base, { waitUntil: 'domcontentloaded' });
-    await skipped.locator('.intro[data-ready="true"]').waitFor({ timeout: 60000 });
-    assert.deepEqual(tourModels, [], 'tour models do not load during the intro');
-    await skipped.getByRole('button', { name: 'ENTER NEXUS' }).click();
-    await skipped.locator('[data-entrance="revealed"]').waitFor();
-    assert.equal(await skipped.locator('.entrance-landing').evaluate(el => el.inert), false, 'entry works without the detailed tour models');
-    assert.equal(tourModels.some(url => /\/(interior|priya-reception)\.glb$/.test(url)), false, 'interior assets wait for tour progress');
-    await skipped.close();
-    for (const reduced of [false, true]) {
-      const mobile = await open(true, reduced);
-      if (!reduced) {
-        await mobile.screenshot({ path: 'qa/entrance-mobile-idle.png' });
-        await mobile.clock.pauseAt(await mobile.evaluate(() => Date.now() + 10000));
+    for (const [name, layout] of Object.entries({ desktop, mobile })) {
+      const page = await open(layout);
+      const opening = page.locator('.nexus-opening');
+      await page.locator('.nexus-opening[data-active]').waitFor();
+      assert.equal(await opening.locator('.nexus-opening-blade').count(), 5);
+      assert.equal(await opening.locator('canvas').count(), 1);
+      await page.waitForFunction(() => {
+        const value = Number(document.querySelector('.nexus-opening-counter')?.textContent);
+        const canvas = document.querySelector('.nexus-opening canvas');
+        if (!canvas || value < 15 || value >= 100) return false;
+        const pixel = canvas.getContext('2d').getImageData(Math.round(canvas.width * .12), Math.round(canvas.height * .5), 1, 1).data;
+        return pixel[0] > pixel[1] * 2 && pixel[3] > 0;
+      }, null, { timeout: 3000 });
+      if (screenshotDir) await page.screenshot({ path: `${screenshotDir}/nexus-opening-${name}.png` });
+
+      if (name === 'mobile') {
+        await page.touchscreen.tap(190, 350);
+      } else {
+        const skip = page.getByRole('button', { name: 'Skip intro' });
+        await page.keyboard.press('Tab');
+        assert.equal(await skip.evaluate(button => button === document.activeElement), true);
+        await page.keyboard.press('Enter');
       }
-      await trigger(mobile, true);
-      if (!reduced) {
-        await mobile.clock.runFor(950);
-        await mobile.screenshot({ path: 'qa/entrance-mobile-rift.png' });
-        await mobile.clock.runFor(1800); await mobile.clock.resume();
-      }
-      await mobile.locator('[data-entrance="revealed"]').waitFor({ timeout: 15000 });
-      await mobile.waitForTimeout(700);
-      await mobile.screenshot({ path: `qa/entrance-mobile${reduced ? '-reduced' : ''}.png` });
-      assert.ok(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'no horizontal overflow');
-      await mobile.close();
+      await opening.waitFor({ state: 'detached' });
+      assert.equal(await page.evaluate(() => document.body.style.overflow), '');
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      console.log(`${name}: the ECG, five shutters and early dismissal verified.`);
+      await page.close();
     }
+
+    const automatic = await open(desktop);
+    await automatic.waitForFunction(() => {
+      const fill = document.querySelectorAll('.nexus-opening-fill')[2];
+      return fill && getComputedStyle(fill).clipPath === 'inset(0%)' && getComputedStyle(fill).color === 'rgb(255, 30, 60)';
+    }, null, { timeout: 6000 });
+    if (screenshotDir) await automatic.screenshot({ path: `${screenshotDir}/nexus-opening-wordmark.png` });
+    await automatic.waitForFunction(() => {
+      const [up, down] = document.querySelectorAll('.nexus-opening-blade');
+      return up && down && new DOMMatrix(getComputedStyle(up).transform).m42 < -30 &&
+        new DOMMatrix(getComputedStyle(down).transform).m42 > 30;
+    }, null, { timeout: 4000 });
+    await automatic.locator('.nexus-opening').waitFor({ state: 'detached' });
+    assert.ok(await automatic.getByRole('heading', { level: 1, name: /Nexus Fitness Club/ }).isVisible());
+    await automatic.close();
+
+    const navigation = await open(desktop, 'no-preference', '/hero');
+    const opening = navigation.locator('.nexus-opening[data-active]');
+    await opening.waitFor();
+    await navigation.mouse.move(640, 410);
+    await navigation.mouse.wheel(0, 140);
+    await opening.waitFor({ state: 'detached' });
+    await navigation.waitForFunction(() => scrollY > 0);
+    await navigation.waitForFunction(() => !document.documentElement.classList.contains('lenis-scrolling'));
+    await navigation.evaluate(() => scrollTo({ top: 1400, behavior: 'instant' }));
+    await navigation.waitForFunction(() => scrollY >= 900);
+    await navigation.reload({ waitUntil: 'load' });
+    await opening.waitFor();
+    await navigation.waitForFunction(() => scrollY === 0);
+    await navigation.close();
+
+    const reduced = await open(mobile, 'reduce');
+    assert.equal(await reduced.locator('.nexus-opening').isVisible(), false);
+    assert.ok(await reduced.getByRole('button', { name: 'Book a trial' }).first().isVisible());
+    await reduced.close();
+
+    const linked = await open(desktop, 'no-preference', '/#about');
+    assert.equal(await linked.locator('.nexus-opening').isVisible(), false);
+    await linked.close();
+
     assert.deepEqual(errors, []);
-    fs.writeFileSync('qa/entrance-result.json', JSON.stringify({ passed: true, checks: ['background and drag rejection', 'scroll lock', 'continuous full-page tear and curl', 'intro disposal', 'landing focus and interactivity', 'skip', 'mobile tap', 'reduced motion', 'no horizontal overflow'], errors }, null, 2));
-    console.log('Entrance checks passed.');
+    console.log('Wordmark fill, shutter motion, automatic reveal, /hero, reload, wheel, reduced motion and direct section links verified.');
+    console.log('VERDICT: PASS');
   } finally { await browser.close(); }
-})().catch(error => { console.error(error); process.exitCode = 1; });
+})().catch(error => { console.error('VERDICT: FAIL', error); process.exitCode = 1; });

@@ -1,0 +1,66 @@
+@font-face {
+  font-family: 'Nexus Barlow Condensed';
+  src: url('/fonts/nexus-barlow-condensed-900.woff2') format('woff2');
+  font-weight: 900;
+  font-display: swap;
+}
+
+.nexus-opening {
+  position: fixed;
+  z-index: 10002;
+  inset: 0;
+  overflow: hidden;
+  color: #fafafa;
+  pointer-events: none;
+  animation: nexus-opening-timeout 5500ms linear both;
+}
+
+.nexus-opening[data-active] {
+  animation: none;
+  pointer-events: auto;
+}
+
+.nexus-opening:not([data-active]) :is(.nexus-opening-lockup, .nexus-opening-skip) {
+  visibility: hidden;
+}
+
+.nexus-opening-display {
+  font-family: 'Nexus Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+}
+
+.nexus-opening-mono {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.nexus-opening-stroke {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgb(250 250 250 / .32);
+}
+
+.nexus-opening-skip {
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .nexus-opening-skip {
+    right: max(40px, env(safe-area-inset-right));
+    bottom: max(32px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 768px) {
+  .nexus-opening-stroke {
+    -webkit-text-stroke: 2px rgb(250 250 250 / .34);
+  }
+}
+
+@keyframes nexus-opening-timeout {
+  0%, 94% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nexus-opening { display: none; }
+}
