@@ -1,0 +1,51 @@
+.nexus-footer-art-filter {
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.nexus-fuzzy-footer {
+  --nexus-footer-accent: #ff6676;
+  border-top: 1px solid var(--theme-line);
+}
+
+html[data-theme="light"] .nexus-fuzzy-footer {
+  --nexus-footer-accent: #a7111d;
+}
+
+.nexus-fuzzy-footer .fgf-img {
+  filter: url(#nexus-footer-art);
+}
+
+.nexus-fuzzy-footer :is(.fgf-head, .fgf-link) {
+  color: var(--theme-ink);
+}
+
+.nexus-fuzzy-footer :is(.fgf-logo, .fgf-link:focus-visible) {
+  color: var(--nexus-footer-accent);
+}
+
+.nexus-fuzzy-footer .fgf-ball {
+  background: radial-gradient(circle at 46% 38%, #fff 42%, #f7f5ef 66%, #e0d5d1 86%, #ba9c97);
+}
+
+.nexus-fuzzy-footer .fgf-rim {
+  background: radial-gradient(closest-side, transparent 98.1%, #ffc6cb80 98.5%, #c8485757);
+}
+
+.nexus-fuzzy-footer .fgf-shade {
+  background: radial-gradient(closest-side, transparent 92%, #6d17201a 95.4%, #6215214d 98.6%, #47131b99);
+}
+
+.nexus-fuzzy-footer .fgf-mail {
+  padding: 12px 20px;
+  border: 1px solid #f7f5ef66;
+  border-radius: 999px;
+  background: #1a1113;
+  color: #f7f5ef;
+}
+
+.nexus-fuzzy-footer .fgf-mail:focus-visible {
+  color: #f7f5ef;
+  outline-color: #f7f5ef;
+}
