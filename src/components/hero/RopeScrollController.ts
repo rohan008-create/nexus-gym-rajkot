@@ -38,11 +38,7 @@ export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: Ro
     const element = root.current; if (!element) return;
     const context = gsap.context(() => {
       if (reduced) { gsap.set('[data-reveal], .persistent-scene, .site-nav', { autoAlpha: 1, clearProps: 'transform' }); return; }
-      if (gymTour) {
-        entrance.current = gsap.timeline({ paused: true }).fromTo('.gym-tour-stage', { opacity: 0 }, { opacity: 1, duration: .55, ease: 'power3.out' });
-        if (enabled.current) entrance.current.play();
-        return;
-      }
+      if (gymTour) return;
       entrance.current = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
         .fromTo('.persistent-scene', { opacity: 0 }, { opacity: 1, duration: .85 })
         .fromTo('.hero-copy .eyebrow', { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: .45 }, .05)

@@ -8,7 +8,7 @@ export default function ArrivalPhotograph() {
   return <div className="gym-tour-arrival" aria-hidden="true">
     <picture>
       <source media="(max-aspect-ratio: 6/5)" srcSet={`/models/nexus-gym/${name}-portrait.webp`} />
-      <img src={`/models/nexus-gym/${name}.webp`} alt="" width={1836} height={856} draggable={false} decoding="async" />
+      <img src={`/models/nexus-gym/${name}.webp`} alt="" width={1836} height={856} draggable={false} decoding="async" fetchPriority="high" />
     </picture>
   </div>;
 }

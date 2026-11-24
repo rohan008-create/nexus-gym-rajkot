@@ -2,13 +2,13 @@
 .gym-tour-hero { --tactile-highlight: #d52036; --tactile-ink: #fffdf5; }
 html[data-theme='light'] .gym-tour-hero { --tactile-highlight: #b9172c; }
 .gym-tour-stage{position:sticky;top:0;height:100svh;height:100dvh;overflow:hidden;background:#283139;-webkit-touch-callout:none}
+.gym-tour-stage[data-tour-pending]{touch-action:pan-x pinch-zoom}
 .gym-tour-visual{position:absolute;inset:0;pointer-events:none;isolation:isolate}
 .gym-tour-visual>div,.gym-tour-visual canvas{width:100%!important;height:100%!important}
 .gym-tour-visual canvas{display:block;touch-action:pan-y}
 .gym-tour-poster{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease-out}
 .gym-tour-poster.is-visible{opacity:1}
 .gym-tour-accessible-title{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.gym-tour-accessible-title:focus{outline:none}
 .gym-tour-edge-shade {
   position: absolute;
   inset: 0;
@@ -50,6 +50,21 @@ html[data-theme='light'] .site-shell .gym-tour-hero :is(.gym-tour-chapter-title,
   line-height: 1.07;
   letter-spacing: -.06em;
   text-transform: none;
+}
+.gym-tour-hero .gym-tour-arrival-title {
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-weight: 950;
+  line-height: .9;
+  letter-spacing: -.085em;
+  text-transform: uppercase;
+  text-shadow: 0 3px 18px #10161790;
+}
+.gym-tour-arrival-title span {
+  display: block;
+  margin-top: .5em;
+  font-size: .37em;
+  letter-spacing: .2em;
+  line-height: 1.2;
 }
 .gym-tour-hero .gym-tour-chapter-description,
 html[data-theme='light'] .site-shell .gym-tour-hero :is(.gym-tour-chapter-description, .gym-tour-static-copy p) {
@@ -174,6 +189,10 @@ html[data-theme='light'] .site-shell .gym-tour-hero :is(.gym-tour-chapter-descri
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  transition: opacity .22s ease-out;
+}
+.gym-tour-hero[data-tour-status='ready']:not(.is-static) .gym-tour-stage:not(:has(.nexus-opening)) .gym-tour-arrival {
+  opacity: 0;
 }
 .gym-tour-arrival picture, .gym-tour-arrival img {
   display: block;

@@ -5,7 +5,7 @@ const moduleObject = { exports: {} };
 const source = fs.readFileSync('src/components/hero/gym-tour/gymTourConfig.ts','utf8');
 const code = ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText;
 new Function('exports', code)(moduleObject.exports);
-const {sampleCamera,tourBeatAt,advanceTour,DOORWAY,DESKTOP_CAMERAS,MOBILE_CAMERAS,sampleGuide,STAIR,stairHeight} = moduleObject.exports;
+const {sampleCamera,tourBeatAt,advanceTour,DOORWAY,DESKTOP_CAMERAS,MOBILE_CAMERAS,sampleGuide,STAIR,STAIR_END,stairHeight,TOUR_CHAPTERS,TOUR_ENTRY_PROGRESS,tourScrollCeiling} = moduleObject.exports;
 for (const mobile of [false,true]) {
   const p=[0,0,0],target=[0,0,0];let last=null;
   for(let step=0;step<=1000;step++){
@@ -32,14 +32,24 @@ function stepsAt(progress) {
   if (guide.stair >= 0) return guide.stair;
   return guide.position[2] === STAIR.bottomZ ? 0 : STAIR.count;
 }
+const receptionEnd = TOUR_CHAPTERS.find(chapter => chapter.id === 'strength').at;
+const receptionPosition = progress => Math.max(STAIR_END, Math.min(receptionEnd, progress));
+const floorPosition = progress => Math.max(receptionEnd, progress);
+assert.equal(tourScrollCeiling(0), TOUR_ENTRY_PROGRESS);
+assert.ok(tourScrollCeiling(0) > TOUR_CHAPTERS.find(chapter => chapter.id === 'stairs').at, 'one fling can reach the entrance chapter');
+assert.ok(tourScrollCeiling(DOORWAY) < receptionEnd, 'one fling from the doorway cannot queue the strength floor');
+assert.ok(tourScrollCeiling(receptionEnd) < TOUR_CHAPTERS.find(chapter => chapter.id === 'cardio').at, 'one fling from the strength entrance cannot queue the cardio floor');
+assert.equal(tourScrollCeiling(1), 1);
 for (const fps of [24, 60, 120]) {
   const playback = { progress: 0, shutter: 0 };
   for (const destination of [1, .28, DOORWAY, .64, 0]) {
     let moving = true;
-    for (let frame = 0; moving && frame < fps * 9; frame++) {
+    for (let frame = 0; moving && frame < fps * 18; frame++) {
       const before = playback.progress;
       moving = advanceTour(playback, destination, 1 / fps);
       assert.ok(Math.abs(stepsAt(playback.progress) - stepsAt(before)) <= 3 / fps + 1e-9, 'fast and reverse scroll must respect the three-step speed cap');
+      assert.ok(Math.abs(receptionPosition(playback.progress) - receptionPosition(before)) <= .05 / fps + 1e-9, 'fast and reverse scroll must preserve a steady pace from the landing through reception');
+      assert.ok(Math.abs(floorPosition(playback.progress) - floorPosition(before)) <= .085 / fps + 1e-9, 'fast and reverse scroll must preserve a steady pace on the training floors');
       assert.equal(playback.shutter, 0, 'the continuous doorway never blacks out');
     }
     assert.equal(moving, false, 'the renderer must become idle');
@@ -52,6 +62,12 @@ assert.ok(Math.abs(slowScroll.progress - (.30 + .002 * -Math.expm1(-12 / 60))) <
 const droppedFrame = { progress: .30, shutter: 0 };
 advanceTour(droppedFrame, .80, 1);
 assert.ok(stepsAt(droppedFrame.progress) - stepsAt(.30) <= .3 + 1e-9, 'a dropped frame must not skip steps');
+const droppedReceptionFrame = { progress: DOORWAY, shutter: 0 };
+advanceTour(droppedReceptionFrame, 1, 1);
+assert.ok(droppedReceptionFrame.progress - DOORWAY <= .005 + 1e-9, 'a dropped frame must not jump through reception');
+const droppedFloorFrame = { progress: receptionEnd, shutter: 0 };
+advanceTour(droppedFloorFrame, 1, 1);
+assert.ok(droppedFloorFrame.progress <= receptionEnd + .0085 + 1e-9, 'a dropped frame must not jump through the training floors');
 const reversal = { progress: .44, shutter: 0 };
 advanceTour(reversal, .6, .03);
 assert.equal(reversal.shutter, 0);
@@ -89,5 +105,5 @@ for(const view of ['exterior','interior']) {
 }
 assets.dispose();
 console.log('Merged exterior/interior geometry: bounded material buckets and finite vertices validated.');
-console.log('Continuous desktop/mobile camera, doorway clearance and a three-step-per-second cap in both directions validated.');
+console.log('Continuous desktop/mobile camera, bounded scroll lookahead, doorway clearance and speed caps through the stairs, reception and training floors validated.');
 console.log('VERDICT: PASS');

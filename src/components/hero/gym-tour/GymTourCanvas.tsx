@@ -1,5 +1,5 @@
 'use client';
-import { Component, useEffect, useMemo, useRef, useState } from 'react';
+import { Component, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { buildGymGeometry } from './buildGymGeometry';
@@ -30,16 +30,16 @@ function Sign({ text, position, width, color = '#f02643' }: { text: string; posi
   useEffect(() => () => texture.dispose(), [texture]);
   return <mesh position={position}><planeGeometry args={[width, width * .1875]} /><meshBasicMaterial map={texture} transparent depthWrite={false} /></mesh>;
 }
-function Scene({ progress, active, mobile, interiorRequested, onInvalidate, onPresent, onReady, onFailure, onDprChange }: {
+function Scene({ progress, active, mobile, interiorRequested, onInvalidate, onPresent, onReady, onFailure }: {
   progress: React.MutableRefObject<number>; active: boolean; mobile: boolean; onInvalidate: React.MutableRefObject<() => void>; onReady: () => void; onFailure: () => void;
   interiorRequested: boolean;
-  onDprChange: (dpr: number) => void;
   onPresent: (progress: number, shutter: number) => void;
 }) {
   const { camera, gl, scene, invalidate, size, setFrameloop } = useThree();
   const night = useNightScene();
   useEffect(() => { gl.domElement.dataset.sceneTime = night ? 'night' : 'day'; invalidate(); }, [night, gl, invalidate]);
   const slowFrames = useRef(0);
+  const adaptiveDpr = useRef(Infinity);
   const exterior = useRef<THREE.Group>(null), interior = useRef<THREE.Group>(null);
   const sky = useRef<THREE.HemisphereLight>(null), sun = useRef<THREE.DirectionalLight>(null), fill = useRef<THREE.DirectionalLight>(null);
   const readiness = useRef({ announced: false, scheduled: false, frame: 0 });
@@ -49,7 +49,7 @@ function Scene({ progress, active, mobile, interiorRequested, onInvalidate, onPr
     result.exterior.forEach(part => { raiseGymBand(part.geometry); openEntrance(part.material); });
     return result;
   }, []);
-  const motion = useMemo(() => ({ position: [0, 0, 0] as Point, target: [0, 0, 0] as Point, progress: 0, shutter: 0, initialized: false }), []);
+  const motion = useMemo(() => ({ position: [0, 0, 0] as Point, target: [0, 0, 0] as Point, progress: 0, shutter: 0 }), []);
   const stopForContextLoss = () => {
     lifecycle.current.stopped = true;
     onInvalidate.current = () => {};
@@ -74,31 +74,24 @@ function Scene({ progress, active, mobile, interiorRequested, onInvalidate, onPr
   useEffect(() => {
     if (lifecycle.current.stopped) return;
     setFrameloop(active ? 'demand' : 'never');
-    motion.initialized = false;
     if (active) invalidate();
-  }, [active, mobile, invalidate, motion, setFrameloop]);
+  }, [active, mobile, invalidate, setFrameloop]);
   useEffect(() => () => assets.dispose(), [assets]);
   // Update progress before the guide/door sample it, including the last demand frame.
   useFrame((_, delta) => {
     if (lifecycle.current.stopped || document.hidden || !active) return;
-    if (!motion.initialized) {
-      motion.progress = progress.current;
-      motion.initialized = true;
-    } else {
-      const moving = advanceTour(motion, progress.current, delta);
-      if (moving && active) {
-        // Lower the pixel cost only after sustained slow scrolling. Ignore the
-        // long first delta when the on-demand canvas wakes up.
-        slowFrames.current = delta > .026 ? slowFrames.current + 1 : Math.max(0, slowFrames.current - 1);
-        if (slowFrames.current >= 8) {
-          const resolution = gl.getPixelRatio();
-          if (resolution > .7) onDprChange(Math.max(.7, resolution - .15));
-          slowFrames.current = 0;
-        }
-        invalidate();
-      } else {
+    const moving = advanceTour(motion, progress.current, delta);
+    if (moving) {
+      // Lower the pixel cost only after several slow frames during movement.
+      slowFrames.current = delta > .026 ? slowFrames.current + 1 : Math.max(0, slowFrames.current - 1);
+      if (slowFrames.current >= 8) {
+        const resolution = Math.min(gl.getPixelRatio(), adaptiveDpr.current);
+        if (resolution > .7) adaptiveDpr.current = Math.max(.7, resolution - .15);
         slowFrames.current = 0;
       }
+      invalidate();
+    } else {
+      slowFrames.current = 0;
     }
   }, -1);
   useFrame(() => {
@@ -135,6 +128,11 @@ function Scene({ progress, active, mobile, interiorRequested, onInvalidate, onPr
     // or already-disposed program after the context-loss event/unmount begins.
     try {
       if (gl.getContext().isContextLost()) { stopForContextLoss(); return; }
+      const resolution = adaptiveDpr.current;
+      if (gl.getPixelRatio() > resolution && size.width > 0 && size.height > 0) {
+        // Resizing clears the drawing buffer. Draw the replacement before returning this frame.
+        gl.setDrawingBufferSize(size.width, size.height, resolution);
+      }
       gl.render(scene, camera);
     } catch (error) {
       // Context loss may occur inside a native GL call before its event arrives.
@@ -143,9 +141,8 @@ function Scene({ progress, active, mobile, interiorRequested, onInvalidate, onPr
       throw error;
     }
     onPresent(motion.progress, motion.shutter);
-    // Announce readiness on the following RAF, after the successful final draw.
-    const exteriorReady = gl.domElement.dataset.exteriorSettled === 'true';
-    if (exteriorReady && !readiness.current.announced && !readiness.current.scheduled && size.width > 0 && size.height > 0) {
+    // The procedural facade is already usable. Detailed assets can upgrade it after the first draw.
+    if (!readiness.current.announced && !readiness.current.scheduled && size.width > 0 && size.height > 0) {
       readiness.current.scheduled = true;
       readiness.current.frame = requestAnimationFrame(() => {
         if (!lifecycle.current.stopped && !gl.getContext().isContextLost()) {
@@ -193,9 +190,6 @@ class Boundary extends Component<{ children: React.ReactNode; onFailure: () => v
   componentDidCatch() { this.props.onFailure(); }
   render() { return this.state.failed ? null : this.props.children; }
 }
-export default function GymTourCanvas(props: Omit<Parameters<typeof Scene>[0], 'onDprChange'>) {
-  // Keep the chosen resolution across React renders as tour chapters change.
-  const [adaptiveDpr, setAdaptiveDpr] = useState<number>();
-  const dpr: number | [number, number] = props.mobile ? Math.min(1, adaptiveDpr ?? 1) : adaptiveDpr ?? [1, 1.5];
-  return <Boundary onFailure={props.onFailure}><Canvas className="gym-tour-world" shadows="soft" frameloop="demand" dpr={dpr} camera={INITIAL_CAMERA} gl={GL_OPTIONS} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1; }} aria-hidden="true"><Scene {...props} onDprChange={setAdaptiveDpr} /></Canvas></Boundary>;
+export default function GymTourCanvas(props: Parameters<typeof Scene>[0]) {
+  return <Boundary onFailure={props.onFailure}><Canvas className="gym-tour-world" shadows="soft" frameloop="demand" dpr={props.mobile ? 1 : [1, 1.5]} camera={INITIAL_CAMERA} gl={GL_OPTIONS} onCreated={({ gl }) => { gl.toneMapping = THREE.ACESFilmicToneMapping; gl.toneMappingExposure = 1; }} aria-hidden="true"><Scene {...props} /></Canvas></Boundary>;
 }

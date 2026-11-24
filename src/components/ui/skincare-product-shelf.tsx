@@ -6,9 +6,12 @@
 'use client';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { LayoutGroup, motion, useMotionValue, useReducedMotion, animate } from 'motion/react';
+import { Box, LayoutGrid, ShoppingBag } from 'lucide-react';
+import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import type { Product, ProductCategory } from '../products/products';
 import { usePageScroller } from '../layout/SmoothScroll';
+import ProductPreview from '../products/ProductPreview';
+import Showroom from '../products/showroom/Showroom';
 
 export type { Product } from '../products/products';
 type KitLine = { productId: string; variant: number; qty: number };
@@ -44,7 +47,7 @@ function NativeDialog({ label, onClose, children }: { label: string; onClose: ()
   return createPortal(<dialog ref={ref} className="ps-dialog" aria-label={label} data-lenis-prevent
     onKeyDown={event => {
       if (event.key !== 'Tab' || !ref.current) return;
-      const focusable = Array.from(ref.current.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), [tabindex="0"]')).filter(element => element.getClientRects().length && !element.closest('[hidden]'));
+      const focusable = Array.from(ref.current.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]')).filter(element => element.getClientRects().length && !element.closest('[hidden]'));
       const first = focusable[0], last = focusable[focusable.length - 1];
       if (event.shiftKey && (document.activeElement === first || document.activeElement === ref.current)) { event.preventDefault(); last?.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
@@ -54,12 +57,28 @@ function NativeDialog({ label, onClose, children }: { label: string; onClose: ()
   </dialog>, document.body);
 }
 
-function ProductImage({ product, detail = false }: { product: Product; detail?: boolean }) {
+function ProductImage({ product }: { product: Product }) {
   const reduce = useReducedMotion();
-  return <motion.img layoutId={`nexus-product-${product.id}`} transition={reduce ? { duration: 0 } : spring} className={detail ? 'ps-detail-image' : 'ps-product-image'} src={product.image} alt={`${product.name} in Nexus concept packaging`} width={768} height={1024} loading={detail ? 'eager' : 'lazy'} decoding="async" draggable={false} />;
+  return <motion.img layoutId={`nexus-product-${product.id}`} transition={reduce ? { duration: 0 } : spring} className="ps-product-image" src={product.image} alt="" width={720} height={720} loading="lazy" decoding="async" draggable={false} />;
 }
 
 export function ProductShelf({ products }: { products: Product[] }) {
+  const [studio, setStudio] = useState(true);
+  const [studioFailed, setStudioFailed] = useState(false);
+  const [studioNear, setStudioNear] = useState(false);
+  const studioRegion = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = studioRegion.current;
+    if (!element || !('IntersectionObserver' in window)) { setStudioNear(true); return; }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setStudioNear(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '240px' });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
   const [filter, setFilter] = useState<'All' | ProductCategory>('All');
   const [view, setView] = useState<string | null>(null);
   const [kit, setKit] = useState<KitLine[]>([]);
@@ -91,24 +110,41 @@ export function ProductShelf({ products }: { products: Product[] }) {
   };
   const changeQty = (index: number, qty: number) => setKit(current => qty <= 0 ? current.filter((_, i) => i !== index) : current.map((line, i) => i === index ? { ...line, qty: Math.min(9, qty) } : line));
   return <LayoutGroup id="nexus-products">
-    <div className="ps-topline"><span>NEXUS / THE ESSENTIALS</span><span>NUTRITION. TRAINING. EVERYDAY.</span></div>
-    <header className="ps-header">
-      <div><p className="ps-eyebrow">THE NEXUS COLLECTION</p><h2 id="products-title">FUEL YOUR<br /><em>EVERYDAY.</em></h2></div>
-      <div className="ps-header-side"><p>From the first scoop<br />to the last rep.</p><span>The essentials that go with you.</span><button className="ps-kit-button" onClick={() => setView('kit')} aria-label={`View kit, ${totalQty} items`}>YOUR KIT <span aria-live="polite">{String(totalQty).padStart(2, '0')}</span></button></div>
+    <header className="ps-studio-heading">
+      <h2 id="products-title">Training <em>essentials.</em></h2>
     </header>
-    <div className="ps-toolbar"><div className="ps-filters" role="group" aria-label="Filter products">{(['All', 'Supplements', 'Nutrition', 'Accessories'] as const).map(category => <button key={category} aria-pressed={filter === category} onClick={() => setFilter(category)}>{category}<span>{category === 'All' ? products.length : products.filter(product => product.category === category).length}</span></button>)}</div><span className="ps-catalogue-note">ILLUSTRATIVE COLLECTION / INDICATIVE PRICES</span></div>
-    <div className="ps-shelves" aria-label="Gym product shelves">
-      {rows.map((row, index) => <div className="ps-shelf-row" key={`${filter}-${index}`}>
-        {row.map(product => <article className="ps-product" key={product.id} data-product={product.id}>
-          <motion.button className="ps-product-stage" onClick={() => setView(product.id)} aria-label={`View ${product.name}`} whileHover={reduce ? undefined : { scale: 1.015 }} transition={spring}>
-            <ProductImage product={product} /><span className="ps-view-label" aria-hidden>EXPLORE PRODUCT</span>
-          </motion.button>
-          <div className="ps-shelf-edge" aria-hidden />
-          <button className="ps-product-caption" onClick={() => setView(product.id)} aria-label={`Details for ${product.name}`}><span className="ps-product-category">{product.category}</span><h3>{product.name}</h3><span className="ps-product-option">{product.variants[0].label}</span><span className="ps-product-price">{currency(product.variants[0].price)}<small>indicative</small></span></button>
-        </article>)}
-      </div>)}
+    <div ref={studioRegion} className="ps-studio">
+      <div className="ps-studio-bar">
+        <div className="ps-studio-views" role="group" aria-label="Product view">
+          <button type="button" aria-pressed={studio} aria-controls="nexus-studio-view" onClick={() => { setStudioFailed(false); setStudio(true); }}><Box size={16} aria-hidden /> {studioFailed ? 'Retry 3D' : '3D Studio'}</button>
+          <button type="button" aria-pressed={!studio} aria-controls="nexus-product-catalogue" onClick={() => setStudio(false)}><LayoutGrid size={16} aria-hidden /> Products</button>
+        </div>
+        <button type="button" className="ps-studio-kit" onClick={() => setView('kit')} aria-label={`View kit, ${totalQty} items`}>
+          <ShoppingBag size={16} aria-hidden /> Your Kit <span aria-hidden>{totalQty}</span>
+        </button>
+      </div>
+      <div id="nexus-studio-view" hidden={!studio}>
+        {studio && (studioNear ? <Showroom products={products} onAdd={add}
+          onFailure={() => { setStudioFailed(true); setStudio(false); }} /> :
+          <div className="nexus-room nexus-room-placeholder"><div className="nexus-room-main"><img className="nexus-room-poster" src="/assets/products/nexus-showroom.webp" alt="" width={1280} height={720} loading="lazy" /></div></div>)}
+      </div>
+      <div id="nexus-product-catalogue" hidden={studio}>
+        {studioFailed && <p className="ps-studio-status" role="status">3D is unavailable. You can browse the product photos below.</p>}
+        <div className="ps-toolbar"><div className="ps-filters" role="group" aria-label="Filter products">{(['All', 'Supplements', 'Nutrition', 'Accessories'] as const).map(category => <button key={category} aria-pressed={filter === category} onClick={() => setFilter(category)}>{category}<span>{category === 'All' ? products.length : products.filter(product => product.category === category).length}</span></button>)}</div><span className="ps-catalogue-note">ILLUSTRATIVE COLLECTION / INDICATIVE PRICES</span></div>
+        <div className="ps-shelves" aria-label="Gym product shelves">
+          {rows.map((row, index) => <div className="ps-shelf-row" key={`${filter}-${index}`}>
+            {row.map(product => <article className="ps-product" key={product.id} data-product={product.id}>
+              <motion.button className="ps-product-stage" onClick={() => setView(product.id)} aria-label={`View ${product.name}`} whileHover={reduce ? undefined : { scale: 1.015 }} transition={spring}>
+                <ProductImage product={product} /><span className="ps-view-label" aria-hidden>EXPLORE PRODUCT</span>
+              </motion.button>
+              <div className="ps-shelf-edge" aria-hidden />
+              <button className="ps-product-caption" onClick={() => setView(product.id)} aria-label={`Details for ${product.name}`}><span className="ps-product-category">{product.category}</span><h3>{product.name}</h3><span className="ps-product-option">{product.variants[0].label}</span><span className="ps-product-price">{currency(product.variants[0].price)}<small>indicative</small></span></button>
+            </article>)}
+          </div>)}
+        </div>
+      </div>
     </div>
-    <footer className="ps-footer"><p>Illustrative Nexus collection. Ask the club to confirm products, ingredients, prices and availability.</p><span>BUILD YOUR ROUTINE. MAKE IT YOURS.</span></footer>
+    <footer className="ps-footer"><p>Photos show example products. Ask Nexus to confirm brands, pack sizes, prices and availability.</p></footer>
     <span className="ps-sr-only" role="status">{notice}</span>
     {selected && <ProductPage key={selected.id} product={selected} onClose={() => setView(null)} onAdd={add} onKit={() => setView('kit')} kitCount={totalQty} />}
     {view === 'kit' && <KitPage products={products} kit={kit} onClose={() => setView(null)} onQuantity={changeQty} />}
@@ -118,23 +154,13 @@ export function ProductShelf({ products }: { products: Product[] }) {
 function ProductPage({ product, onClose, onAdd, onKit, kitCount }: { product: Product; onClose: () => void; onAdd: (product: Product, variant: number, qty: number) => void; onKit: () => void; kitCount: number }) {
   const [variant, setVariant] = useState(0), [qty, setQty] = useState(1), [added, setAdded] = useState(false);
   const [expanded, setExpanded] = useState<string | null>('Product details');
-  const tilt = useMotionValue(0);
-  const reduce = useReducedMotion();
-  const drag = useRef<{ x: number; start: number } | null>(null);
   const selected = product.variants[variant];
   return <NativeDialog label={product.name} onClose={onClose}>
     <div className="ps-modal-top"><button onClick={onClose} autoFocus>BACK TO SHELF</button><span>NEXUS / THE ESSENTIALS</span><button onClick={onKit}>YOUR KIT ({kitCount})</button></div>
     <div className="ps-detail-grid">
       <div className="ps-detail-stage">
         <span className="ps-detail-edition">THE COLLECTION / {product.category.toUpperCase()}</span>
-        <motion.div className="ps-inspect" style={{ rotateY: tilt }} onPointerDown={event => {
-          if (reduce || (event.pointerType === 'mouse' && event.button !== 0)) return;
-          event.currentTarget.setPointerCapture(event.pointerId); tilt.stop(); drag.current = { x: event.clientX, start: tilt.get() };
-        }} onPointerMove={event => { if (drag.current) tilt.set(Math.max(-20, Math.min(20, drag.current.start + (event.clientX - drag.current.x) / 8))); }}
-          onPointerUp={() => { drag.current = null; animate(tilt, 0, spring); }} onPointerCancel={() => { drag.current = null; animate(tilt, 0, spring); }}>
-          <ProductImage product={product} detail />
-        </motion.div>
-        <div className="ps-display-plinth" aria-hidden /><p>{reduce ? 'PRODUCT PREVIEW' : 'DRAG TO INSPECT'}</p>
+        <ProductPreview product={product} />
       </div>
       <div className="ps-detail-copy">
         <span className="ps-eyebrow">{product.category.toUpperCase()}</span><h2>{product.name}</h2><p className="ps-tagline">{product.tagline}</p>

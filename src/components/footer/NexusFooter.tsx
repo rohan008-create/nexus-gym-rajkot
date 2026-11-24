@@ -7,7 +7,7 @@ import NexusWordmark from '../ui/nexus-wordmark';
 import './footer.css';
 
 const explore = [['Our story', 'about'], ['Programs', 'programs'], ['Meet the trainers', 'trainers'], ['The essentials', 'products']] as const;
-const club = [['Membership', 'membership'], ['Book a visit', 'booking'], ['Find the club', 'location']] as const;
+const club = [['Membership', 'membership'], ['Find the club', 'location'], ['Visit FAQ', 'faq'], ['Book a visit', 'booking']] as const;
 
 export default function NexusFooter({ linkBase = '/hero' }: { linkBase?: string }) {
   const root = useRef<HTMLElement>(null);

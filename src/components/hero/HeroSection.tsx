@@ -18,6 +18,7 @@ import GymProductsSection from '../products/GymProductsSection';
 import WhatsAppBooking from '../booking/WhatsAppBooking';
 import NexusVoices from '../voices/NexusVoices';
 import RoadToNexus from '../location/RoadToNexus';
+import VisitFAQ from '../sections/VisitFAQ';
 import NexusSocialSection from '../social/NexusSocialSection';
 import SmoothScroll from '../layout/SmoothScroll';
 import NexusFooter from '../footer/NexusFooter';
@@ -43,7 +44,7 @@ export default function HeroSection() {
   }, [reduced]);
   const content = useMemo(() => <main ref={root} className="site-shell rope-experience" data-rope-status={status} onPointerMove={event => { pointer.current.x = event.clientX / window.innerWidth * 2 - 1; pointer.current.y = 1 - event.clientY / window.innerHeight * 2; }} onPointerLeave={() => { pointer.current.x = 0; pointer.current.y = 0; }}>
     <div className="hero-experience">
-      <GymTourHero active={true} reduced={reduced} onStatus={setStatus} onTrial={() => setTrial(true)} onExplorePrograms={() => navigate('Programs')} />
+      <GymTourHero reduced={reduced} onStatus={setStatus} onTrial={() => setTrial(true)} onExplorePrograms={() => navigate('Programs')} />
       <section className="continuation-section about-section" id="about" aria-labelledby="about-title">
         <AboutNexus panel={panel} onTrial={() => setTrial(true)} />
       </section>
@@ -59,11 +60,12 @@ export default function HeroSection() {
     }} />
     <NexusAdvantageSection />
     <NexusTrainersSection />
-    <NexusMembershipCards onEnquire={plan => { setMembershipPlan(plan); setTrial(true); }} />
-    <GymProductsSection />
-    <WhatsAppBooking />
     <NexusVoices />
+    <NexusMembershipCards onEnquire={plan => { setMembershipPlan(plan); setTrial(true); }} />
     <RoadToNexus />
+    <VisitFAQ />
+    <WhatsAppBooking />
+    <GymProductsSection />
     <NexusSocialSection />
     <NexusFooter linkBase="" />
     <TrialDialog open={trial} membershipPlan={membershipPlan} onClose={() => { setTrial(false); setMembershipPlan(undefined); }} />

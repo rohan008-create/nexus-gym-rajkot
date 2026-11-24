@@ -4,11 +4,12 @@ export type Point = [number, number, number];
 // Keep the full stair flight behind the forecourt curb (world Z = 4.9).
 export const COMPLEX_SETBACK = 4.8;
 export type CameraStop = { at: number; position: Point; target: Point; fov: number };
+export const RECEPTION_END = .863;
 export const TOUR_CHAPTERS = [
-  { id: 'arrival', at: 0, label: 'Nexus Fitness Club · Rajkot', lead: 'Welcome to', highlight: 'Nexus.', description: 'Follow Ryan inside and see where you’ll train.' },
+  { id: 'arrival', at: 0, label: 'Rajkot', lead: 'Nexus', highlight: 'Fitness Club', description: 'Follow Ryan inside and see where you’ll train.' },
   { id: 'stairs', at: .12, label: 'The entrance', lead: 'Come on', highlight: 'in.', description: 'Head up the stairs with Ryan.' },
   { id: 'reception', at: .74, label: 'Reception', lead: 'Welcome to', highlight: 'the club.', description: 'Walk in with a goal. Walk out stronger.' },
-  { id: 'strength', at: .863, label: 'Strength floor', lead: 'Build your', highlight: 'strength.', description: 'Free weights, benches and room for your next personal best.' },
+  { id: 'strength', at: RECEPTION_END, label: 'Strength floor', lead: 'Build your', highlight: 'strength.', description: 'Free weights, benches and room for your next personal best.' },
   { id: 'cardio', at: .935, label: 'Cardio floor', lead: 'Find your', highlight: 'pace.', description: 'Warm up, build endurance or finish with an easy run.' },
 ] as const;
 
@@ -57,9 +58,25 @@ const STAIR_START = .16;
 export const STAIR_END = .52;
 const STAIR_SPAN = STAIR_END - STAIR_START;
 const MAX_STEPS_PER_SECOND = 3;
+const MAX_RECEPTION_PROGRESS_PER_SECOND = .05;
+const MAX_FLOOR_PROGRESS_PER_SECOND = .085;
+const SCROLL_LOOKAHEAD = .07;
+// Leave room for whole-pixel rounding at the entrance chapter boundary.
+export const TOUR_ENTRY_PROGRESS = .13;
 export const clamp = (value: number, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 export const smooth = (value: number) => { const t = clamp(value); return t * t * (3 - 2 * t); };
 const stairFraction = (progress: number) => smooth((progress - STAIR_START) / STAIR_SPAN);
+export function tourScrollCeiling(presented: number) {
+  // Allow the initial approach, then limit how much movement one gesture can queue.
+  return clamp(presented + SCROLL_LOOKAHEAD, TOUR_ENTRY_PROGRESS);
+}
+
+function limitSectionTravel(from: number, to: number, start: number, end: number, limit: number) {
+  const sectionFrom = clamp(from, start, end);
+  const travel = clamp(to, start, end) - sectionFrom;
+  return Math.abs(travel) > limit ? sectionFrom + Math.sign(travel) * limit : to;
+}
+
 export function stairHeight(index: number) {
   return index < 0 ? .189 : index >= STAIR.count ? STAIR.landingY : .24 + (index + .5) * STAIR.rise + .075;
 }
@@ -70,7 +87,9 @@ export function advanceTour(playback: TourPlayback, destination: number, delta: 
   // a suspended tab or a long idle interval.
   const target = clamp(destination), dt = Math.min(delta, .1);
   const distance = target - playback.progress;
-  const next = Math.abs(distance) < .00005 ? target : playback.progress + distance * -Math.expm1(-12 * dt);
+  let next = Math.abs(distance) < .00005 ? target : playback.progress + distance * -Math.expm1(-12 * dt);
+  next = limitSectionTravel(playback.progress, next, RECEPTION_END, 1, MAX_FLOOR_PROGRESS_PER_SECOND * dt);
+  next = limitSectionTravel(playback.progress, next, STAIR_END, RECEPTION_END, MAX_RECEPTION_PROGRESS_PER_SECOND * dt);
   const currentStair = stairFraction(playback.progress);
   const stairTravel = stairFraction(next) - currentStair;
   const stairLimit = MAX_STEPS_PER_SECOND * dt / STAIR.count;

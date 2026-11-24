@@ -104,10 +104,12 @@ export const ModalBody = ({
 
   useEffect(() => {
     if (!open) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // Lock the viewport without turning the body into a sticky containing block.
+    const viewport = document.documentElement;
+    const previous = viewport.style.overflowY;
+    viewport.style.overflowY = "hidden";
     return () => {
-      document.body.style.overflow = previous;
+      viewport.style.overflowY = previous;
     };
   }, [open]);
 
@@ -158,6 +160,7 @@ export const ModalBody = ({
             opacity: 0,
             backdropFilter: "blur(0px)",
           }}
+          data-lenis-prevent
           className="fixed [perspective:800px] [transform-style:preserve-3d] inset-0 h-full w-full  flex items-center justify-center z-50"
         >
           <Overlay />

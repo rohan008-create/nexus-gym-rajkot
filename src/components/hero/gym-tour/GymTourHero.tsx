@@ -4,29 +4,31 @@ import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import ArrivalPhotograph from './ArrivalPhotograph';
 import { usePageScroller } from '../../layout/SmoothScroll';
-import TactileHighlight from '../../ui/tactile-highlight';
-import TourChapterCopy from './TourChapterCopy';
-import { STAIR_END, tourBeatAt, tourChapterAt, tourRailProgress, type TourStatus } from './gymTourConfig';
+import TourChapterCopy, { ArrivalWordmark } from './TourChapterCopy';
+import { TOUR_ENTRY_PROGRESS, tourBeatAt, tourChapterAt, tourRailProgress, tourScrollCeiling, type TourStatus } from './gymTourConfig';
 
 const GymTourCanvas = dynamic(() => import('./GymTourCanvas'), { ssr: false });
-const SCROLL_MOMENTUM_WINDOW = 500;
+const SCROLL_MOMENTUM_WINDOW = 1500;
+const TOUR_START_TIMEOUT = 12_000;
 
-type Props = { active: boolean; reduced: boolean; onStatus: (status: TourStatus) => void; onTrial: () => void; onExplorePrograms: () => void };
-export default function GymTourHero({ active, reduced, onStatus, onTrial, onExplorePrograms }: Props) {
+type Props = { reduced: boolean; onStatus: (status: TourStatus) => void; onTrial: () => void; onExplorePrograms: () => void };
+export default function GymTourHero({ reduced, onStatus, onTrial, onExplorePrograms }: Props) {
   const root = useRef<HTMLElement>(null), progress = useRef(0), invalidate = useRef<() => void>(() => {});
   const scroller = usePageScroller();
   const [status, setStatus] = useState<TourStatus>('loading');
   const [beat, setBeat] = useState(0), [mobile, setMobile] = useState(false), [inView, setInView] = useState(true), [pageVisible, setPageVisible] = useState(true);
   const [attempt, setAttempt] = useState(0);
   const [interiorRequested, setInteriorRequested] = useState(false);
+  const interiorRequestedRef = useRef(false);
   const [chapter, setChapter] = useState(0);
-  const entryFocusDone = useRef(false);
+  const [tourComplete, setTourComplete] = useState(false);
   const displayedProgress = useRef(0);
   const scrollGestureUntil = useRef(0);
   const lastBeat = useRef(0);
   const lastChapter = useRef(0);
   const staticView = reduced || status === 'error';
   const present = useCallback((value: number) => {
+    if ((value === 1) !== (displayedProgress.current === 1)) setTourComplete(value === 1);
     displayedProgress.current = value;
     const position = value.toFixed(4);
     const nextChapter = tourChapterAt(value);
@@ -42,39 +44,26 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
   const fail = useCallback(() => { setStatus('error'); onStatus('error'); }, [onStatus]);
   const retry = () => { setAttempt(value => value + 1); setStatus('loading'); onStatus('loading'); };
   useEffect(() => {
-    if (active || reduced) return;
-    setStatus('loading');
-    onStatus('loading');
-    setInteriorRequested(false);
-  }, [active, reduced, onStatus]);
-  useEffect(() => {
-    if (!active || !inView || status !== 'loading' || reduced || !pageVisible) return;
-    const timeout = window.setTimeout(fail, 60000);
+    if (!inView || status !== 'loading' || reduced || !pageVisible) return;
+    const timeout = window.setTimeout(fail, TOUR_START_TIMEOUT);
     return () => window.clearTimeout(timeout);
-  }, [active, inView, status, reduced, pageVisible, fail, attempt]);
+  }, [inView, status, reduced, pageVisible, fail, attempt]);
   useEffect(() => {
     // The shared hook starts conservatively at true during hydration. Only a
-    // real reduced-motion preference may bypass the detailed-model gate.
+    // real reduced-motion preference can make the static view the final view.
     if (reduced && matchMedia('(prefers-reduced-motion: reduce)').matches) onStatus('ready');
   }, [reduced, onStatus]);
   useEffect(() => {
-    if (!active) { entryFocusDone.current = false; return; }
-    const element = root.current;
-    if (entryFocusDone.current || element?.closest('.nexus-entrance')?.getAttribute('data-entrance') !== 'revealed') return;
-    const frame = requestAnimationFrame(() => {
-      const heading = element.querySelector<HTMLElement>('#hero-title');
-      if (!heading || element.closest('[inert]') || element.closest('.nexus-entrance')?.getAttribute('data-entrance') !== 'revealed') return;
-      if (document.activeElement !== document.body && document.activeElement !== heading) return;
-      heading.focus({ preventScroll: true }); entryFocusDone.current = true;
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [active]);
-  useEffect(() => {
     const element = root.current!;
-    let intersecting = true, top = 0, range = 1;
+    const stage = element.querySelector<HTMLElement>('.gym-tour-stage')!;
+    let intersecting = true, top = 0, range = 1, previousScrollY = window.scrollY;
     const stickyEnd = () => Math.floor(top + range);
     const isAtStage = () => window.scrollY >= top && window.scrollY <= stickyEnd();
-    const climbPending = () => active && !staticView && status === 'ready' && displayedProgress.current < STAIR_END;
+    // Keep the scroll limit until the stage has committed its completed state.
+    const tourPending = () => !staticView &&
+      (displayedProgress.current < 1 || stage.hasAttribute('data-tour-pending'));
+    const scrollCeiling = () => Math.floor(top + range * tourScrollCeiling(displayedProgress.current));
+    let stageTouch: { id: number; x: number; y: number; axis: 'horizontal' | 'vertical' | null } | null = null;
     // An edge touching the viewport can still be "intersecting" with zero area.
     const observer = new IntersectionObserver(([entry]) => {
       intersecting = isAtStage() || (entry.isIntersecting && entry.intersectionRatio >= .001);
@@ -84,58 +73,136 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
     const visible = () => setPageVisible(!document.hidden);
     visible(); document.addEventListener('visibilitychange', visible);
     const media = matchMedia('(max-width: 760px)');
-    const measure = () => { top = element.getBoundingClientRect().top + window.scrollY; range = Math.max(1, element.offsetHeight - window.innerHeight); };
+    const measure = () => {
+      top = element.getBoundingClientRect().top + window.scrollY;
+      range = Math.max(1, element.offsetHeight - stage.offsetHeight);
+    };
+    const clearScrollGesture = () => { scrollGestureUntil.current = 0; };
     const rememberScrollGesture = () => {
-      if (isAtStage()) scrollGestureUntil.current = performance.now() + SCROLL_MOMENTUM_WINDOW;
+      if (tourPending() && isAtStage()) scrollGestureUntil.current = performance.now() + SCROLL_MOMENTUM_WINDOW;
     };
     const onWheel = (event: WheelEvent) => {
-      if (event.ctrlKey || event.deltaY === 0) return;
+      if (event.ctrlKey || event.deltaY <= 0) return;
+      if (event.target instanceof Element && event.target.closest('[data-lenis-prevent]')) return;
       rememberScrollGesture();
       const lenis = scroller?.current;
-      if (!lenis || !event.cancelable || event.deltaY < 0 || !isAtStage() || !climbPending()) return;
+      if (!lenis || lenis.isStopped || lenis.isLocked || !event.cancelable || !isAtStage() || !tourPending()) return;
       const unit = event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? innerHeight : event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 100 / 6 : 1;
-      if (Math.max(window.scrollY, lenis.targetScroll) + event.deltaY * unit <= stickyEnd()) return;
-      // Bound Lenis's destination before it can scroll past the visible stage.
+      const ceiling = Math.max(window.scrollY, scrollCeiling());
+      if (Math.max(window.scrollY, lenis.targetScroll) + event.deltaY * unit <= ceiling) return;
       event.preventDefault();
       event.stopPropagation();
-      lenis.scrollTo(stickyEnd());
+      lenis.scrollTo(ceiling, {
+        programmatic: false,
+        duration: lenis.options.duration,
+        easing: lenis.options.easing,
+        lerp: lenis.options.lerp,
+      });
     };
-    const onTouchMove = (event: TouchEvent) => {
+    const onNativeTouchMove = (event: TouchEvent) => {
       if (event.touches.length === 1) rememberScrollGesture();
+    };
+    const onStageTouchStart = (event: TouchEvent) => {
+      const finger = event.touches[0];
+      stageTouch = tourPending() && event.touches.length === 1
+        ? { id: finger.identifier, x: finger.clientX, y: finger.clientY, axis: null }
+        : null;
+    };
+    const onStageTouchMove = (event: TouchEvent) => {
+      const finger = event.touches[0];
+      if (!stageTouch || event.touches.length !== 1 || finger.identifier !== stageTouch.id) return;
+      const delta = stageTouch.y - finger.clientY;
+      if (!stageTouch.axis) {
+        const horizontal = Math.abs(stageTouch.x - finger.clientX);
+        if (Math.max(horizontal, Math.abs(delta)) < 5) return;
+        stageTouch.axis = horizontal > Math.abs(delta) ? 'horizontal' : 'vertical';
+      }
+      if (stageTouch.axis !== 'vertical') return;
+      stageTouch.y = finger.clientY;
+      if (event.cancelable) event.preventDefault();
+      event.stopPropagation();
+      const lenis = scroller?.current;
+      if (lenis?.isStopped || lenis?.isLocked) return;
+      // Limit the swipe before the browser can briefly paint past the sticky stage.
+      const current = window.scrollY;
+      const target = delta > 0 && isAtStage() && tourPending()
+        ? Math.min(current + delta, Math.max(current, scrollCeiling()))
+        : current + delta;
+      if (target === current) return;
+      if (lenis) lenis.scrollTo(target, { immediate: true });
+      else window.scrollTo({ top: target, behavior: 'instant' });
+    };
+    const onStageTouchEnd = () => { stageTouch = null; };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+      if (!['ArrowDown', 'PageDown', 'End', ' '].includes(event.key)) return;
+      if (event.target instanceof HTMLElement) {
+        if (event.target.closest('dialog, [role="dialog"], input, select, textarea, [contenteditable]')) return;
+        if (event.key === ' ' && event.target.closest('button, a, [role="button"]')) return;
+      }
+      if (!isAtStage() || !tourPending()) return;
+      const lenis = scroller?.current;
+      if (lenis?.isStopped || lenis?.isLocked) return;
+      event.preventDefault();
+      const ceiling = Math.max(window.scrollY, scrollCeiling());
+      const distance = event.key === 'ArrowDown' ? 40 : stage.clientHeight * .875;
+      const target = event.key === 'End'
+        ? ceiling
+        : Math.min(ceiling, Math.max(window.scrollY, lenis?.targetScroll ?? 0) + distance);
+      if (lenis) lenis.scrollTo(target, { programmatic: false, duration: lenis.options.duration, easing: lenis.options.easing });
+      else window.scrollTo({ top: target, behavior: 'smooth' });
     };
     const update = () => {
       let scrollY = window.scrollY;
       const now = performance.now();
-      if (now <= scrollGestureUntil.current) {
+      if (scrollY > previousScrollY && now <= scrollGestureUntil.current) {
         scrollGestureUntil.current = now + SCROLL_MOMENTUM_WINDOW;
-        const end = stickyEnd();
-        // Keep the stage in view when a gesture outruns the guide's climb.
-        if (climbPending() && scrollY > end) {
-          scroller?.current?.scrollTo(end, { immediate: true });
-          if (window.scrollY > end) window.scrollTo({ top: end, behavior: 'instant' });
-          scrollY = end;
+        const ceiling = Math.max(previousScrollY, scrollCeiling());
+        // Clamp native touch momentum and browser scrolling to the same limit as Lenis.
+        if (tourPending() && scrollY > ceiling) {
+          scroller?.current?.scrollTo(ceiling, { immediate: true });
+          if (window.scrollY > ceiling) window.scrollTo({ top: ceiling, behavior: 'instant' });
+          scrollY = ceiling;
         }
       }
-      const value = staticView ? 0 : Math.max(0, Math.min(1, (scrollY - top) / range));
+      previousScrollY = scrollY;
+      // The browser scrolls to whole CSS pixels, even when the sticky end is fractional.
+      const value = staticView ? 0 : scrollY >= stickyEnd() ? 1 : Math.max(0, (scrollY - top) / range);
       // Start the room and host downloads on the stairs, before the room enters view.
-      if (!interiorRequested && active && intersecting && value >= .10 && scrollY < top + range + window.innerHeight) setInteriorRequested(true);
+      if (!interiorRequestedRef.current && intersecting && value >= .10 && scrollY < top + range + window.innerHeight) {
+        interiorRequestedRef.current = true;
+        setInteriorRequested(true);
+      }
       if (value === progress.current) return;
       progress.current = value;
-      if (active && intersecting && !document.hidden && !staticView) invalidate.current();
+      if (intersecting && !document.hidden && !staticView) invalidate.current();
     };
     const resize = () => { setMobile(media.matches); measure(); update(); };
     if (staticView) present(0);
     resize();
     window.addEventListener('scroll', update, { passive: true }); window.addEventListener('resize', resize, { passive: true });
     window.addEventListener('wheel', onWheel, { passive: false, capture: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-    const sizeObserver = new ResizeObserver(() => { measure(); update(); }); sizeObserver.observe(element);
+    window.addEventListener('touchmove', onNativeTouchMove, { passive: true });
+    stage.addEventListener('touchstart', onStageTouchStart, { passive: true });
+    stage.addEventListener('touchmove', onStageTouchMove, { passive: false });
+    stage.addEventListener('touchend', onStageTouchEnd, { passive: true });
+    stage.addEventListener('touchcancel', onStageTouchEnd, { passive: true });
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('click', clearScrollGesture, true);
+    const sizeObserver = new ResizeObserver(() => { measure(); update(); });
+    sizeObserver.observe(element);
+    sizeObserver.observe(stage);
     return () => {
       observer.disconnect(); sizeObserver.disconnect(); document.removeEventListener('visibilitychange', visible);
       window.removeEventListener('scroll', update); window.removeEventListener('resize', resize);
-      window.removeEventListener('wheel', onWheel, true); window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('wheel', onWheel, true); window.removeEventListener('touchmove', onNativeTouchMove);
+      stage.removeEventListener('touchstart', onStageTouchStart);
+      stage.removeEventListener('touchmove', onStageTouchMove);
+      stage.removeEventListener('touchend', onStageTouchEnd);
+      stage.removeEventListener('touchcancel', onStageTouchEnd);
+      window.removeEventListener('keydown', onKeyDown); window.removeEventListener('click', clearScrollGesture, true);
     };
-  }, [active, staticView, status, present, interiorRequested, scroller]);
+  }, [staticView, present, scroller]);
   const scrollTo = (top: number) => {
     if (scroller?.current) scroller.current.scrollTo(top, { immediate: reduced });
     else window.scrollTo({ top, behavior: reduced ? 'instant' : 'smooth' });
@@ -147,23 +214,23 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
   };
   const begin = () => {
     const element = root.current!;
-    // Land slightly past the threshold so rounding to a scroll pixel opens the next chapter.
-    scrollTo(element.getBoundingClientRect().top + window.scrollY + (element.offsetHeight - window.innerHeight) * .13);
+    const stage = element.querySelector<HTMLElement>('.gym-tour-stage')!;
+    scrollTo(element.getBoundingClientRect().top + window.scrollY + (element.offsetHeight - stage.offsetHeight) * TOUR_ENTRY_PROGRESS);
   };
-  return <section ref={root} id="home" className={`gym-tour-hero${staticView ? ' is-static' : ''}`} data-tour-active={active && inView && pageVisible && !staticView ? 'true' : 'false'} data-tour-status={reduced ? 'ready' : status} data-tour-beat={['exterior', 'entry', 'strength', 'cardio'][staticView ? 0 : beat]} data-tour-progress="0.0000" aria-labelledby="hero-title">
-    <h1 id="hero-title" tabIndex={-1} className="gym-tour-accessible-title">Welcome to Nexus Fitness Club, Rajkot. Follow Ryan inside.</h1>
-    <div className="gym-tour-stage" onContextMenu={event => event.preventDefault()}>
+  return <section ref={root} id="home" className={`gym-tour-hero${staticView ? ' is-static' : ''}`} data-tour-active={inView && pageVisible && !staticView ? 'true' : 'false'} data-tour-status={reduced ? 'ready' : status} data-tour-beat={['exterior', 'entry', 'strength', 'cardio'][staticView ? 0 : beat]} data-tour-progress="0.0000" aria-labelledby="hero-title">
+    <h1 id="hero-title" className="gym-tour-accessible-title">Nexus Fitness Club, Rajkot</h1>
+    <div className="gym-tour-stage" data-tour-pending={!staticView && !tourComplete ? true : undefined} onContextMenu={event => event.preventDefault()}>
       <div className="gym-tour-visual" aria-hidden="true">
-        {active && !staticView && <GymTourCanvas key={attempt} progress={progress} active={inView && pageVisible} mobile={mobile} interiorRequested={interiorRequested} onInvalidate={invalidate} onPresent={present} onReady={ready} onFailure={fail} />}
-        {(!active || staticView || status === 'loading') && <ArrivalPhotograph />}
+        {!staticView && <GymTourCanvas key={attempt} progress={progress} active={inView && pageVisible} mobile={mobile} interiorRequested={interiorRequested} onInvalidate={invalidate} onPresent={present} onReady={ready} onFailure={fail} />}
+        <ArrivalPhotograph />
       </div>
       {!staticView && <div className="gym-tour-edge-shade" aria-hidden="true" />}
-      {!staticView && active && <TourChapterCopy chapterIndex={chapter} />}
+      {!staticView && <TourChapterCopy chapterIndex={chapter} />}
       {!staticView && status === 'ready' && beat === 0 && <button className="gym-tour-enter" onClick={begin}><span>FOLLOW RYAN INSIDE</span><ArrowDown size={15} aria-hidden /></button>}
       {!staticView && <button className="gym-tour-skip" onClick={skip}>Skip tour <ArrowUpRight size={13} aria-hidden /></button>}
       {!staticView && beat === 3 && <div className="gym-tour-final-actions"><button data-tour-trial onClick={onTrial}>Book a trial <ArrowUpRight size={16} aria-hidden /></button><button onClick={onExplorePrograms}>Explore programs <ArrowUpRight size={16} aria-hidden /></button></div>}
-      {staticView && <div className="gym-tour-static-copy"><p>NEXUS FITNESS CLUB · RAJKOT</p><h2>Welcome to<br /><TactileHighlight animate={false}>Nexus.</TactileHighlight></h2><button data-tour-trial onClick={onTrial}>Book a trial <ArrowUpRight size={16} aria-hidden /></button><button onClick={onExplorePrograms}>Explore programs</button></div>}
-      {status === 'loading' && !reduced && <span className="gym-tour-loading" role="status">Opening Nexus…</span>}
+      {staticView && <div className="gym-tour-static-copy"><p>RAJKOT</p><h2 className="gym-tour-arrival-title"><ArrivalWordmark /></h2><button data-tour-trial onClick={onTrial}>Book a trial <ArrowUpRight size={16} aria-hidden /></button><button onClick={onExplorePrograms}>Explore programs</button></div>}
+      {status === 'loading' && !reduced && <span className="gym-tour-loading" role="status">Loading 3D tour…</span>}
       {status === 'error' && <div className="gym-tour-fallback-note"><span role="status">Explore Nexus at your own pace.</span><button type="button" onClick={retry}>Retry tour</button></div>}
     </div>
   </section>;
