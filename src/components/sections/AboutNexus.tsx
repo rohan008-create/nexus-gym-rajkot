@@ -4,7 +4,6 @@ import { ArrowUpRight } from 'lucide-react';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import './about-editorial.css';
 
 export type AboutPanel = 'About' | 'Programs' | 'Plans' | 'Location';
 

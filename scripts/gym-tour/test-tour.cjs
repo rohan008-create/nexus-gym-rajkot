@@ -26,18 +26,32 @@ for (const mobile of [false,true]) {
   sampleCamera(10,mobile,p,target);assert.ok(p.every((v,i)=>Math.abs(v-stops.at(-1).position[i])<1e-10));
 }
 assert.deepEqual([0,.28,.82,1].map(tourBeatAt),[0,1,2,3]);
+const guide = { position:[0,0,0],yaw:0,stair:-1,walk:0 };
+function stepsAt(progress) {
+  sampleGuide(progress, guide);
+  if (guide.stair >= 0) return guide.stair;
+  return guide.position[2] === STAIR.bottomZ ? 0 : STAIR.count;
+}
 for (const fps of [24, 60, 120]) {
   const playback = { progress: 0, shutter: 0 };
   for (const destination of [1, .28, DOORWAY, .64, 0]) {
     let moving = true;
-    for (let frame = 0; moving && frame < fps * 2; frame++) {
+    for (let frame = 0; moving && frame < fps * 9; frame++) {
+      const before = playback.progress;
       moving = advanceTour(playback, destination, 1 / fps);
+      assert.ok(Math.abs(stepsAt(playback.progress) - stepsAt(before)) <= 3 / fps + 1e-9, 'fast and reverse scroll must respect the three-step speed cap');
       assert.equal(playback.shutter, 0, 'the continuous doorway never blacks out');
     }
     assert.equal(moving, false, 'the renderer must become idle');
     assert.deepEqual(playback, { progress: destination, shutter: 0 }, 'even a stop exactly at the doorway must clear');
   }
 }
+const slowScroll = { progress: .30, shutter: 0 };
+advanceTour(slowScroll, .302, 1 / 60);
+assert.ok(Math.abs(slowScroll.progress - (.30 + .002 * -Math.expm1(-12 / 60))) < 1e-9, 'slow scrolling keeps the normal easing response');
+const droppedFrame = { progress: .30, shutter: 0 };
+advanceTour(droppedFrame, .80, 1);
+assert.ok(stepsAt(droppedFrame.progress) - stepsAt(.30) <= .3 + 1e-9, 'a dropped frame must not skip steps');
 const reversal = { progress: .44, shutter: 0 };
 advanceTour(reversal, .6, .03);
 assert.equal(reversal.shutter, 0);
@@ -46,7 +60,6 @@ for (let frame = 0; frame < 90; frame++) {
   assert.ok(reversal.progress < DOORWAY, 'reversing before the cut keeps the exterior visible');
 }
 assert.deepEqual(reversal, { progress: .4, shutter: 0 });
-const guide = { position:[0,0,0],yaw:0,stair:-1,walk:0 };
 let previousGuide;
 for(let frame=0;frame<=2000;frame++) {
   const p=frame/2000;
@@ -76,5 +89,5 @@ for(const view of ['exterior','interior']) {
 }
 assets.dispose();
 console.log('Merged exterior/interior geometry: bounded material buckets and finite vertices validated.');
-console.log('Continuous desktop/mobile camera, open doorway clearance, reversible playback and stair guide route validated.');
+console.log('Continuous desktop/mobile camera, doorway clearance and a three-step-per-second cap in both directions validated.');
 console.log('VERDICT: PASS');

@@ -31,6 +31,7 @@ fs.writeFileSync(`${out}/policy.json`, JSON.stringify({ planning: 'compact', con
         await page.screenshot({ path: `${out}/mobile-night.png` });
       }
       await page.locator('#location').evaluate(el => scrollTo({ top: el.getBoundingClientRect().top + scrollY, behavior: 'instant' }));
+      if (label === 'desktop') await page.getByRole('button', { name: 'Explore in 3D' }).click();
       await page.waitForFunction(() => document.querySelector('.cesium-globe-canvas[data-globe-theme]') && !document.querySelector('.globe-loading-overlay'), null, { timeout: 120000 });
       if (label === 'mobile') {
         await page.getByRole('button', { name: 'Reset to Earth view', exact: true }).click();

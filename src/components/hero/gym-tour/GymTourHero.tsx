@@ -6,10 +6,10 @@ import ArrivalPhotograph from './ArrivalPhotograph';
 import { usePageScroller } from '../../layout/SmoothScroll';
 import TactileHighlight from '../../ui/tactile-highlight';
 import TourChapterCopy from './TourChapterCopy';
-import { tourBeatAt, tourChapterAt, tourRailProgress, type TourStatus } from './gymTourConfig';
-import './gym-tour.css';
+import { STAIR_END, tourBeatAt, tourChapterAt, tourRailProgress, type TourStatus } from './gymTourConfig';
 
 const GymTourCanvas = dynamic(() => import('./GymTourCanvas'), { ssr: false });
+const SCROLL_MOMENTUM_WINDOW = 500;
 
 type Props = { active: boolean; reduced: boolean; onStatus: (status: TourStatus) => void; onTrial: () => void; onExplorePrograms: () => void };
 export default function GymTourHero({ active, reduced, onStatus, onTrial, onExplorePrograms }: Props) {
@@ -21,10 +21,13 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
   const [interiorRequested, setInteriorRequested] = useState(false);
   const [chapter, setChapter] = useState(0);
   const entryFocusDone = useRef(false);
+  const displayedProgress = useRef(0);
+  const scrollGestureUntil = useRef(0);
   const lastBeat = useRef(0);
   const lastChapter = useRef(0);
   const staticView = reduced || status === 'error';
   const present = useCallback((value: number) => {
+    displayedProgress.current = value;
     const position = value.toFixed(4);
     const nextChapter = tourChapterAt(value);
     if (root.current && root.current.dataset.tourProgress !== position) {
@@ -69,9 +72,12 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
   useEffect(() => {
     const element = root.current!;
     let intersecting = true, top = 0, range = 1;
+    const stickyEnd = () => Math.floor(top + range);
+    const isAtStage = () => window.scrollY >= top && window.scrollY <= stickyEnd();
+    const climbPending = () => active && !staticView && status === 'ready' && displayedProgress.current < STAIR_END;
     // An edge touching the viewport can still be "intersecting" with zero area.
     const observer = new IntersectionObserver(([entry]) => {
-      intersecting = entry.isIntersecting && entry.intersectionRatio >= .001;
+      intersecting = isAtStage() || (entry.isIntersecting && entry.intersectionRatio >= .001);
       setInView(intersecting);
     }, { threshold: .001 });
     observer.observe(element);
@@ -79,8 +85,37 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
     visible(); document.addEventListener('visibilitychange', visible);
     const media = matchMedia('(max-width: 760px)');
     const measure = () => { top = element.getBoundingClientRect().top + window.scrollY; range = Math.max(1, element.offsetHeight - window.innerHeight); };
+    const rememberScrollGesture = () => {
+      if (isAtStage()) scrollGestureUntil.current = performance.now() + SCROLL_MOMENTUM_WINDOW;
+    };
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || event.deltaY === 0) return;
+      rememberScrollGesture();
+      const lenis = scroller?.current;
+      if (!lenis || !event.cancelable || event.deltaY < 0 || !isAtStage() || !climbPending()) return;
+      const unit = event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? innerHeight : event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 100 / 6 : 1;
+      if (Math.max(window.scrollY, lenis.targetScroll) + event.deltaY * unit <= stickyEnd()) return;
+      // Bound Lenis's destination before it can scroll past the visible stage.
+      event.preventDefault();
+      event.stopPropagation();
+      lenis.scrollTo(stickyEnd());
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      if (event.touches.length === 1) rememberScrollGesture();
+    };
     const update = () => {
-      const scrollY = window.scrollY;
+      let scrollY = window.scrollY;
+      const now = performance.now();
+      if (now <= scrollGestureUntil.current) {
+        scrollGestureUntil.current = now + SCROLL_MOMENTUM_WINDOW;
+        const end = stickyEnd();
+        // Keep the stage in view when a gesture outruns the guide's climb.
+        if (climbPending() && scrollY > end) {
+          scroller?.current?.scrollTo(end, { immediate: true });
+          if (window.scrollY > end) window.scrollTo({ top: end, behavior: 'instant' });
+          scrollY = end;
+        }
+      }
       const value = staticView ? 0 : Math.max(0, Math.min(1, (scrollY - top) / range));
       // Start the room and host downloads on the stairs, before the room enters view.
       if (!interiorRequested && active && intersecting && value >= .10 && scrollY < top + range + window.innerHeight) setInteriorRequested(true);
@@ -92,14 +127,21 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
     if (staticView) present(0);
     resize();
     window.addEventListener('scroll', update, { passive: true }); window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
     const sizeObserver = new ResizeObserver(() => { measure(); update(); }); sizeObserver.observe(element);
-    return () => { observer.disconnect(); sizeObserver.disconnect(); document.removeEventListener('visibilitychange', visible); window.removeEventListener('scroll', update); window.removeEventListener('resize', resize); };
-  }, [active, staticView, present, interiorRequested]);
+    return () => {
+      observer.disconnect(); sizeObserver.disconnect(); document.removeEventListener('visibilitychange', visible);
+      window.removeEventListener('scroll', update); window.removeEventListener('resize', resize);
+      window.removeEventListener('wheel', onWheel, true); window.removeEventListener('touchmove', onTouchMove);
+    };
+  }, [active, staticView, status, present, interiorRequested, scroller]);
   const scrollTo = (top: number) => {
     if (scroller?.current) scroller.current.scrollTo(top, { immediate: reduced });
     else window.scrollTo({ top, behavior: reduced ? 'instant' : 'smooth' });
   };
   const skip = () => {
+    scrollGestureUntil.current = 0;
     const about = document.getElementById('about');
     if (about) scrollTo(about.getBoundingClientRect().top + window.scrollY);
   };
@@ -110,7 +152,7 @@ export default function GymTourHero({ active, reduced, onStatus, onTrial, onExpl
   };
   return <section ref={root} id="home" className={`gym-tour-hero${staticView ? ' is-static' : ''}`} data-tour-active={active && inView && pageVisible && !staticView ? 'true' : 'false'} data-tour-status={reduced ? 'ready' : status} data-tour-beat={['exterior', 'entry', 'strength', 'cardio'][staticView ? 0 : beat]} data-tour-progress="0.0000" aria-labelledby="hero-title">
     <h1 id="hero-title" tabIndex={-1} className="gym-tour-accessible-title">Welcome to Nexus Fitness Club, Rajkot. Follow Ryan inside.</h1>
-    <div className="gym-tour-stage">
+    <div className="gym-tour-stage" onContextMenu={event => event.preventDefault()}>
       <div className="gym-tour-visual" aria-hidden="true">
         {active && !staticView && <GymTourCanvas key={attempt} progress={progress} active={inView && pageVisible} mobile={mobile} interiorRequested={interiorRequested} onInvalidate={invalidate} onPresent={present} onReady={ready} onFailure={fail} />}
         {(!active || staticView || status === 'loading') && <ArrivalPhotograph />}

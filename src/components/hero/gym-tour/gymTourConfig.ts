@@ -53,8 +53,13 @@ MOBILE_CAMERAS[0] = { at: 0, position: [2.2, 7, 43], target: [2.2, 7, 0], fov: 5
 
 export const DOORWAY = .74;
 export const STAIR = { x: 8.05, bottomZ: 8.8, run: .355, rise: .21, count: 20, landingY: 4.51 };
+const STAIR_START = .16;
+export const STAIR_END = .52;
+const STAIR_SPAN = STAIR_END - STAIR_START;
+const MAX_STEPS_PER_SECOND = 3;
 export const clamp = (value: number, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 export const smooth = (value: number) => { const t = clamp(value); return t * t * (3 - 2 * t); };
+const stairFraction = (progress: number) => smooth((progress - STAIR_START) / STAIR_SPAN);
 export function stairHeight(index: number) {
   return index < 0 ? .189 : index >= STAIR.count ? STAIR.landingY : .24 + (index + .5) * STAIR.rise + .075;
 }
@@ -65,7 +70,19 @@ export function advanceTour(playback: TourPlayback, destination: number, delta: 
   // a suspended tab or a long idle interval.
   const target = clamp(destination), dt = Math.min(delta, .1);
   const distance = target - playback.progress;
-  playback.progress = Math.abs(distance) < .00005 ? target : playback.progress + distance * -Math.expm1(-12 * dt);
+  const next = Math.abs(distance) < .00005 ? target : playback.progress + distance * -Math.expm1(-12 * dt);
+  const currentStair = stairFraction(playback.progress);
+  const stairTravel = stairFraction(next) - currentStair;
+  const stairLimit = MAX_STEPS_PER_SECOND * dt / STAIR.count;
+  if (Math.abs(stairTravel) > stairLimit) {
+    // Cap travel in actual steps, then invert smoothstep to keep the camera
+    // and guide on the same timeline, including when scroll direction reverses.
+    const eased = currentStair + Math.sign(stairTravel) * stairLimit;
+    const linear = .5 - Math.sin(Math.asin(1 - 2 * eased) / 3);
+    playback.progress = STAIR_START + STAIR_SPAN * linear;
+  } else {
+    playback.progress = next;
+  }
   playback.shutter = 0;
   return playback.progress !== target;
 }
@@ -84,13 +101,13 @@ export type GuidePose = { position: Point; yaw: number; stair: number; walk: num
 export function sampleGuide(progress: number, pose: GuidePose) {
   const p = clamp(progress);
   pose.stair = -1; pose.walk = 0;
-  if (p < .16) {
+  if (p < STAIR_START) {
     pose.position[0] = STAIR.x; pose.position[1] = stairHeight(0); pose.position[2] = STAIR.bottomZ;
-    pose.yaw = Math.PI * smooth((p - .12) / .04);
+    pose.yaw = Math.PI * smooth((p - .12) / (STAIR_START - .12));
     return;
   }
-  if (p <= .52) {
-    const t = smooth((p - .16) / .36);
+  if (p <= STAIR_END) {
+    const t = stairFraction(p);
     pose.stair = t * STAIR.count;
     pose.position[0] = STAIR.x;
     pose.position[1] = stairHeight(0) + (STAIR.landingY - stairHeight(0)) * t;
@@ -99,7 +116,7 @@ export function sampleGuide(progress: number, pose: GuidePose) {
     return;
   }
   const stops = [
-    { at: .52, p: [STAIR.x, STAIR.landingY, STAIR.bottomZ - STAIR.count * STAIR.run], yaw: Math.PI },
+    { at: STAIR_END, p: [STAIR.x, STAIR.landingY, STAIR.bottomZ - STAIR.count * STAIR.run], yaw: Math.PI },
     { at: .68, p: [8.05, STAIR.landingY, -1.26], yaw: Math.PI },
     { at: .76, p: [4.52, STAIR.landingY, -1.26], yaw: Math.PI * 1.5 },
     { at: .853, p: [4.52, STAIR.landingY, -1.26], yaw: Math.PI * 1.5 },
@@ -112,5 +129,5 @@ export function sampleGuide(progress: number, pose: GuidePose) {
   const a = stops[i], b = stops[i + 1], t = smooth((p - a.at) / (b.at - a.at));
   for (let axis = 0; axis < 3; axis++) pose.position[axis] = a.p[axis] + (b.p[axis] - a.p[axis]) * t;
   pose.yaw = a.yaw + (b.yaw - a.yaw) * t;
-  pose.walk = 6.6 + (Math.min(p, .93) - .52) * 25;
+  pose.walk = 6.6 + (Math.min(p, .93) - STAIR_END) * 25;
 }

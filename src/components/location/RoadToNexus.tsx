@@ -17,33 +17,17 @@ const CesiumGlobe = dynamic(() => import('./CesiumGlobe'), {
 
 export default function RoadToNexus() {
   const sectionRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
   const globeRef = useRef<CesiumGlobeHandle>(null);
 
-  const [hasError, setHasError] = useState<boolean>(false);
-  const [isReady, setIsReady] = useState<boolean>(false);
-  const [controller, setController] = useState<CesiumGlobeHandle | null>(null);
-  const [nearViewport, setNearViewport] = useState(false);
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setNearViewport(true); observer.disconnect(); }
-    }, { rootMargin: '600px' });
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const [globeState, setGlobeState] = useState<'preview' | 'loading' | 'ready' | 'error'>('preview');
 
   const handleGlobeReady = useCallback(() => {
-    setIsReady(true);
+    setGlobeState('ready');
   }, []);
 
   const handleGlobeError = useCallback((err: Error) => {
     console.error('Cesium Globe failed:', err);
-    setHasError(true);
-  }, []);
-
-  const handleControllerReady = useCallback((ctrl: CesiumGlobeHandle) => {
-    globeRef.current = ctrl;
-    setController(ctrl);
+    setGlobeState('error');
   }, []);
 
   // GSAP Entrance Animation
@@ -79,13 +63,6 @@ export default function RoadToNexus() {
         delay: 0.4,
         ease: 'power2.out',
       });
-      gsap.from('.globe-controls', {
-        opacity: 0,
-        x: 20,
-        duration: 0.8,
-        delay: 0.5,
-        ease: 'power2.out',
-      });
       gsap.from('.globe-action-shelf', {
         opacity: 0,
         y: 25,
@@ -107,7 +84,7 @@ export default function RoadToNexus() {
     >
 
       {/* Section Header */}
-      <header ref={headerRef} className="globe-header">
+      <header className="globe-header">
         <p className="globe-eyebrow">
           <span className="globe-eyebrow-dot" aria-hidden />
           <span>11 / GLOBAL DESTINATION</span>
@@ -126,20 +103,21 @@ export default function RoadToNexus() {
       </div>
 
       {/* 3D Earth Globe with CesiumJS */}
-      {!hasError ? (
+      {globeState !== 'error' ? (
         <>
-          {nearViewport ? <CesiumGlobe
+          {globeState === 'preview' ? (
+            <img className="globe-preview" src="/assets/nexus-earth-preview.webp" alt="" loading="lazy" decoding="async" />
+          ) : <CesiumGlobe
             controllerRef={globeRef}
-            onControllerReady={handleControllerReady}
             onReady={handleGlobeReady}
             onError={handleGlobeError}
-          /> : <GlobeLoading message="EXPLORE YOUR DESTINATION" />}
+          />}
 
           {/* Floating Navigation Controls (Zoom In, Zoom Out, Reset) */}
-          <div className="globe-controls" role="toolbar" aria-label="Globe navigation controls">
+          {globeState === 'ready' && <div className="globe-controls" role="toolbar" aria-label="Globe navigation controls">
             <button
               type="button"
-              onClick={() => (controller || globeRef.current)?.zoomIn()}
+              onClick={() => globeRef.current?.zoomIn()}
               className="globe-ctrl-btn"
               aria-label="Zoom in"
               title="Zoom in"
@@ -148,7 +126,7 @@ export default function RoadToNexus() {
             </button>
             <button
               type="button"
-              onClick={() => (controller || globeRef.current)?.zoomOut()}
+              onClick={() => globeRef.current?.zoomOut()}
               className="globe-ctrl-btn"
               aria-label="Zoom out"
               title="Zoom out"
@@ -157,25 +135,32 @@ export default function RoadToNexus() {
             </button>
             <button
               type="button"
-              onClick={() => (controller || globeRef.current)?.resetGlobe()}
+              onClick={() => globeRef.current?.resetGlobe()}
               className="globe-ctrl-btn"
               aria-label="Reset to Earth view"
               title="Reset Earth view"
             >
               ⟲
             </button>
-          </div>
+          </div>}
 
-          {/* Explore Nexus Primary Floating Shelf */}
-          <div className="globe-action-shelf">
+          <div className={`globe-action-shelf${globeState === 'loading' ? ' is-loading' : ''}`}>
+            <a className="globe-directions-btn" href={directionsUrl} target="_blank" rel="noopener noreferrer">
+              <MapPin size={16} aria-hidden />
+              Get Directions
+            </a>
             <button
               type="button"
-              onClick={() => (controller || globeRef.current)?.flyToNexus()}
+              onClick={() => {
+                if (globeState === 'preview') setGlobeState('loading');
+                if (globeState === 'ready') globeRef.current?.flyToNexus();
+              }}
               className="globe-explore-btn"
-              aria-label="Explore Nexus Fitness Club in Rajkot, Gujarat"
+              aria-disabled={globeState === 'loading'}
+              aria-label={globeState === 'ready' ? 'Explore Nexus Fitness Club in Rajkot, Gujarat' : undefined}
             >
               <span className="globe-explore-dot" aria-hidden />
-              <span>EXPLORE NEXUS</span>
+              <span>{globeState === 'preview' ? 'EXPLORE IN 3D' : globeState === 'loading' ? 'LOADING 3D' : 'EXPLORE NEXUS'}</span>
               <span className="globe-explore-arrow"><Navigation size={18} strokeWidth={1.7} aria-hidden /></span>
             </button>
           </div>

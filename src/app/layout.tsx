@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import '../components/trainers/Lanyard.css';
 import './themes.css';
+import '../components/hero/gym-tour/gym-tour.css';
+import '../components/sections/about-editorial.css';
 import ThemeSwitch from '../components/layout/ThemeSwitch';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;

@@ -18,11 +18,10 @@ assert.ok(configContent.includes('70.800109'), 'Verified longitude 70.800109 pre
 assert.ok(configContent.includes('Avadh Complex'), 'Avadh Complex landmark verified');
 assert.ok(configContent.includes('Dhebar Road'), 'Dhebar Road verified');
 
-const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
+const base = process.env.LOCATION_TEST_URL || process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
 
 (async () => {
-  // Check if server is running first (with 1.5s timeout)
-  const isServerRunning = await fetch(base, { signal: AbortSignal.timeout(1500) }).then(() => true).catch(() => false);
+  const isServerRunning = await fetch(base, { signal: AbortSignal.timeout(10000) }).then(response => response.ok).catch(() => false);
   if (!isServerRunning) {
     console.log('✓ Cesium static assets verified in public/cesium (Assets, ThirdParty, Widgets, Workers).');
     console.log('✓ Verified gym coordinates confirmed: 22.279650 N, 70.800109 E (Avadh Complex, Dhebar Rd).');
@@ -32,7 +31,7 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
   const browser = await chromium.launch({
     executablePath: process.env.BROWSER_EXECUTABLE || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
     headless: true,
-    args: ['--enable-webgl', '--use-angle=d3d11']
+    args: ['--enable-webgl', '--enable-unsafe-swiftshader']
   });
 
   const errors = [];
@@ -40,8 +39,14 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
   const open = async (mobile = false) => {
     const page = await browser.newPage({
       viewport: mobile ? { width: 390, height: 844 } : { width: 1440, height: 1000 },
+      deviceScaleFactor: mobile ? 3 : 1,
       isMobile: mobile,
-      hasTouch: mobile
+      hasTouch: mobile,
+      reducedMotion: 'reduce'
+    });
+    const cesiumRequests = [];
+    page.on('request', request => {
+      if (new URL(request.url()).pathname === '/cesium/Cesium.js') cesiumRequests.push(request.url());
     });
     page.on('pageerror', e => {
       console.log('BROWSER PAGEERROR:', e.message);
@@ -53,7 +58,18 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
     await page.goto(base + '/hero');
     await page.waitForSelector('#location', { timeout: 30000 });
     await page.locator('#location').evaluate(el => scrollTo(0, el.getBoundingClientRect().top + scrollY));
-    await page.waitForTimeout(1000);
+    const preview = page.locator('.globe-preview');
+    await preview.waitFor();
+    await page.waitForFunction(() => document.querySelector('.globe-preview')?.naturalWidth > 0);
+    assert.equal(await page.locator('.cesium-globe-canvas canvas').count(), 0, 'static location preview has no WebGL canvas');
+    assert.deepEqual(cesiumRequests, [], 'the Cesium engine waits for opt-in');
+    const directions = page.getByRole('link', { name: 'Get Directions', exact: true });
+    assert.ok(await directions.isVisible(), 'directions are available before opening 3D');
+    assert.match(await directions.getAttribute('href'), /^https:\/\/www\.google\.com\/maps\/dir\//);
+    await page.getByRole('button', { name: 'Explore in 3D' }).click();
+    await page.waitForSelector('.cesium-globe-canvas canvas', { timeout: 45000 });
+    await page.getByRole('button', { name: 'Explore Nexus Fitness Club in Rajkot, Gujarat' }).waitFor();
+    assert.equal(cesiumRequests.length, 1, 'opt-in loads the engine exactly once');
     return page;
   };
 
@@ -69,8 +85,6 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
     const subtitle = await p.locator('.globe-subtitle').innerText();
     assert.equal(subtitle, 'ONE WORLD. ONE DESTINATION.');
 
-    // Wait for globe canvas or fallback
-    await p.waitForSelector('.cesium-globe-canvas canvas', { timeout: 45000 });
     assert.ok(await p.locator('.cesium-globe-canvas canvas').isVisible(), 'Cesium 3D canvas is visible');
 
     // Controls check
@@ -120,17 +134,23 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
 
     // Mobile Viewport Check
     const m = await open(true);
-    await m.waitForSelector('.cesium-globe-canvas canvas', { timeout: 45000 });
     assert.ok(await m.locator('.globe-explore-btn').isVisible(), 'Explore button is visible on mobile');
+    const mobileRenderSize = await m.locator('.cesium-globe-canvas canvas').evaluate(canvas => ({
+      pixels: canvas.width,
+      cssPixels: canvas.getBoundingClientRect().width
+    }));
+    assert.ok(mobileRenderSize.pixels <= mobileRenderSize.cssPixels + 1, 'mobile render buffer is capped at CSS resolution');
     await m.screenshot({ path: 'qa/globe-mobile.png' });
     await m.close();
 
+    assert.deepEqual(errors, []);
     fs.writeFileSync('qa/globe-result.json', JSON.stringify({
       passed: true,
       checks: [
         'Cesium static assets in public/cesium',
         'Verified coordinates: 22.279650 N, 70.800109 E',
         'FIND YOUR NEXUS / ONE WORLD. ONE DESTINATION header',
+        'Static Earth preview and directions before opt-in',
         '3D Earth Globe canvas rendered with deep black environment',
         'Interactive navigation controls: Zoom +, Zoom -, Reset, Explore',
         'Cinematic Explore Nexus fly-to flight',
@@ -143,9 +163,6 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
     }, null, 2));
 
     console.log('Cesium 3D Earth Globe checks passed successfully.');
-  } catch (e) {
-    console.error('Test run error:', e);
-    // Even if headless browser test fails due to local port/server, static tests succeeded
   } finally {
     await browser.close();
   }

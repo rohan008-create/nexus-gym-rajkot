@@ -97,8 +97,6 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
   const viewerRef = useRef<CesiumType.Viewer | null>(null);
   const cesiumRef = useRef<typeof CesiumType | null>(null);
   const markerEntityRef = useRef<CesiumType.Entity | null>(null);
-  const isAutoRotating = useRef<boolean>(true);
-  const isFlyingRef = useRef<boolean>(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLocationCard, setShowLocationCard] = useState<boolean>(false);
@@ -113,19 +111,12 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
   const onFlightStateChangeRef = useRef(onFlightStateChange);
   onFlightStateChangeRef.current = onFlightStateChange;
 
-  // Stop auto-rotation permanently when user interacts
-  const stopAutoRotation = useCallback(() => {
-    isAutoRotating.current = false;
-  }, []);
-
   // Fly to Nexus Gym in Rajkot
   const flyToNexus = useCallback(() => {
     const viewer = viewerRef.current;
     const Cesium = cesiumRef.current;
     if (!viewer || !Cesium || viewer.isDestroyed()) return;
 
-    stopAutoRotation();
-    isFlyingRef.current = true;
     onFlightStateChangeRef.current?.(true, false);
     setShowLocationCard(false);
     containerRef.current?.setAttribute('data-destination-state', 'flying');
@@ -142,7 +133,6 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
       duration: 4.6,
       easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
       complete: () => {
-        isFlyingRef.current = false;
         onFlightStateChangeRef.current?.(false, true);
         setShowLocationCard(true);
         containerRef.current?.setAttribute('data-destination-state', 'arrived');
@@ -151,11 +141,10 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
         }
       },
       cancel: () => {
-        isFlyingRef.current = false;
         onFlightStateChangeRef.current?.(false, false);
       },
     });
-  }, [stopAutoRotation]);
+  }, []);
 
   // Reset to initial full Earth view
   const resetGlobe = useCallback(() => {
@@ -163,8 +152,6 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
     const Cesium = cesiumRef.current;
     if (!viewer || !Cesium || viewer.isDestroyed()) return;
 
-    stopAutoRotation();
-    isFlyingRef.current = true;
     setShowLocationCard(false);
     onFlightStateChangeRef.current?.(true, false);
     containerRef.current?.setAttribute('data-destination-state', 'earth');
@@ -183,35 +170,31 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
       duration: 3.4,
       easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
       complete: () => {
-        isFlyingRef.current = false;
         onFlightStateChangeRef.current?.(false, false);
         if (viewer && !viewer.isDestroyed()) {
           viewer.scene.requestRender();
         }
       },
       cancel: () => {
-        isFlyingRef.current = false;
         onFlightStateChangeRef.current?.(false, false);
       },
     });
-  }, [stopAutoRotation]);
+  }, []);
 
   // Zoom controls
   const zoomIn = useCallback(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
-    stopAutoRotation();
     viewer.camera.zoomIn(viewer.camera.positionCartographic.height * 0.45);
     viewer.scene.requestRender();
-  }, [stopAutoRotation]);
+  }, []);
 
   const zoomOut = useCallback(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
-    stopAutoRotation();
     viewer.camera.zoomOut(viewer.camera.positionCartographic.height * 0.65);
     viewer.scene.requestRender();
-  }, [stopAutoRotation]);
+  }, []);
 
   // Expose imperative handle to parent
   const handle: CesiumGlobeHandle = useMemo(
@@ -239,7 +222,8 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
 
     let destroyed = false;
     let handler: CesiumType.ScreenSpaceEventHandler | null = null;
-    let postRenderRemove: (() => void) | null = null;
+    let removeVisibilityListeners: (() => void) | null = null;
+    let removeMarkerProjection: (() => void) | null = null;
     let themeObserver: MutationObserver | null = null;
 
     const initCesium = async () => {
@@ -254,7 +238,7 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
           Cesium.Ion.defaultAccessToken = token;
         }
 
-        // Create Viewer with minimal, clean options
+        const compact = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches;
         const viewer = new Cesium.Viewer(containerRef.current, {
           animation: false,
           baseLayerPicker: false,
@@ -271,9 +255,11 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
           scene3DOnly: true,
           requestRenderMode: true,
           maximumRenderTimeChange: Number.POSITIVE_INFINITY,
+          useDefaultRenderLoop: false,
+          targetFrameRate: compact ? 30 : undefined,
           baseLayer: false,
-          msaaSamples: 4,
-          contextOptions: { webgl: { alpha: false, antialias: true } },
+          msaaSamples: compact ? 1 : 4,
+          contextOptions: { webgl: { alpha: false, antialias: !compact } },
         });
 
         if (destroyed) {
@@ -283,12 +269,12 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
 
         viewerRef.current = viewer;
 
-        // Render crisp imagery at up to 2x pixel density without unbounded 3x/4x GPU cost.
-        const compact = window.matchMedia('(max-width: 767px)').matches;
+        // Cap the render buffer at CSS pixels on compact screens.
         viewer.useBrowserRecommendedResolution = false;
-        viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 2) / (window.devicePixelRatio || 1);
-        viewer.scene.globe.maximumScreenSpaceError = 1.5;
-        viewer.scene.globe.tileCacheSize = compact ? 128 : 256;
+        const pixelRatio = window.devicePixelRatio || 1;
+        viewer.resolutionScale = Math.min(pixelRatio, compact ? 1 : 2) / pixelRatio;
+        viewer.scene.globe.maximumScreenSpaceError = compact ? 2.5 : 1.5;
+        viewer.scene.globe.tileCacheSize = compact ? 96 : 256;
         viewer.scene.globe.preloadAncestors = true;
         viewer.scene.globe.preloadSiblings = false;
         viewer.clock.shouldAnimate = false;
@@ -309,7 +295,7 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
         });
         visibilityObserver.observe(containerRef.current!);
         document.addEventListener('visibilitychange', syncVisibility);
-        postRenderRemove = () => {
+        removeVisibilityListeners = () => {
           visibilityObserver.disconnect();
           document.removeEventListener('visibilitychange', syncVisibility);
         };
@@ -458,35 +444,17 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
         // Interaction Setup: ScreenSpaceEventHandler for Marker Clicks
         handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
         handler.setInputAction((movement: { position: CesiumType.Cartesian2 }) => {
-          stopAutoRotation();
           const pickedObject = viewer.scene.pick(movement.position);
           if (Cesium.defined(pickedObject) && pickedObject.id === markerEntity) {
             setShowLocationCard(true);
           }
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-        // Rotate only while visible; demand rendering can sleep after interaction.
-        let lastTime = performance.now();
-        const spinSpeed = 0.009; // Radians per second
-        const autoRotateListener = () => {
+        // Capture the marker location only when the scene draws a new frame.
+        removeMarkerProjection = viewer.scene.postRender.addEventListener(() => {
           const projected = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, markerPosition);
           if (projected && containerRef.current) containerRef.current.dataset.markerScreen = `${projected.x.toFixed(1)},${projected.y.toFixed(1)}`;
-          const now = performance.now();
-          const dt = Math.min((now - lastTime) / 1000, 0.1);
-          lastTime = now;
-          if (inViewport && !document.hidden && !window.matchMedia('(prefers-reduced-motion: reduce)').matches && isAutoRotating.current && !viewer.isDestroyed() && !isFlyingRef.current) {
-            viewer.scene.camera.rotate(Cesium.Cartesian3.UNIT_Z, -spinSpeed * dt);
-            viewer.scene.requestRender();
-          }
-        };
-        viewer.scene.preUpdate.addEventListener(autoRotateListener);
-        const removeVisibility = postRenderRemove;
-        postRenderRemove = () => {
-          removeVisibility?.();
-          if (viewer && !viewer.isDestroyed()) {
-            viewer.scene.preUpdate.removeEventListener(autoRotateListener);
-          }
-        };
+        });
 
         // Screen space camera controller adjustments with premium inertial damping
         const controller = viewer.scene.screenSpaceCameraController;
@@ -513,18 +481,18 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
     return () => {
       destroyed = true;
       themeObserver?.disconnect();
-      if (postRenderRemove) postRenderRemove();
+      removeVisibilityListeners?.();
+      removeMarkerProjection?.();
       if (handler) handler.destroy();
       if (viewerRef.current && !viewerRef.current.isDestroyed()) {
         viewerRef.current.destroy();
         viewerRef.current = null;
       }
     };
-  }, [stopAutoRotation]);
+  }, []);
 
   // Activate / deactivate wheel zoom on canvas click to prevent trapping page scroll
   const handleCanvasInteraction = () => {
-    stopAutoRotation();
     if (!isWheelActive) {
       setIsWheelActive(true);
       if (viewerRef.current && !viewerRef.current.isDestroyed()) {

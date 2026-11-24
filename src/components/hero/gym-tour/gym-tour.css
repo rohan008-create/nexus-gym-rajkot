@@ -1,7 +1,7 @@
 ﻿.gym-tour-hero{position:relative;height:650svh;color:#f7f5ef;background:#d4d3c9;isolation:isolate}
 .gym-tour-hero { --tactile-highlight: #d52036; --tactile-ink: #fffdf5; }
 html[data-theme='light'] .gym-tour-hero { --tactile-highlight: #b9172c; }
-.gym-tour-stage{position:sticky;top:0;height:100svh;height:100dvh;overflow:hidden;background:#283139}
+.gym-tour-stage{position:sticky;top:0;height:100svh;height:100dvh;overflow:hidden;background:#283139;-webkit-touch-callout:none}
 .gym-tour-visual{position:absolute;inset:0;pointer-events:none;isolation:isolate}
 .gym-tour-visual>div,.gym-tour-visual canvas{width:100%!important;height:100%!important}
 .gym-tour-visual canvas{display:block;touch-action:pan-y}

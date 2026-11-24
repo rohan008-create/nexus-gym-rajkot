@@ -26,7 +26,7 @@ async function main() {
   const source = fs.readFileSync('src/components/hero/gym-tour/RyanTourGuide.tsx', 'utf8');
   const normalize = source.slice(source.indexOf('function normalizeGuide('), source.indexOf('// Solve a two-bone'));
   new Function('THREE', 'avatar', ts.transpileModule(normalize, {}).outputText + '; normalizeGuide(avatar);')(THREE, avatar);
-  const create = source.slice(source.indexOf('function createLeg('), source.indexOf('function AnimatedRyan('));
+  const create = source.slice(source.indexOf('function createLeg('), source.indexOf('function relaxIdleArms('));
   const createLeg = new Function('THREE', 'STAIR', 'stairHeight', 'smooth', ts.transpileModule(create, {}).outputText + '; return createLeg;')(THREE, STAIR, stairHeight, smooth);
   const legs = [createLeg(avatar, 'Left'), createLeg(avatar, 'Right')];
   const root = new THREE.Group(); root.add(avatar);
@@ -62,6 +62,35 @@ async function main() {
     count++;
   }
   console.log(`${count} forward/reverse rig poses: knees stay separate, lateral deviation ${(maxLateral * 100).toFixed(2)} cm, foot error ${(maxError * 1000).toFixed(3)} mm.`);
+
+  root.rotation.set(0, 0, 0);
+  const relaxSource = source.slice(source.indexOf('function relaxIdleArms('), source.indexOf('function AnimatedRyan('));
+  const relaxIdleArms = new Function('THREE', ts.transpileModule(relaxSource, {}).outputText + '; return relaxIdleArms;')(THREE);
+  const idleClip = asset.animations.find(clip => clip.name === 'Idle');
+  const walkClip = asset.animations.find(clip => clip.name === 'Walk');
+  const mixer = new THREE.AnimationMixer(avatar);
+  const idle = mixer.clipAction(relaxIdleArms(idleClip, walkClip)).play();
+  const walk = mixer.clipAction(walkClip).play();
+  function sample(walking, phase) {
+    idle.setEffectiveWeight(1 - walking);
+    walk.setEffectiveWeight(walking);
+    idle.time = .4;
+    walk.time = walkClip.duration * phase;
+    mixer.update(0);
+  }
+  sample(0, 0);
+  assert.ok(position('RightForeArm')[1] - position('RightHand')[1] > .20, 'the resting right wrist hangs below the elbow');
+  mixer.stopAllAction();
+  idle.play();
+  walk.play();
+  sample(smooth(.25), 0);
+  assert.ok(position('RightForeArm')[1] - position('RightHand')[1] > .20, 'the wrist stays relaxed at the start of the stair turn');
+  const armSwing = side => position(side + 'Hand')[2] - position(side + 'Arm')[2];
+  sample(1, .25);
+  const leftForward = armSwing('Left'), rightForward = armSwing('Right');
+  sample(1, .75);
+  assert.ok(leftForward - armSwing('Left') > .12 && armSwing('Right') - rightForward > .12, 'the arms swing in opposite directions during each stair cycle');
+  console.log('Guide arms rest at the sides between gestures and alternate through the climb.');
   console.log('VERDICT: PASS');
 }
 main().catch(e => { console.error(e); process.exitCode = 1; });

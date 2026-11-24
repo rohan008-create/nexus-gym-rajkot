@@ -107,6 +107,21 @@ function createLeg(avatar: THREE.Object3D, side: string) {
   } };
 }
 
+function relaxIdleArms(idle: THREE.AnimationClip, walk: THREE.AnimationClip) {
+  const tracks = idle.tracks.map(track => {
+    if (!/^mixamorig(?:Left|Right)(?:Arm|ForeArm|Hand)\.quaternion$/.test(track.name)) return track;
+    const walkTrack = walk.tracks.find(candidate => candidate.name === track.name);
+    if (!walkTrack) return track;
+    // Opposite points in the walk cycle put the arms at a neutral midpoint.
+    // Keep the idle clip's breathing, shoulders and finger movement.
+    const sample = walkTrack.createInterpolant();
+    const neutral = new THREE.Quaternion().fromArray(sample.evaluate(walk.duration * .25));
+    neutral.slerp(new THREE.Quaternion().fromArray(sample.evaluate(walk.duration * .75)), .5);
+    return new THREE.QuaternionKeyframeTrack(track.name, [0], neutral.toArray());
+  });
+  return new THREE.AnimationClip(idle.name, idle.duration, tracks, idle.blendMode);
+}
+
 function AnimatedRyan({ asset, active, motion }: Props & { asset: GLTF }) {
   const root = useRef<THREE.Group>(null);
   const shadow = useRef<THREE.Mesh>(null);
@@ -125,8 +140,9 @@ function AnimatedRyan({ asset, active, motion }: Props & { asset: GLTF }) {
       return bone ? [{ bone, position: bone.position.clone(), quaternion: bone.quaternion.clone() }] : [];
     });
     const mixer = new THREE.AnimationMixer(avatar);
+    const walkClip = asset.animations.find(clip => clip.name === 'Walk');
     const actions = Object.fromEntries(asset.animations.map(clip => {
-      const action = mixer.clipAction(clip); action.play(); action.paused = true;
+      const action = mixer.clipAction(clip.name === 'Idle' && walkClip ? relaxIdleArms(clip, walkClip) : clip);
       return [clip.name, action];
     }));
     return { avatar, mixer, actions, hips, hipRest, hipRotation, legs, overrides };
@@ -135,8 +151,14 @@ function AnimatedRyan({ asset, active, motion }: Props & { asset: GLTF }) {
   const yaw = useMemo(() => new THREE.Quaternion(), []);
   const axis = useMemo(() => new THREE.Vector3(0, 1, 0), []);
   useEffect(() => {
+    for (const action of Object.values(model.actions)) {
+      action.play();
+      action.paused = true;
+    }
     gl.domElement.dataset.guideSource = 'ready'; invalidate();
-    return () => { model.mixer.stopAllAction(); model.mixer.uncacheRoot(model.avatar); };
+    // This mixer belongs to the cloned avatar. Keep its bindings available
+    // when React cleans up and replays the effect during development.
+    return () => { model.mixer.stopAllAction(); };
   }, [gl, invalidate, model]);
   useEffect(() => { if (!active) elapsed.current = 0; else invalidate(); }, [active, invalidate]);
   useFrame((_, delta) => {
@@ -153,8 +175,9 @@ function AnimatedRyan({ asset, active, motion }: Props & { asset: GLTF }) {
     const wave = model.actions.Wave, walk = model.actions.Walk, idle = model.actions.Idle;
     const receptionPause = smooth((p - .75) / .01) * (1 - smooth((p - .853) / .01));
     const walking = (1 - receptionPause) * smooth((p - .12) / .04) * (1 - smooth((p - .91) / .02));
-    const greeting = (p < .12 || p > .94) && elapsed.current < wave.getClip().duration ? 1 : 0;
-    wave.setEffectiveWeight(greeting * (1 - walking)); wave.time = Math.min(elapsed.current, wave.getClip().duration - .001);
+    const waveDuration = wave.getClip().duration;
+    const greeting = (p > .94 ? 1 : 1 - smooth((p - .095) / .025)) * smooth((waveDuration - elapsed.current) / .2);
+    wave.setEffectiveWeight(greeting * (1 - walking)); wave.time = Math.min(elapsed.current, waveDuration - .001);
     walk.setEffectiveWeight(walking);
     walk.time = (pose.stair >= 0 ? pose.stair * walk.getClip().duration / 2 : pose.walk) % walk.getClip().duration;
     idle.setEffectiveWeight((1 - greeting) * (1 - walking)); idle.time = elapsed.current % idle.getClip().duration;
