@@ -1,20 +1,89 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, CalendarDays, Menu, X } from 'lucide-react';
-export type Destination = 'Home' | 'About' | 'Programs' | 'Plans' | 'Location';
-export default function Navbar({ active, onNavigate, onTrial }: { active: Destination; onNavigate: (to: Destination) => void; onTrial: () => void }) {
-  const [open, setOpen] = useState(false), [scrolled, setScrolled] = useState(false);
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { ArrowUpRight, Menu, X } from 'lucide-react';
+import { usePageScroller } from './SmoothScroll';
+import './navbar.css';
+
+const sections = [
+  ['Home', 'home'],
+  ['About', 'about'],
+  ['Programs', 'programs'],
+  ['Membership', 'membership'],
+  ['Location', 'location'],
+  ['Products', 'products'],
+] as const;
+type Destination = typeof sections[number][1];
+
+export default function Navbar({ onTrial }: { onTrial: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [afterHero, setAfterHero] = useState(false);
+  const [active, setActive] = useState<Destination>('home');
+  const header = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
-  useEffect(() => { const update = () => setScrolled(window.scrollY > 25); update(); window.addEventListener('scroll', update, { passive: true }); return () => window.removeEventListener('scroll', update); }, []);
-  useEffect(() => { const escape = (e: KeyboardEvent) => { if (e.key === 'Escape' && open) { setOpen(false); toggle.current?.focus(); } }; window.addEventListener('keydown', escape); return () => window.removeEventListener('keydown', escape); }, [open]);
-  const navigate = (destination: Destination) => { setOpen(false); onNavigate(destination); };
-  return <header className={`site-nav ${scrolled ? 'is-scrolled' : ''}`}>
-    <a href="#home" className="brand" aria-label="Nexus Fitness Club home" onClick={e => { e.preventDefault(); navigate('Home'); }}><img src="/assets/nexus-logo.png" alt="Nexus Fitness Club" width="2172" height="724" /></a>
-    <nav className={`nav-links ${open ? 'is-open' : ''}`} id="primary-navigation" aria-label="Main navigation">
-      {(['Home', 'About', 'Programs', 'Plans', 'Location'] as Destination[]).map(item => <a key={item} href={item === 'Home' ? '#home' : item === 'Programs' ? '#programs' : item === 'Plans' ? '#membership' : '#about'} aria-current={active === item ? 'page' : undefined} onClick={e => { e.preventDefault(); navigate(item); }}>{item}<ArrowUpRight size={14} aria-hidden /></a>)}
-      <button className="nav-mobile-trial" onClick={() => { setOpen(false); onTrial(); }}>Book Free Trial</button>
+  const scroller = usePageScroller();
+
+  useEffect(() => {
+    const targets = sections.map(([, id]) => ({ id, element: document.getElementById(id) }));
+    const hero = document.getElementById('home');
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const heroIsAboveViewport = !hero || hero.getBoundingClientRect().bottom <= 1;
+      setAfterHero(heroIsAboveViewport);
+      if (!heroIsAboveViewport) setOpen(false);
+      const line = (header.current?.offsetHeight ?? 0) + 24;
+      let current: Destination = 'home';
+      for (const { id, element } of targets) {
+        if (element && element.getBoundingClientRect().top <= line) current = id;
+      }
+      setActive(current);
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const observer = new ResizeObserver(schedule);
+    if (hero) observer.observe(hero);
+    update();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+    };
+  }, []);
+
+  const close = () => {
+    setOpen(false);
+    toggle.current?.focus();
+  };
+  const navigate = (event: MouseEvent<HTMLAnchorElement>, destination: Destination) => {
+    if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+    const section = document.getElementById(destination);
+    if (!section) return;
+    event.preventDefault();
+    setOpen(false);
+    setActive(destination);
+    const target = section.getBoundingClientRect().top + window.scrollY;
+    if (scroller?.current) scroller.current.scrollTo(target, { immediate: true });
+    else window.scrollTo({ top: target, behavior: 'instant' });
+    const heading = section.querySelector<HTMLElement>('h1, h2');
+    if (heading) {
+      if (!heading.hasAttribute('tabindex')) heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
+  };
+
+  return <header ref={header} className="site-nav" hidden={!afterHero} onKeyDown={event => {
+    if (event.key === 'Escape' && open) { event.preventDefault(); close(); }
+  }}>
+    <a href="#home" className="brand" aria-label="Nexus Fitness Club home" onClick={event => navigate(event, 'home')}>
+      <img src="/assets/nexus-logo.png" alt="" width={2172} height={724} />
+    </a>
+    <button ref={toggle} type="button" className="menu-toggle" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} aria-controls="primary-navigation" onClick={() => setOpen(value => !value)}>{open ? <X aria-hidden /> : <Menu aria-hidden />}</button>
+    <nav className={`nav-links ${open ? 'is-open' : ''}`} id="primary-navigation" aria-label="Main navigation" data-lenis-prevent={open ? '' : undefined}>
+      {sections.map(([label, id]) => <a key={id} href={`#${id}`} aria-current={active === id ? 'location' : undefined} onClick={event => navigate(event, id)}>{label}<ArrowUpRight size={14} aria-hidden /></a>)}
+      <button type="button" className="nav-mobile-trial" onClick={() => { close(); onTrial(); }}>Book a trial</button>
     </nav>
-    <button className="trial-button" aria-label="Book Free Trial" onClick={onTrial}><CalendarDays size={17} aria-hidden /><span>Book Free Trial</span></button>
-    <button ref={toggle} className="menu-toggle" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} aria-controls="primary-navigation" onClick={() => setOpen(value => !value)}>{open ? <X /> : <Menu />}</button>
+    <button type="button" className="trial-button" onClick={onTrial}>Book a trial <ArrowUpRight size={15} aria-hidden /></button>
   </header>;
 }

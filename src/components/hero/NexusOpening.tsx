@@ -395,7 +395,7 @@ export default function NexusOpening({ onFinish }: { onFinish: () => void }) {
             ref={(el) => {
               bladeRefs.current[i] = el;
             }}
-            className="nexus-opening-blade relative h-full w-full bg-[#09090b] border-r border-white/[0.04] last:border-r-0 will-change-transform"
+            className="nexus-opening-blade relative h-full will-change-transform"
           >
             {/* Leading crimson laser edge that ignites right as the blades cleave open */}
             <div

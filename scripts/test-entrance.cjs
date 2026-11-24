@@ -27,6 +27,13 @@ const screenshotDir = process.env.ENTRANCE_SCREENSHOT_DIR;
       const opening = page.locator('.nexus-opening');
       await page.locator('.nexus-opening[data-active]').waitFor();
       assert.equal(await opening.locator('.nexus-opening-blade').count(), 5);
+      const edges = await opening.locator('.nexus-opening-blade').evaluateAll(blades =>
+        blades.map(blade => {
+          const bounds = blade.getBoundingClientRect();
+          return { left: bounds.left, right: bounds.right };
+        })
+      );
+      assert.ok(edges.slice(1).every((edge, index) => edges[index].right - edge.left >= 1), 'closed shutters overlap to cover fractional pixel gaps');
       assert.equal(await opening.locator('canvas').count(), 1);
       await page.waitForFunction(() => {
         const value = Number(document.querySelector('.nexus-opening-counter')?.textContent);

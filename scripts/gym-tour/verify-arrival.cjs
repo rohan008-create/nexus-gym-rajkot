@@ -32,7 +32,7 @@ async function run() {
       await page.waitForFunction(() => document.querySelector('#home .gym-tour-world canvas')?.dataset.guideState === 'wave', null, { timeout: 10000 });
       check(label + ': Ryan greets with Wave', true);
       await page.waitForFunction(() => document.querySelector('#home .gym-tour-world canvas')?.dataset.exteriorSource === 'detailed' && document.querySelector('#home .gym-tour-world canvas')?.dataset.interiorSource === 'detailed', null, { timeout: 90000 });
-      check(label + ': navbar and old footer removed', await page.locator('.site-nav,.gym-tour-footer,.gym-tour-copy').count() === 0);
+      check(label + ': navbar stays hidden during the tour', !(await page.locator('.site-nav').isVisible()) && await page.locator('.gym-tour-footer,.gym-tour-copy').count() === 0);
       check(label + ': stage fills viewport', await page.locator('.gym-tour-stage').evaluate(e => Math.abs(e.getBoundingClientRect().height - innerHeight) < 2));
       await page.screenshot({ path: `${out}/${label}-arrival.png` });
       await page.getByRole('button', { name: 'FOLLOW RYAN INSIDE' }).click();
