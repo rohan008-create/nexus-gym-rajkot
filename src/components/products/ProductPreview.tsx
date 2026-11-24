@@ -65,13 +65,13 @@ export default function ProductPreview({ product, enabled = true }: { product: P
       {showScene && <ProductScene product={product} angle={angle} onReady={() => setReady(true)} onFailure={() => setFailed(true)} />}
     </div>
     <div className="ps-preview-controls">
-      <span>{failed ? 'Product photo' : interactive ? 'Drag to rotate' : photo ? 'Product photo' : 'Loading 3D preview'}</span>
+      <span>{failed ? 'Product photo' : interactive ? 'Drag to rotate' : photo ? 'Product photo' : 'Opening product preview…'}</span>
       {interactive && <>
         <button type="button" aria-label="Rotate product left" onClick={() => rotate(-increment)}><RotateCcw size={17} aria-hidden /></button>
         <button type="button" aria-label="Rotate product right" onClick={() => rotate(increment)}><RotateCw size={17} aria-hidden /></button>
       </>}
       {!failed && <button type="button" onClick={() => { setReady(false); setPhoto(value => !value); }}>
-        {photo ? 'View 3D model' : 'View photo'}
+        {photo ? 'Rotate product' : 'View photo'}
       </button>}
     </div>
   </div>;

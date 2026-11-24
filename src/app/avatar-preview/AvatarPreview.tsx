@@ -88,7 +88,7 @@ class PreviewBoundary extends Component<{ children: ReactNode }, { failed: boole
   static getDerivedStateFromError() { return { failed: true }; }
   render() {
     return this.state.failed
-      ? <div className="avatar-message">Could not load the 3D preview. Refresh and check that WebGL is enabled.</div>
+      ? <div className="avatar-message">Couldn’t open the preview. Refresh the page to try again.</div>
       : this.props.children;
   }
 }
@@ -118,7 +118,7 @@ export default function AvatarPreview() {
     </header>
     <div className="avatar-stage">
       <PreviewBoundary>
-        <Canvas key={view} dpr={[1, 1.5]} camera={{ position: [0, 1.1, 3.4], fov: 38 }} gl={{ antialias: true }} fallback={<div className="avatar-message">This preview needs a browser with WebGL support.</div>}>
+        <Canvas key={view} dpr={[1, 1.5]} camera={{ position: [0, 1.1, 3.4], fov: 38 }} gl={{ antialias: true }} fallback={<div className="avatar-message">This preview is unavailable in your browser.</div>}>
           <color attach="background" args={['#15191f']} />
           <ambientLight intensity={1.5} />
           <directionalLight position={[3, 5, 4]} intensity={3} />

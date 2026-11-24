@@ -520,7 +520,7 @@ const CesiumGlobe = forwardRef<CesiumGlobeHandle, CesiumGlobeProps>(function Ces
         ref={containerRef}
         className="cesium-globe-canvas"
         role="application"
-        aria-label="Interactive 3D Earth Globe. Left click and drag to rotate Earth, use buttons to zoom."
+        aria-label="Globe map. Drag to rotate and use the buttons to zoom."
       />
 
       {/* Branded loading state */}

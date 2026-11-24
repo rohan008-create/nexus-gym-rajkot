@@ -207,7 +207,7 @@ export default function VirtualShowroom(props: Props) {
   // Fiber mounts fallback inside <canvas> even when WebGL works. Keep it passive:
   // reporting failure from a fallback effect would close every supported showroom.
   return <Canvas className="nexus-room-canvas" camera={{ fov: props.lowQuality ? 69 : 62, near: .1, far: 40 }} dpr={props.lowQuality ? [1, 1.25] : [1, 2]} shadows={!props.lowQuality}
-    frameloop={visible ? 'demand' : 'never'} gl={{ antialias: true, powerPreference: 'default' }} onCreated={({ gl }) => { gl.shadowMap.type = THREE.PCFSoftShadowMap; }} fallback={<p>3D requires a browser with WebGL 2 support. Use the product list to browse.</p>}>
+    frameloop={visible ? 'demand' : 'never'} gl={{ antialias: true, powerPreference: 'default' }} onCreated={({ gl }) => { gl.shadowMap.type = THREE.PCFSoftShadowMap; }} fallback={<p>The studio is unavailable on this device. You can browse the product list.</p>}>
     <Room {...props} />
   </Canvas>;
 }

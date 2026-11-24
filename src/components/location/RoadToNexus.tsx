@@ -12,7 +12,7 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 // Lazy-load CesiumGlobe on client-side only
 const CesiumGlobe = dynamic(() => import('./CesiumGlobe'), {
   ssr: false,
-  loading: () => <GlobeLoading message="INITIALIZING 3D EARTH GLOBE" />,
+  loading: () => <GlobeLoading />,
 });
 
 export default function RoadToNexus() {
@@ -159,9 +159,8 @@ export default function RoadToNexus() {
               aria-disabled={globeState === 'loading'}
               aria-label={globeState === 'ready' ? 'Explore Nexus Fitness Club in Rajkot, Gujarat' : undefined}
             >
-              <span className="globe-explore-dot" aria-hidden />
-              <span>{globeState === 'preview' ? 'EXPLORE IN 3D' : globeState === 'loading' ? 'LOADING 3D' : 'EXPLORE NEXUS'}</span>
-              <span className="globe-explore-arrow"><Navigation size={18} strokeWidth={1.7} aria-hidden /></span>
+              <span>{globeState === 'preview' ? 'Explore the map' : globeState === 'loading' ? 'Opening map…' : 'EXPLORE NEXUS'}</span>
+              <Navigation size={17} strokeWidth={1.8} aria-hidden />
             </button>
           </div>
         </>

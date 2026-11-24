@@ -1,7 +1,7 @@
 'use client';
 import { Globe2 } from 'lucide-react';
 
-export default function GlobeLoading({ message = 'INITIALIZING NEXUS WORLD' }: { message?: string }) {
+export default function GlobeLoading() {
   return (
     <div className="globe-loading-overlay" role="status" aria-live="polite">
       <div className="globe-loading-box">
@@ -11,7 +11,7 @@ export default function GlobeLoading({ message = 'INITIALIZING NEXUS WORLD' }: {
           <div className="globe-ring ring-3" />
           <Globe2 className="globe-loading-icon" size={28} />
         </div>
-        <p className="globe-loading-text">{message}</p>
+        <p className="globe-loading-text">Opening the map…</p>
         <span className="globe-loading-sub">ONE WORLD. ONE DESTINATION.</span>
       </div>
     </div>

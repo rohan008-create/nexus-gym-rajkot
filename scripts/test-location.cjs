@@ -66,7 +66,7 @@ const base = process.env.LOCATION_TEST_URL || process.env.ARMORY_TEST_URL || 'ht
     const directions = page.getByRole('link', { name: 'Get Directions', exact: true });
     assert.ok(await directions.isVisible(), 'directions are available before opening 3D');
     assert.match(await directions.getAttribute('href'), /^https:\/\/www\.google\.com\/maps\/dir\//);
-    await page.getByRole('button', { name: 'Explore in 3D' }).click();
+    await page.getByRole('button', { name: 'Explore the map' }).click();
     await page.waitForSelector('.cesium-globe-canvas canvas', { timeout: 45000 });
     await page.getByRole('button', { name: 'Explore Nexus Fitness Club in Rajkot, Gujarat' }).waitFor();
     assert.equal(cesiumRequests.length, 1, 'opt-in loads the engine exactly once');

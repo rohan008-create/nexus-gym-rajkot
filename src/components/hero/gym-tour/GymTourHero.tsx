@@ -1,7 +1,8 @@
 ﻿'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ArrowDown, ArrowUpRight, RotateCcw } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ArrivalPhotograph from './ArrivalPhotograph';
 import { usePageScroller } from '../../layout/SmoothScroll';
 import TourChapterCopy, { ArrivalWordmark } from './TourChapterCopy';
@@ -22,11 +23,13 @@ export default function GymTourHero({ reduced, onStatus, onTrial, onExploreProgr
   const interiorRequestedRef = useRef(false);
   const [chapter, setChapter] = useState(0);
   const [tourComplete, setTourComplete] = useState(false);
+  const [tourPreview, setTourPreview] = useState(false);
+  const layoutChange = useRef<{ anchor: HTMLElement; viewportTop: number } | null>(null);
   const displayedProgress = useRef(0);
   const scrollGestureUntil = useRef(0);
   const lastBeat = useRef(0);
   const lastChapter = useRef(0);
-  const staticView = reduced || status === 'error';
+  const staticView = reduced || status === 'error' || tourPreview;
   const present = useCallback((value: number) => {
     if ((value === 1) !== (displayedProgress.current === 1)) setTourComplete(value === 1);
     displayedProgress.current = value;
@@ -43,11 +46,35 @@ export default function GymTourHero({ reduced, onStatus, onTrial, onExploreProgr
   const ready = useCallback(() => { setStatus('ready'); onStatus('ready'); }, [onStatus]);
   const fail = useCallback(() => { setStatus('error'); onStatus('error'); }, [onStatus]);
   const retry = () => { setAttempt(value => value + 1); setStatus('loading'); onStatus('loading'); };
+  const showPreview = useCallback((anchor: HTMLElement, viewportTop: number) => {
+    if (layoutChange.current) return;
+    layoutChange.current = { anchor, viewportTop };
+    scrollGestureUntil.current = 0;
+    ready();
+    setTourPreview(true);
+  }, [ready]);
+  useLayoutEffect(() => {
+    const change = layoutChange.current;
+    if (!change) return;
+    layoutChange.current = null;
+    const { anchor, viewportTop } = change;
+    // Keep the section below in the same viewport position when the tour shrinks.
+    const target = window.scrollY + anchor.getBoundingClientRect().top - viewportTop;
+    const lenis = scroller?.current;
+    if (lenis?.isScrolling === 'smooth') {
+      lenis.stop();
+      lenis.start();
+    }
+    lenis?.resize();
+    if (lenis) lenis.scrollTo(target, { immediate: true, force: true });
+    else window.scrollTo({ top: target, behavior: 'instant' });
+    ScrollTrigger.refresh();
+  }, [scroller, tourPreview]);
   useEffect(() => {
-    if (!inView || status !== 'loading' || reduced || !pageVisible) return;
+    if (!inView || status !== 'loading' || staticView || !pageVisible) return;
     const timeout = window.setTimeout(fail, TOUR_START_TIMEOUT);
     return () => window.clearTimeout(timeout);
-  }, [inView, status, reduced, pageVisible, fail, attempt]);
+  }, [inView, status, staticView, pageVisible, fail, attempt]);
   useEffect(() => {
     // The shared hook starts conservatively at true during hydration. Only a
     // real reduced-motion preference can make the static view the final view.
@@ -166,6 +193,11 @@ export default function GymTourHero({ reduced, onStatus, onTrial, onExploreProgr
         }
       }
       previousScrollY = scrollY;
+      if (!staticView && scrollY >= Math.floor(top + element.offsetHeight)) {
+        const about = document.getElementById('about');
+        if (about) showPreview(about, about.getBoundingClientRect().top);
+        return;
+      }
       // The browser scrolls to whole CSS pixels, even when the sticky end is fractional.
       const value = staticView ? 0 : scrollY >= stickyEnd() ? 1 : Math.max(0, (scrollY - top) / range);
       // Start the room and host downloads on the stairs, before the room enters view.
@@ -202,15 +234,28 @@ export default function GymTourHero({ reduced, onStatus, onTrial, onExploreProgr
       stage.removeEventListener('touchcancel', onStageTouchEnd);
       window.removeEventListener('keydown', onKeyDown); window.removeEventListener('click', clearScrollGesture, true);
     };
-  }, [staticView, present, scroller]);
+  }, [staticView, present, scroller, showPreview]);
   const scrollTo = (top: number) => {
     if (scroller?.current) scroller.current.scrollTo(top, { immediate: reduced });
     else window.scrollTo({ top, behavior: reduced ? 'instant' : 'smooth' });
   };
   const skip = () => {
-    scrollGestureUntil.current = 0;
     const about = document.getElementById('about');
-    if (about) scrollTo(about.getBoundingClientRect().top + window.scrollY);
+    if (about) showPreview(about, 0);
+  };
+  const explorePrograms = () => {
+    const programs = document.getElementById('programs');
+    if (programs) showPreview(programs, 0);
+  };
+  const replay = () => {
+    const element = root.current;
+    if (!element) return;
+    layoutChange.current = { anchor: element, viewportTop: 0 };
+    progress.current = 0;
+    present(0);
+    retry();
+    setTourPreview(false);
+    element.querySelector<HTMLElement>('#hero-title')?.focus({ preventScroll: true });
   };
   const begin = () => {
     const element = root.current!;
@@ -228,9 +273,14 @@ export default function GymTourHero({ reduced, onStatus, onTrial, onExploreProgr
       {!staticView && <TourChapterCopy chapterIndex={chapter} />}
       {!staticView && status === 'ready' && beat === 0 && <button className="gym-tour-enter" onClick={begin}><span>FOLLOW RYAN INSIDE</span><ArrowDown size={15} aria-hidden /></button>}
       {!staticView && <button className="gym-tour-skip" onClick={skip}>Skip tour <ArrowUpRight size={13} aria-hidden /></button>}
-      {!staticView && beat === 3 && <div className="gym-tour-final-actions"><button data-tour-trial onClick={onTrial}>Book a trial <ArrowUpRight size={16} aria-hidden /></button><button onClick={onExplorePrograms}>Explore programs <ArrowUpRight size={16} aria-hidden /></button></div>}
-      {staticView && <div className="gym-tour-static-copy"><p>RAJKOT</p><h2 className="gym-tour-arrival-title"><ArrivalWordmark /></h2><button data-tour-trial onClick={onTrial}>Book a trial <ArrowUpRight size={16} aria-hidden /></button><button onClick={onExplorePrograms}>Explore programs</button></div>}
-      {status === 'loading' && !reduced && <span className="gym-tour-loading" role="status">Loading 3D tour…</span>}
+      {!staticView && beat === 3 && <div className="gym-tour-final-actions"><button data-tour-trial onClick={onTrial}>Book a trial <ArrowUpRight size={16} aria-hidden /></button><button onClick={explorePrograms}>Explore programs <ArrowUpRight size={16} aria-hidden /></button></div>}
+      {staticView && <div className="gym-tour-static-copy">
+        <p>RAJKOT</p><h2 className="gym-tour-arrival-title"><ArrivalWordmark /></h2>
+        <button data-tour-trial onClick={onTrial}>Book a trial <ArrowUpRight size={16} aria-hidden /></button>
+        <button onClick={onExplorePrograms}>Explore programs</button>
+        {tourPreview && !reduced && <button onClick={replay}>Replay tour <RotateCcw size={16} aria-hidden /></button>}
+      </div>}
+      {status === 'loading' && !reduced && <span className="gym-tour-loading" role="status">Opening the gym tour…</span>}
       {status === 'error' && <div className="gym-tour-fallback-note"><span role="status">Explore Nexus at your own pace.</span><button type="button" onClick={retry}>Retry tour</button></div>}
     </div>
   </section>;

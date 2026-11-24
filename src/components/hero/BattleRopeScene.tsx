@@ -58,7 +58,7 @@ export default function BattleRopeScene(props: Props) {
     <SceneBoundary onError={() => props.onStatus('error')}>
       <Canvas frameloop={visible && props.active !== false ? 'always' : 'demand'} dpr={dpr} camera={{ position: [0, .1, 10.2], fov: 35, near: .1, far: 50 }} gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2, powerPreference: 'high-performance' }} onCreated={({ gl }) => {
         const lost = (event: Event) => { event.preventDefault(); props.onStatus('error'); }; gl.domElement.addEventListener('webglcontextlost', lost); cleanup.current = () => gl.domElement.removeEventListener('webglcontextlost', lost);
-      }} fallback={<span className="webgl-note">3D preview unavailable on this device.</span>}>
+      }} fallback={<span className="webgl-note">The preview is unavailable on this device.</span>}>
         {props.active !== false && <PerformanceMonitor flipflops={2} onDecline={() => setDpr(1)} onFallback={() => setDpr(1)} />}
         <Suspense fallback={null}><Scene {...props} /></Suspense>
       </Canvas>

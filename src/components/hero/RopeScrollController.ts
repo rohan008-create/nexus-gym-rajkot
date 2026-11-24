@@ -85,10 +85,12 @@ export function useHeroTransition(root: React.RefObject<HTMLElement>, motion: Ro
       ScrollTrigger.create({ trigger: '#home', start: 'top 45%', end: 'bottom 45%', onEnter: () => onSection?.('Home'), onEnterBack: () => onSection?.('Home') });
       ScrollTrigger.create({ trigger: '#about', start: 'top 45%', end: 'bottom 45%', onEnter: () => onSection?.('About'), onEnterBack: () => onSection?.('About') });
       ScrollTrigger.create({ trigger: '#programs', start: 'top 45%', end: 'bottom bottom', onEnter: () => onSection?.('Programs'), onEnterBack: () => onSection?.('Programs') });
-      gsap.timeline({ scrollTrigger: { trigger: '#programs', start: 'top 85%', end: 'top 35%', scrub: reduced ? true : .4 } })
-        .fromTo('.programs-light-sweep', { opacity: 0, scaleX: .1 }, { opacity: .7, scaleX: 1, duration: .35 }, 0)
-        .fromTo('.programs-heading', { opacity: 0, y: reduced ? 0 : 28 }, { opacity: 1, y: 0, duration: .5 }, .1)
-        .fromTo('.program-panel', { opacity: 0, y: reduced ? 0 : 45 }, { opacity: 1, y: 0, duration: .5, stagger: .055 }, .2);
+      if (!reduced) {
+        gsap.timeline({ scrollTrigger: { trigger: '#programs', start: 'top 85%', once: true } })
+          .fromTo('.programs-light-sweep', { opacity: 0, scaleX: .1 }, { opacity: .7, scaleX: 1, duration: .35 }, 0)
+          .fromTo('.programs-heading', { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: .5 }, .1)
+          .fromTo('.program-panel', { opacity: 0, y: 45 }, { opacity: 1, y: 0, duration: .5, stagger: .055 }, .2);
+      }
     }, element);
     let disposed = false;
     document.fonts.ready.then(() => { if (!disposed) { measure(); ScrollTrigger.refresh(); } });

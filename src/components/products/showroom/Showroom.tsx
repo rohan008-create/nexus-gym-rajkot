@@ -124,7 +124,7 @@ export default function Showroom({ products, onAdd, onFailure }: Props) {
   <div ref={roomRef} className="nexus-room" data-room-ready={ready} data-fullscreen={fullscreen}
     data-viewport-mode={inlineHeight !== null} data-inspecting={inspecting}
     role={fullscreen ? 'dialog' : undefined} aria-modal={fullscreen || undefined}
-    aria-label={fullscreen ? '3D product studio' : undefined} data-lenis-prevent={fullscreen ? '' : undefined}
+    aria-label={fullscreen ? 'Product studio' : undefined} data-lenis-prevent={fullscreen ? '' : undefined}
     onKeyDown={event => {
     if (event.key !== 'Escape') return;
     if (inlineHeight !== null) {
@@ -136,7 +136,7 @@ export default function Showroom({ products, onAdd, onFailure }: Props) {
       <div className="nexus-room-main">
         {!ready && <>
           <img className="nexus-room-poster" src="/assets/products/nexus-showroom.webp" alt="" width={1280} height={720} />
-          <p className="nexus-room-loading" role="status">Loading 3D studio…</p>
+          <p className="nexus-room-loading" role="status">Opening the studio…</p>
         </>}
         <div className="nexus-room-live" data-ready={ready}>
           <RoomBoundary onFailure={onFailure}>

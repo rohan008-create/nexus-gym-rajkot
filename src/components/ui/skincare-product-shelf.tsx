@@ -116,7 +116,7 @@ export function ProductShelf({ products }: { products: Product[] }) {
     <div ref={studioRegion} className="ps-studio">
       <div className="ps-studio-bar">
         <div className="ps-studio-views" role="group" aria-label="Product view">
-          <button type="button" aria-pressed={studio} aria-controls="nexus-studio-view" onClick={() => { setStudioFailed(false); setStudio(true); }}><Box size={16} aria-hidden /> {studioFailed ? 'Retry 3D' : '3D Studio'}</button>
+          <button type="button" aria-pressed={studio} aria-controls="nexus-studio-view" onClick={() => { setStudioFailed(false); setStudio(true); }}><Box size={16} aria-hidden /> {studioFailed ? 'Retry studio' : 'Product Studio'}</button>
           <button type="button" aria-pressed={!studio} aria-controls="nexus-product-catalogue" onClick={() => setStudio(false)}><LayoutGrid size={16} aria-hidden /> Products</button>
         </div>
         <button type="button" className="ps-studio-kit" onClick={() => setView('kit')} aria-label={`View kit, ${totalQty} items`}>
@@ -129,7 +129,7 @@ export function ProductShelf({ products }: { products: Product[] }) {
           <div className="nexus-room nexus-room-placeholder"><div className="nexus-room-main"><img className="nexus-room-poster" src="/assets/products/nexus-showroom.webp" alt="" width={1280} height={720} loading="lazy" /></div></div>)}
       </div>
       <div id="nexus-product-catalogue" hidden={studio}>
-        {studioFailed && <p className="ps-studio-status" role="status">3D is unavailable. You can browse the product photos below.</p>}
+        {studioFailed && <p className="ps-studio-status" role="status">The studio couldn’t open. You can browse the product photos below.</p>}
         <div className="ps-toolbar"><div className="ps-filters" role="group" aria-label="Filter products">{(['All', 'Supplements', 'Nutrition', 'Accessories'] as const).map(category => <button key={category} aria-pressed={filter === category} onClick={() => setFilter(category)}>{category}<span>{category === 'All' ? products.length : products.filter(product => product.category === category).length}</span></button>)}</div><span className="ps-catalogue-note">ILLUSTRATIVE COLLECTION / INDICATIVE PRICES</span></div>
         <div className="ps-shelves" aria-label="Gym product shelves">
           {rows.map((row, index) => <div className="ps-shelf-row" key={`${filter}-${index}`}>

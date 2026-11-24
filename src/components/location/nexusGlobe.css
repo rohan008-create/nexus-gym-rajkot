@@ -195,14 +195,14 @@
   gap: 8px;
   min-height: 48px;
   padding: 12px 20px;
-  border: 1px solid #ffffff2b;
+  border: 1px solid #ffffff70;
   border-radius: 6px;
   background: #15151b;
   color: #fff;
   font-size: 11px;
   font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .12em;
+  letter-spacing: .06em;
+  transition: border-color 160ms ease;
 }
 
 .globe-directions-btn:hover {
@@ -211,65 +211,39 @@
 
 .globe-explore-btn[aria-disabled="true"] {
   cursor: progress;
-  box-shadow: none;
-  transform: none;
 }
 
 .globe-explore-btn {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 12px 22px;
   background: #e50914;
   color: #ffffff;
-  padding: 16px 28px;
   font-size: 11px;
   font-weight: 900;
-  letter-spacing: 0.16em;
+  letter-spacing: .06em;
   border: none;
-  border-radius: 6px;
+  border-radius: 999px;
   cursor: pointer;
-  box-shadow: 0 10px 32px rgba(229, 9, 20, 0.45);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 160ms ease;
 }
 
-.globe-explore-btn:hover {
-  background: #ff1e27;
-  transform: translateY(-2px);
-  box-shadow: 0 14px 42px rgba(229, 9, 20, 0.65);
+.globe-explore-btn:not([aria-disabled="true"]):hover {
+  background-color: #c90813;
 }
 
-.globe-explore-btn:active {
-  transform: translateY(0);
+.globe-action-shelf :is(.globe-directions-btn, .globe-explore-btn):focus-visible {
+  outline: 2px solid var(--theme-ink, #fff);
+  outline-offset: 4px;
 }
 
-.globe-explore-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 10px #ffffff;
-  animation: explore-pulse 1.6s infinite;
-}
-
-@keyframes explore-pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.6); opacity: 0.5; }
-}
-
-.globe-explore-arrow {
-  font-size: 14px;
-  transition: transform 0.2s ease;
-}
-
-.globe-explore-btn .globe-explore-arrow { display:grid; place-items:center; width:34px; height:34px; margin:-8px -16px -8px 12px; border:1px solid #ffffff55; border-radius:50%; background:#ffffff16; }
 @media(max-width:899px) {
   .nexus-globe-section .globe-info-card { max-height:34svh; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
   .nexus-globe-section .globe-card-actions { grid-template-columns:1fr 1fr; }
   .nexus-globe-section .globe-btn-primary { grid-column:1 / -1; }
-}
-
-.globe-explore-btn:hover .globe-explore-arrow {
-  transform: translate(2px, -2px);
 }
 
 /* Location Information Card (Appears on Flight Complete or Pin Click) */
@@ -644,14 +618,9 @@
     height: 64%;
   }
 
-  .globe-directions-btn {
-    width: 100%;
-  }
-
+  .globe-directions-btn,
   .globe-explore-btn {
     width: 100%;
-    justify-content: center;
-    padding: 14px 20px;
   }
 
   .globe-info-card {
