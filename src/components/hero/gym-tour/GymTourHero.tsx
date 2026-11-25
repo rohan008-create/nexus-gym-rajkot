@@ -12,8 +12,8 @@ const GymTourCanvas = dynamic(() => import('./GymTourCanvas'), { ssr: false });
 const SCROLL_MOMENTUM_WINDOW = 1500;
 const TOUR_START_TIMEOUT = 12_000;
 
-type Props = { reduced: boolean; onStatus: (status: TourStatus) => void; onTrial: () => void; onExplorePrograms: () => void };
-export default function GymTourHero({ reduced, onStatus, onTrial, onExplorePrograms }: Props) {
+type Props = { openingFinished: boolean; reduced: boolean; onStatus: (status: TourStatus) => void; onTrial: () => void; onExplorePrograms: () => void };
+export default function GymTourHero({ openingFinished, reduced, onStatus, onTrial, onExplorePrograms }: Props) {
   const root = useRef<HTMLElement>(null), progress = useRef(0), invalidate = useRef<() => void>(() => {});
   const scroller = usePageScroller();
   const [status, setStatus] = useState<TourStatus>('loading');
@@ -71,10 +71,10 @@ export default function GymTourHero({ reduced, onStatus, onTrial, onExploreProgr
     ScrollTrigger.refresh();
   }, [scroller, tourPreview]);
   useEffect(() => {
-    if (!inView || status !== 'loading' || staticView || !pageVisible) return;
+    if (!openingFinished || !inView || status !== 'loading' || staticView || !pageVisible) return;
     const timeout = window.setTimeout(fail, TOUR_START_TIMEOUT);
     return () => window.clearTimeout(timeout);
-  }, [inView, status, staticView, pageVisible, fail, attempt]);
+  }, [openingFinished, inView, status, staticView, pageVisible, fail, attempt]);
   useEffect(() => {
     // The shared hook starts conservatively at true during hydration. Only a
     // real reduced-motion preference can make the static view the final view.
@@ -266,7 +266,7 @@ export default function GymTourHero({ reduced, onStatus, onTrial, onExploreProgr
     <h1 id="hero-title" className="gym-tour-accessible-title">Nexus Fitness Club, Rajkot</h1>
     <div className="gym-tour-stage" data-tour-pending={!staticView && !tourComplete ? true : undefined} onContextMenu={event => event.preventDefault()}>
       <div className="gym-tour-visual" aria-hidden="true">
-        {!staticView && <GymTourCanvas key={attempt} progress={progress} active={inView && pageVisible} mobile={mobile} interiorRequested={interiorRequested} onInvalidate={invalidate} onPresent={present} onReady={ready} onFailure={fail} />}
+        {openingFinished && !staticView && <GymTourCanvas key={attempt} progress={progress} active={inView && pageVisible} mobile={mobile} interiorRequested={interiorRequested} onInvalidate={invalidate} onPresent={present} onReady={ready} onFailure={fail} />}
         <ArrivalPhotograph />
       </div>
       {!staticView && <div className="gym-tour-edge-shade" aria-hidden="true" />}

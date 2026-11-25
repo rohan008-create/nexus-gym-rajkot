@@ -53,6 +53,8 @@ export interface FuzzyGazeFooterProps {
   imageSmall?: string
   /** Let pointer and touch strokes ruffle the creature's fur. */
   brushFur?: boolean
+  /** Let pointer and touch strokes compress padded artwork. */
+  paddedArtwork?: boolean
   /** Where the shut eyes are in the picture. */
   eyes?: FooterEye[]
   /** Where the top of the creature's head is in the picture, as a fraction of its height. */
@@ -256,6 +258,7 @@ export default function FuzzyGazeFooter({
   image = IMG_BASE + "creature.webp",
   imageSmall = image === IMG_BASE + "creature.webp" ? IMG_BASE + "creature-960.webp" : undefined,
   brushFur = false,
+  paddedArtwork = false,
   eyes = DEFAULT_EYES,
   crown = 0.161,
   background = "#90acf7",
@@ -286,7 +289,7 @@ export default function FuzzyGazeFooter({
     const image = imgRef.current
     if (!root || !art || !ready) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    const fur = canvas && image ? createFurStroke(canvas, eyes) : null
+    const fur = canvas && image ? createFurStroke(canvas, eyes, paddedArtwork) : null
     const eyeEls = Array.from(art.querySelectorAll(".fgf-eye")) as HTMLElement[]
     const pupils = eyeEls.map((el) => el.querySelector(".fgf-pupil") as HTMLElement)
     const look = eyeEls.map(() => ({ x: 0, y: 0.12 }))
@@ -406,7 +409,7 @@ export default function FuzzyGazeFooter({
       art.style.removeProperty("--fgf-nudge-x")
       art.style.removeProperty("--fgf-nudge-y")
     }
-  }, [ready, eyes, brushFur, crown])
+  }, [ready, eyes, brushFur, paddedArtwork, crown])
 
   // ---- wordmark: hover or focus turns it to mist, then it re-forms ----
   useEffect(() => {
@@ -519,7 +522,7 @@ export default function FuzzyGazeFooter({
           {...imageProps}
           onLoad={() => setReady(true)}
         />
-        {brushFur && <canvas ref={brushRef} className="fgf-fur-stroke" hidden />}
+        {(brushFur || paddedArtwork) && <canvas ref={brushRef} className="fgf-fur-stroke" hidden />}
         {eyes.map((eye, i) => (
           <span
             key={i}

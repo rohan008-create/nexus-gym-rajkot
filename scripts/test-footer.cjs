@@ -23,13 +23,20 @@ async function verifyLayout(browser, { width, theme, reduced = false }) {
     await footer.locator('.fgf-art[data-ready]').waitFor();
     assert.equal(await footer.evaluate(el => getComputedStyle(el).backgroundColor),
       theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)');
-    assert.equal(await footer.locator('.fgf-eye').count(), 2);
+    assert.equal(await footer.locator('.fgf-eye').count(), 0);
     assert.equal(await footer.locator('[data-testid="nexus-wordmark"], .nf-logo').count(), 0);
     assert.ok(await footer.locator('.fgf-img').evaluate(async image => {
       await image.decode();
-      return image.naturalWidth > 0 && new URL(image.currentSrc).origin === location.origin;
+      const url = new URL(image.currentSrc);
+      return image.naturalWidth === image.naturalHeight &&
+        url.origin === location.origin && url.pathname === '/assets/footer/nexus-boxing-glove.webp';
     }));
-    assert.match(await footer.locator('.fgf-img').evaluate(image => getComputedStyle(image).filter), /#nexus-footer-art/);
+    assert.ok(await footer.evaluate(el => {
+      const nav = el.querySelector('.fgf-top').getBoundingClientRect();
+      const art = el.querySelector('.fgf-art').getBoundingClientRect();
+      const phone = el.querySelector('.fgf-mail').getBoundingClientRect();
+      return art.width > 0 && art.top >= nav.bottom && phone.top >= art.bottom;
+    }));
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth === innerWidth));
     assert.ok(await footer.evaluate(el => {
       const frame = el.getBoundingClientRect();
@@ -57,17 +64,11 @@ async function verifyLayout(browser, { width, theme, reduced = false }) {
     if (reduced) {
       assert.equal(await footer.locator('.fgf-fur-stroke').isVisible(), false);
       assert.equal(await wordmark.locator('.fgf-word').evaluate(el => getComputedStyle(el).filter), 'none');
-      assert.equal(await footer.locator('.fgf-eye').first().evaluate(el => el.style.getPropertyValue('--fgf-lid')), '');
     } else if (width === 1440) {
       await page.waitForFunction(() => getComputedStyle(document.querySelector('.fgf-word')).filter !== 'none');
       await page.waitForFunction(() => getComputedStyle(document.querySelector('.fgf-word')).filter === 'none');
       await wordmark.hover();
       await page.waitForFunction(() => getComputedStyle(document.querySelector('.fgf-word')).filter !== 'none');
-      await page.mouse.move(width - 20, 360);
-      await page.waitForFunction(() => parseFloat(document.querySelector('.fgf-pupil').style.transform.slice(10)) > 10);
-      await page.mouse.move(20, 360);
-      await page.waitForFunction(() => parseFloat(document.querySelector('.fgf-pupil').style.transform.slice(10)) < -10);
-      await page.waitForFunction(() => parseFloat(document.querySelector('.fgf-eye').style.getPropertyValue('--fgf-lid')) > 95, null, { timeout: 9000 });
     }
 
     if (!reduced && (width === 1440 || width === 320)) {

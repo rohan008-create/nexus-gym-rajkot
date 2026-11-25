@@ -1,43 +1,57 @@
-.nexus-footer-art-filter {
-  position: absolute;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.nexus-fuzzy-footer {
+﻿.fgf-root.nexus-boxing-footer {
   --nexus-footer-accent: #ff6676;
+  display: grid;
+  grid-template-areas: 'navigation' 'artwork' 'contact';
+  gap: 12px;
+  padding: 76px clamp(24px, 4vw, 72px) 40px;
   border-top: 1px solid var(--theme-line);
 }
 
-html[data-theme="light"] .nexus-fuzzy-footer {
+html[data-theme="light"] .nexus-boxing-footer {
   --nexus-footer-accent: #a7111d;
 }
 
-.nexus-fuzzy-footer .fgf-img {
-  filter: url(#nexus-footer-art);
+.nexus-boxing-footer .fgf-in {
+  display: contents;
 }
 
-.nexus-fuzzy-footer :is(.fgf-head, .fgf-link) {
+.nexus-boxing-footer .fgf-top {
+  grid-area: navigation;
+}
+
+.nexus-boxing-footer .fgf-art {
+  position: relative;
+  z-index: auto;
+  grid-area: artwork;
+  top: auto;
+  left: auto;
+  justify-self: center;
+  width: min(100%, 460px);
+  height: auto;
+  aspect-ratio: 1;
+  transform: translate(var(--fgf-nudge-x, 0px), var(--fgf-nudge-y, 0px));
+}
+
+.nexus-boxing-footer .fgf-img {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.nexus-boxing-footer .fgf-gap {
+  display: none;
+}
+
+.nexus-boxing-footer :is(.fgf-head, .fgf-link) {
   color: var(--theme-ink);
 }
 
-.nexus-fuzzy-footer :is(.fgf-logo, .fgf-link:focus-visible) {
+.nexus-boxing-footer :is(.fgf-logo, .fgf-link:focus-visible) {
   color: var(--nexus-footer-accent);
 }
 
-.nexus-fuzzy-footer .fgf-ball {
-  background: radial-gradient(circle at 46% 38%, #fff 42%, #f7f5ef 66%, #e0d5d1 86%, #ba9c97);
-}
-
-.nexus-fuzzy-footer .fgf-rim {
-  background: radial-gradient(closest-side, transparent 98.1%, #ffc6cb80 98.5%, #c8485757);
-}
-
-.nexus-fuzzy-footer .fgf-shade {
-  background: radial-gradient(closest-side, transparent 92%, #6d17201a 95.4%, #6215214d 98.6%, #47131b99);
-}
-
-.nexus-fuzzy-footer .fgf-mail {
+.nexus-boxing-footer .fgf-mail {
+  grid-area: contact;
+  justify-self: center;
   padding: 12px 20px;
   border: 1px solid #f7f5ef66;
   border-radius: 999px;
@@ -45,7 +59,14 @@ html[data-theme="light"] .nexus-fuzzy-footer {
   color: #f7f5ef;
 }
 
-.nexus-fuzzy-footer .fgf-mail:focus-visible {
+.nexus-boxing-footer .fgf-mail:focus-visible {
   color: #f7f5ef;
-  outline-color: #f7f5ef;
+  outline-color: var(--nexus-footer-accent);
+}
+
+@media (max-width: 599px) {
+  .fgf-root.nexus-boxing-footer {
+    padding-top: 84px;
+    padding-bottom: 34px;
+  }
 }

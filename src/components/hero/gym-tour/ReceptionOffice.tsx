@@ -69,13 +69,12 @@ function ReceptionFinishes() {
   useEffect(() => {
     // Include the hidden reception and procedural room once their textures are
     // ready, rather than first compiling them halfway up the staircase.
-    let mounted = true;
-    gl.compileAsync(scene, camera).then(() => {
-      if (mounted) gl.domElement.dataset.receptionShaders = 'ready';
-    }).catch(() => {
-      if (mounted) gl.domElement.dataset.receptionShaders = 'deferred';
-    });
-    return () => { mounted = false; };
+    try {
+      gl.compile(scene, camera);
+      gl.domElement.dataset.receptionShaders = 'ready';
+    } catch {
+      gl.domElement.dataset.receptionShaders = 'deferred';
+    }
   }, [gl, scene, camera, wood, stone, logo]);
   return <>
     {/* Bookmatched wall panels with recessed shadow joints. */}

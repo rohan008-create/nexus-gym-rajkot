@@ -21,16 +21,16 @@ export default function DetailedInterior({ requested, fallback }: { requested: b
   const clone = useMemo(() => asset?.scene.clone(true), [asset]);
   useEffect(() => {
     if (!clone) return;
-    let mounted = true;
-    // Compile against the tour's lights before the doorway reveals this room.
-    // Keep the procedural room mounted until the detailed shaders are ready.
-    gl.compileAsync(clone, camera, scene).then(() => {
-      if (mounted) { setPrepared(true); invalidate(); }
-    }).catch(() => {
-      // The procedural room remains usable if the optional upgrade fails.
-      if (mounted) { gl.domElement.dataset.interiorSource = 'fallback'; gl.domElement.dataset.interiorSettled = 'true'; invalidate(); }
-    });
-    return () => { mounted = false; };
+    // Warm the room against the tour's lights. The async compiler polls even
+    // after a skipped tour destroys the renderer and its programs.
+    try {
+      gl.compile(clone, camera, scene);
+      setPrepared(true);
+    } catch {
+      gl.domElement.dataset.interiorSource = 'fallback';
+      gl.domElement.dataset.interiorSettled = 'true';
+    }
+    invalidate();
   }, [clone, camera, gl, scene, invalidate]);
   useEffect(() => {
     if (!requested) return;

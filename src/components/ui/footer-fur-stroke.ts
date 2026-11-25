@@ -8,13 +8,63 @@ function noise(column: number, row: number, seed: number) {
   return ((value ^ (value >>> 15)) >>> 0) / 4294967296;
 }
 
-export function createFurStroke(canvas: HTMLCanvasElement, eyes: FooterEye[]) {
+function paintPadding(
+  patch: ImageData,
+  texture: ImageData,
+  x: number,
+  y: number,
+  radiusX: number,
+  radiusY: number,
+  stroke: number,
+) {
+  const { width, height, data } = texture;
+  const pixels = patch.data;
+  for (let row = 0; row < patch.height; row++) {
+    const dy = (row + .5) / (patch.height / 2) - 1;
+    for (let col = 0; col < patch.width; col++) {
+      const dx = (col + .5) / (patch.width / 2) - 1;
+      const offset = (row * patch.width + col) * 4;
+      pixels[offset + 3] = 0;
+      const edge = 1 - dx * dx - dy * dy;
+      if (edge <= 0) continue;
+      const pressure = edge * edge * stroke;
+      const pull = 1 / (1 + .32 * pressure);
+      const sx = x + dx * radiusX * pull;
+      const sy = y + dy * radiusY * pull;
+      const ix = Math.floor(sx);
+      const iy = Math.floor(sy);
+      const ox = Math.floor(x + dx * radiusX);
+      const oy = Math.floor(y + dy * radiusY);
+      if (ix < 0 || iy < 0 || ix >= width - 1 || iy >= height - 1 ||
+          ox < 0 || oy < 0 || ox >= width || oy >= height) continue;
+
+      const sample = (iy * width + ix) * 4;
+      const next = sample + width * 4;
+      const original = (oy * width + ox) * 4;
+      const alpha = Math.min(data[original + 3], data[sample + 3], data[sample + 7], data[next + 3], data[next + 7]);
+      if (alpha < 238 || data[original] < data[original + 1] * 1.45 || data[original] < data[original + 2] * 1.25) continue;
+      const fx = sx - ix;
+      const fy = sy - iy;
+      // Light rolls across the padded leather as it presses inward.
+      const light = 1 + pressure * (-.20 + .65 * (.31 * dx + .72 * dy));
+      for (let channel = 0; channel < 3; channel++) {
+        const upper = data[sample + channel] * (1 - fx) + data[sample + 4 + channel] * fx;
+        const lower = data[next + channel] * (1 - fx) + data[next + 4 + channel] * fx;
+        pixels[offset + channel] = (upper * (1 - fy) + lower * fy) * light;
+      }
+      pixels[offset + 3] = alpha * Math.min(1, edge * edge * 5, stroke * 20);
+    }
+  }
+}
+
+export function createFurStroke(canvas: HTMLCanvasElement, eyes: FooterEye[], padded = false) {
   const context = canvas.getContext('2d');
   const buffer = document.createElement('canvas');
   const sourceContext = buffer.getContext('2d', { willReadFrequently: true });
   if (!context || !sourceContext) return null;
 
-  canvas.width = canvas.height = PATCH_SIZE;
+  canvas.width = canvas.height = padded ? 232 : PATCH_SIZE;
+  const paddingPatch = padded ? context.createImageData(canvas.width, canvas.height) : null;
   let texture: ImageData | undefined;
   let currentSource = '';
   let lastFrame: { x: number; y: number; width: number; height: number; stroke: number } | undefined;
@@ -39,7 +89,8 @@ export function createFurStroke(canvas: HTMLCanvasElement, eyes: FooterEye[]) {
       if (!texture) return false;
       const { width, height, data } = texture;
       const center = (Math.floor(y * height / box.height) * width + Math.floor(x * width / box.width)) * 4;
-      return data[center + 3] >= 225;
+      return data[center + 3] >= 225 &&
+        (!padded || (data[center] > data[center + 1] * 1.45 && data[center] > data[center + 2] * 1.25));
     },
     paint(box: DOMRect, x: number, y: number, stroke: number) {
       if (stroke < .012 || !texture || x < 0 || y < 0 || x >= box.width || y >= box.height) {
@@ -51,13 +102,21 @@ export function createFurStroke(canvas: HTMLCanvasElement, eyes: FooterEye[]) {
           Math.abs(lastFrame.stroke - stroke) < .008) return;
       lastFrame = { x, y, width: box.width, height: box.height, stroke };
 
-      const radius = Math.max(77, Math.min(183, box.width * .155));
+      const radius = Math.max(padded ? 54 : 77, Math.min(padded ? 121 : 183, box.width * .155));
       const unit = HALF_PATCH / radius;
       const left = x - radius;
       const top = y - radius;
       const { width, height, data } = texture;
       const sx = width / box.width;
       const sy = height / box.height;
+      canvas.style.width = canvas.style.height = 2 * radius + 'px';
+      canvas.style.transform = 'translate3d(' + left + 'px, ' + top + 'px, 0)';
+      if (paddingPatch) {
+        paintPadding(paddingPatch, texture, x * sx, y * sy, radius * sx, radius * sy, stroke);
+        context.putImageData(paddingPatch, 0, 0);
+        canvas.hidden = false;
+        return;
+      }
       const center = (Math.floor(y * sy) * width + Math.floor(x * sx)) * 4;
       const eyesInStroke = eyes.map(eye => ({
         x: (eye.x * box.width - left) * unit,
@@ -147,8 +206,6 @@ export function createFurStroke(canvas: HTMLCanvasElement, eyes: FooterEye[]) {
         context.fillStyle = fade;
         context.fillRect(0, 0, PATCH_SIZE, PATCH_SIZE);
       }
-      canvas.style.width = canvas.style.height = 2 * radius + 'px';
-      canvas.style.transform = 'translate3d(' + left + 'px, ' + top + 'px, 0)';
       canvas.hidden = false;
     },
   };

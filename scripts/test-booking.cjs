@@ -11,8 +11,8 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3001';
     p.on('pageerror', error => errors.push(error.message));
     p.on('response', r => { if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`); });
     p.on('request', r => { if (r.url().startsWith('https://wa.me/')) whatsAppRequests++; });
-    await p.goto(`${base}/hero`);
-    await p.waitForSelector('[data-rope-status=ready]', { timeout: 90000 });
+    await p.goto(`${base}/hero#booking`);
+    await p.waitForFunction(() => document.documentElement.classList.contains('lenis'));
     await p.locator('#booking').evaluate(el => scrollTo(0, el.getBoundingClientRect().top + scrollY - 84));
     await p.waitForTimeout(1000); return p;
   };
@@ -21,9 +21,14 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3001';
   try {
     fs.mkdirSync('qa', { recursive: true });
     const p = await open(false);
-    assert.equal(await p.locator('#booking').evaluate(el => el.previousElementSibling.id), 'products');
+    assert.equal(await p.locator('#booking').evaluate(el => el.previousElementSibling.id), 'faq');
+    assert.equal(await p.getByRole('heading', { name: 'Plan your first visit.' }).count(), 1);
     await p.screenshot({ path: 'qa/booking-desktop.png' });
-    for (const title of ['Trial session', 'Membership enquiry', 'Gym visit']) { await p.locator('.booking-experience').filter({ hasText: title }).click(); assert.ok(await p.getByRole('radio', { name: new RegExp(title) }).isChecked()); }
+    for (const title of ['Trial session', 'Membership enquiry', 'Gym visit']) {
+      await p.locator('.booking-experience').filter({ hasText: title }).click();
+      assert.ok(await p.getByRole('radio', { name: new RegExp(title) }).isChecked());
+      assert.equal(await p.locator('.booking-pass-title').textContent(), title);
+    }
     await p.locator('.booking-experience').filter({ hasText: 'Trial session' }).click(); await next(p); await step(p, 2);
     assert.ok(await p.locator('[data-day="2026-11-09"]').isDisabled());
     assert.ok(await p.getByRole('button', { name: 'Previous month' }).isDisabled());
@@ -31,7 +36,7 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3001';
     await p.locator('[data-day="2026-11-10"]').focus(); await p.keyboard.press('ArrowRight'); await p.keyboard.press('Enter');
     assert.ok((await p.locator('[data-day="2026-11-11"]').getAttribute('class')).includes('is-selected'));
     await p.getByRole('button', { name: 'Next month' }).click(); await p.getByRole('button', { name: 'Next month' }).click();
-    assert.equal(await p.locator('#booking-calendar-month').innerText(), 'January 2027');
+    assert.equal(await p.locator('#booking-calendar-month').textContent(), 'January 2027');
     await p.getByRole('button', { name: 'Previous month' }).click();
     await p.locator('[data-day="2026-12-31"]').focus(); await p.keyboard.press('ArrowRight');
     await p.waitForFunction(() => document.activeElement.getAttribute('data-day') === '2027-01-01'); await p.keyboard.press('Enter');

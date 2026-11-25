@@ -4,18 +4,57 @@ const names = ['trainer-01', 'trainer-02', 'trainer-03', 'trainer-04', 'trainer-
 const specializations = ['STRENGTH &amp; CONDITIONING', 'FUNCTIONAL FITNESS', 'PERFORMANCE &amp; CONDITIONING', 'MOBILITY &amp; RECOVERY', 'STRENGTH &amp; TECHNIQUE'];
 const focuses = [['STRENGTH FOUNDATIONS', 'CONTROLLED TECHNIQUE', 'PROGRESSIVE TRAINING'], ['MOVEMENT QUALITY', 'FULL-BODY STRENGTH', 'EVERYDAY FITNESS'], ['CONDITIONING', 'TRAINING CONSISTENCY', 'WORK CAPACITY'], ['MOBILITY PRACTICE', 'MOVEMENT CONTROL', 'RECOVERY HABITS'], ['LIFTING FOUNDATIONS', 'TECHNIQUE PRACTICE', 'STEADY PROGRESS']];
 const biographies = [['Purposeful strength sessions.', 'Steady progress, one rep at a time.'], ['Move with confidence.', 'Build balanced full-body strength.'], ['Train with intention.', 'Develop consistent training habits.'], ['Move freely, train confidently.', 'Build sustainable movement habits.'], ['Build strength with purpose.', 'Practice technique, rep by rep.']];
-const svg = body => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="768" height="1080"><defs><linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#090909"/></linearGradient></defs><style>text{font-family:Arial,sans-serif;fill:#fff}.muted{fill:#a1a1aa}.red{fill:#ff1728}</style>${body}</svg>`);
+const accents = ['#285b63', '#244c71', '#8d4c3c', '#65517a', '#4f6042'];
+const portraitCrops = ['north', 'north', 'north', 'north', 'centre'];
+const svg = (body, accent) => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="768" height="1080">
+  <defs>
+    <linearGradient id="paper" x2=".92" y2="1"><stop stop-color="#fff8e8"/><stop offset="1" stop-color="#e6d6b8"/></linearGradient>
+    <pattern id="grain" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 1H8" stroke="#634e32" opacity=".06"/></pattern>
+  </defs>
+  <style>text{font-family:Arial,sans-serif;fill:#202931}.muted{fill:#4f5354}.accent{fill:${accent}}</style>
+  ${body}</svg>`);
+const backing = '<rect width="768" height="1080" fill="url(#paper)"/><rect width="768" height="1080" fill="url(#grain)"/>';
+async function writeBadge(image, id, side) {
+  const path = `public/assets/trainers/${id}-${side}`;
+  const png = await image.png().toBuffer();
+  await Promise.all([
+    fs.writeFile(`${path}.png`, png),
+    sharp(png).webp({ lossless: true, effort: 6 }).toFile(`${path}.webp`)
+  ]);
+}
 (async () => {
   await fs.mkdir('public/assets/trainers', { recursive: true });
-  const logo = await sharp('public/assets/nexus-logo.png').resize({ width: 340, height: 76, fit: 'inside' }).png().toBuffer();
+  const logo = await sharp('public/assets/nexus-logo.png').resize({ width: 245, height: 62, fit: 'inside' }).png().toBuffer();
   for (let i = 0; i < names.length; i++) {
     const id = names[i]; const number = String(i + 1).padStart(2, '0');
-    const photo = await sharp(`assets/imagegen/trainers/${id}-original.png`).resize(720, 680, { fit: 'cover', position: 'attention' }).png().toBuffer();
-    await sharp(`assets/imagegen/trainers/${id}-original.png`).resize({ width: 640 }).webp({ quality: 85 }).toFile(`public/assets/trainers/${id}-photo.webp`);
-    const front = svg(`<rect x="24" y="185" width="720" height="680" fill="url(#fade)"/><path d="M24 867H744" stroke="#e50914" stroke-width="4"/><text x="40" y="43" font-size="15" letter-spacing="5" class="muted">NEXUS / ELITE TEAM</text><text x="40" y="925" font-size="43" font-weight="900" font-style="italic">DEMO TRAINER ${number}</text><text x="40" y="968" font-size="22" letter-spacing="1" class="red">${specializations[i]}</text><text x="40" y="1036" font-size="18" letter-spacing="3" class="muted">ELITE TEAM / 00${i + 1}</text><text x="728" y="1036" font-size="16" text-anchor="end" class="muted">DEMO</text>`);
-    await sharp({ create: { width: 768, height: 1080, channels: 4, background: '#101010' } }).composite([{ input: photo, left: 24, top: 185 }, { input: logo, left: 214, top: 91 }, { input: front }]).png().toFile(`public/assets/trainers/${id}-front.png`);
-    const back = svg(`<rect width="768" height="1080" fill="#0c0c0c"/><path d="M420 0L768 348M480 0L768 288M0 900L180 1080M0 950L130 1080" stroke="#e50914" stroke-opacity=".16" stroke-width="25"/><text x="48" y="226" font-size="17" letter-spacing="4" class="red">ELITE TRAINER PROFILE</text><text x="48" y="298" font-size="43" font-weight="900" font-style="italic">DEMO TRAINER ${number}</text><text x="48" y="348" font-size="22" class="muted">${specializations[i]}</text><path d="M48 391H720" stroke="#e50914"/><text x="48" y="450" font-size="16" letter-spacing="4" class="muted">TRAINING FOCUS</text>${focuses[i].map((text,j) => `<text x="48" y="${508+j*54}" font-size="23">/ ${text}</text>`).join('')}<text x="48" y="731" font-size="23" class="muted">${biographies[i][0]}</text><text x="48" y="768" font-size="23" class="muted">${biographies[i][1]}</text><text x="48" y="862" font-size="16" class="muted">ILLUSTRATIVE PROFILE / NOT ACTUAL NEXUS STAFF</text><path d="M48 925H720" stroke="#ffffff" stroke-opacity=".15"/><text x="48" y="994" font-size="29" font-style="italic" font-weight="900">BUILT FOR PROGRESS.</text><text x="48" y="1036" font-size="16" letter-spacing="3" class="red">NEXUS FITNESS CLUB / DEMO 00${i+1}</text>`);
-    await sharp(back).composite([{ input: logo, left: 214, top: 91 }]).png().toFile(`public/assets/trainers/${id}-back.png`);
+    const accent = accents[i];
+    const portrait = `assets/imagegen/trainers/${id}-white.png`;
+    const photo = await sharp(portrait).resize(688, 610, { fit: 'cover', position: portraitCrops[i] }).png().toBuffer();
+    await sharp(portrait).resize({ width: 640 }).webp({ quality: 85 }).toFile(`public/assets/trainers/${id}-photo.webp`);
+    const front = svg(`
+      <rect x="40" y="185" width="688" height="610" fill="none" stroke="${accent}" stroke-width="5"/>
+      <path d="M40 832H728" stroke="${accent}" stroke-width="3"/>
+      <path d="M40 832H142" stroke="${accent}" stroke-width="8"/>
+      <text x="724" y="132" text-anchor="end" font-size="23" font-weight="700" letter-spacing="3" class="accent">DEMO PROFILE</text>
+      <text x="40" y="918" font-size="51" font-weight="900" letter-spacing="-1">Trainer ${number}</text>
+      <text x="40" y="975" font-size="27" font-weight="700" letter-spacing="1" class="accent">${specializations[i]}</text>
+      <rect y="1042" width="768" height="38" fill="${accent}"/>`, accent);
+    await writeBadge(sharp(svg(backing, accent))
+      .composite([{ input: photo, left: 40, top: 185 }, { input: logo, left: 38, top: 94 }, { input: front }]), id, 'front');
+    const back = svg(`${backing}
+      <path d="M40 191H728" stroke="${accent}" stroke-width="3"/>
+      <text x="724" y="132" text-anchor="end" font-size="23" font-weight="700" letter-spacing="3" class="accent">DEMO PROFILE</text>
+      <text x="40" y="290" font-size="61" font-weight="900" letter-spacing="-2">Trainer ${number}</text>
+      <text x="40" y="348" font-size="28" font-weight="700" class="accent">${specializations[i]}</text>
+      <rect x="40" y="410" width="688" height="244" rx="14" fill="${accent}" opacity=".11"/>
+      <text x="68" y="464" font-size="21" font-weight="700" letter-spacing="3" class="accent">TRAINING FOCUS</text>
+      ${focuses[i].map((value, row) => `<circle cx="75" cy="${508 + row * 44}" r="4" fill="${accent}"/><text x="94" y="${515 + row * 44}" font-size="24">${value}</text>`).join('')}
+      <text x="40" y="728" font-size="27">${biographies[i][0]}</text>
+      <text x="40" y="774" font-size="27">${biographies[i][1]}</text>
+      <path d="M40 904H728" stroke="${accent}" opacity=".55"/>
+      <text x="40" y="960" font-size="21" class="muted">Illustrative profile ? Not actual Nexus staff</text>
+      <rect y="1042" width="768" height="38" fill="${accent}"/>`, accent);
+    await writeBadge(sharp(back).composite([{ input: logo, left: 38, top: 94 }]), id, 'back');
   }
   const strap = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="128"><rect width="1024" height="128" fill="#111111"/><path d="M0 8H1024M0 120H1024" stroke="#393939" stroke-width="2" stroke-dasharray="8 6"/><text x="512" y="78" text-anchor="middle" font-family="Arial" font-weight="900" font-size="46" letter-spacing="6" fill="#e50914">NEXUS FITNESS CLUB</text></svg>`);
   await sharp(strap).png().toFile('public/assets/trainers/nexus-lanyard-strap.png');

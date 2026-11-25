@@ -6,7 +6,7 @@ import NexusOpening from './NexusOpening';
 import type { TourStatus } from './gym-tour/gymTourConfig';
 import TrialDialog from './TrialDialog';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
-import { useHeroTransition } from './RopeScrollController';
+import { useHeroTransition } from './useHeroTransition';
 import AboutNexus from '../sections/AboutNexus';
 import type { RopeLayout } from './ropeGeometry';
 import ProgramsSection from '../sections/ProgramsSection';
@@ -40,7 +40,7 @@ export default function HeroSection() {
   const content = useMemo(() => <main ref={root} className="site-shell rope-experience" data-rope-status={status} onPointerMove={event => { pointer.current.x = event.clientX / window.innerWidth * 2 - 1; pointer.current.y = 1 - event.clientY / window.innerHeight * 2; }} onPointerLeave={() => { pointer.current.x = 0; pointer.current.y = 0; }}>
     {openingFinished && <Navbar onTrial={() => setTrial(true)} />}
     <div className="hero-experience">
-      <GymTourHero reduced={reduced} onStatus={setStatus} onTrial={() => setTrial(true)} onExplorePrograms={explorePrograms} />
+      <GymTourHero openingFinished={openingFinished} reduced={reduced} onStatus={setStatus} onTrial={() => setTrial(true)} onExplorePrograms={explorePrograms} />
       <section className="continuation-section about-section" id="about" aria-labelledby="about-title">
         <AboutNexus panel="About" onTrial={() => setTrial(true)} />
       </section>

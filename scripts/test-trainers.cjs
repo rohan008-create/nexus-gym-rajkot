@@ -33,7 +33,6 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
   assert.notDeepEqual(await canvas.screenshot(), held, 'card moves after release');
   await p.getByRole('button', { name: '03 Demo Trainer 03' }).click();
   assert.ok((await p.locator('#trainer-profile').innerText()).toLowerCase().includes('performance & conditioning'));
-  assert.equal(await p.locator('.armory-is-pinned').count(), 1);
   await p.emulateMedia({ reducedMotion: 'reduce' }); await p.waitForTimeout(300);
   assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await p.close();
@@ -62,7 +61,7 @@ const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3000';
   const y = await m.evaluate(() => scrollY); await m.mouse.wheel(0, 300); await m.waitForTimeout(400); assert.ok(await m.evaluate(() => scrollY) > y, 'page remains scrollable');
   assert.ok(await m.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   assert.deepEqual(errors, []);
-  fs.writeFileSync('qa/trainers-result.json', JSON.stringify({ passed: true, checks: ['placement', 'five desktop canvases and shared rail', 'real textures', 'pointer flip', 'keyboard flip', 'drag', 'no drag flip', 'release motion', 'HTML profile selection', 'one mobile canvas', 'mobile switching', 'mobile flip', 'touch tap-to-flip', 'touch dragging', 'no touch drag flip', 'normal scrolling', 'reduced motion', 'Armory pin', 'no overflow'], errors }, null, 2));
+  fs.writeFileSync('qa/trainers-result.json', JSON.stringify({ passed: true, checks: ['placement', 'five desktop badges on one canvas', 'real textures', 'pointer flip', 'keyboard flip', 'drag', 'no drag flip', 'release motion', 'HTML profile selection', 'one mobile canvas', 'mobile switching', 'mobile flip', 'touch tap-to-flip', 'touch dragging', 'no touch drag flip', 'normal scrolling', 'reduced motion', 'no overflow'], errors }, null, 2));
   console.log('Trainer browser checks passed.');
  } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });

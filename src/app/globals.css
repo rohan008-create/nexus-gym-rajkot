@@ -612,13 +612,14 @@ html.lenis, html.lenis body { height: auto; }
   .equipment-pods-section .locker-heading { font-size: clamp(32px, 9vw, 56px); }
   .equipment-pods-section .locker-scene-area { height: 490px; margin-top: 20px; }
 }
-/* A shared steel rail and five separate attachment rings ground the lanyards. */
+/* A brushed-metal rail with a collar at each strap anchor. */
 .trainers-stage { position:relative; width:100%; max-width:1040px; margin-inline:auto; grid-template-columns:repeat(5,minmax(200px,1fr)); gap:10px; padding-top:16px; overflow-x:auto; overflow-y:hidden; min-height:480px; scrollbar-width:thin; scrollbar-color:#8885 transparent; }
-.trainers-support-rail { position:absolute; z-index:2; top:5px; left:0; width:max(100%,1040px); height:9px; border:1px solid #60646a; border-radius:6px; background:linear-gradient(#43474c,#d1d3d5 30%,#858a90 48%,#34383d 80%,#171a1d); box-shadow:0 3px 5px #0004,inset 0 1px 1px #fff8; pointer-events:none; }
-.trainers-support-rail > span { position:absolute; top:-6px; left:5px; width:22px; height:21px; border:1px solid #51555a; border-radius:4px; background:linear-gradient(100deg,#30343a,#92979c 40%,#393e44); box-shadow:0 3px 7px #0003; }
-.trainers-support-rail > span:last-child { left:auto; right:5px; }
+.trainers-support-rail { position:absolute; z-index:2; top:4px; inset-inline:0; height:12px; border:1px solid #535d65; border-radius:4px; background:linear-gradient(#59646d,#aeb5b8 24%,#828c94 45%,#3f4a53); pointer-events:none; }
+.trainers-support-rail > span { position:absolute; top:-4px; left:0; width:20px; height:18px; border:1px solid #4e5b63; border-radius:3px; background:linear-gradient(110deg,#53616b,#a1a6a4 45%,#5b686c); }
+.trainers-support-rail > span:last-child { left:auto; right:0; }
 .trainer-installation { position:relative; }
-.trainer-rail-hook { position:absolute; z-index:3; top:-15px; left:50%; width:24px; height:30px; transform:translateX(-50%); border:4px solid #777d85; border-radius:12px; background:transparent; box-shadow:inset 1px 0 1px #fff9,1px 1px 2px #0008; pointer-events:none; }
+.trainer-rail-hook { position:absolute; z-index:3; top:-14px; left:50%; width:30px; height:24px; transform:translateX(-50%); border:1px solid #4c555b; border-radius:5px; background:linear-gradient(105deg,#586069,#a4adaf 44%,#6b7678); pointer-events:none; }
+.trainer-rail-hook::after { content:''; position:absolute; inset:auto 4px 2px; height:4px; border-radius:2px; background:#292d34; }
 .trainer-lanyard-slot { height:410px; }
 @media(max-width:719px) { .trainers-stage { overflow:visible; padding-top:16px; } .trainers-support-rail { width:100%; } .trainer-lanyard-slot { height:470px; } }
 .trainers-stage { overflow:visible; grid-template-columns:repeat(5,minmax(0,1fr)); }

@@ -15,13 +15,15 @@ const NODE_WEIGHT = 1 / 0.05;
 const MAX_STEP = 1 / 960;
 const ITERATIONS = 2;
 const SAMPLES = 72;
+const IDLE_FRAME_MS = 32;
+const INTERACTION_SETTLE_MS = 1800;
 const FOV = 24;
 const STRAP_WIDTH = 0.36;
 const RING_RADIUS = 0.095;
 const RING_TUBE = 0.0135;
 const EYELET_RADIUS = 0.036;
 const CLAMP_BODY = 0.15;
-const FACE_WIDTH = 1024;
+const FACE_WIDTH = 768;
 
 const FINISHES = {
   glossy: { roughness: 0.42, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.06, foil: 0, anisotropy: 0 },
@@ -708,6 +710,8 @@ function acquireRack(host) {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(FOV, 1, .1, 200);
   const environment = buildEnvironment(renderer);
+  const grain = buildGrainTexture();
+  const weave = buildWeaveTexture();
   scene.environment = environment.texture;
   const key = new THREE.DirectionalLight(0xffffff,1.6); key.position.set(-2.5,4,6);
   const fill = new THREE.DirectionalLight(0xffffff,.35); fill.position.set(3,-1,4);
@@ -717,18 +721,26 @@ function acquireRack(host) {
   canvas.className = 'lanyard-canvas trainer-shared-canvas';
   canvas.setAttribute('aria-hidden','true');
   host.appendChild(canvas);
-  rack = { host, renderer, scene, camera, environment, users:1, frame:0, entries:new Map(), owner:null,
+  let lastIdleFrame = -Infinity;
+  rack = { host, renderer, scene, camera, environment, grain, weave, imageCache: new Map(),
+    users:1, frame:0, entries:new Map(), owner:null,
+    idleFrame(now) {
+      if (now - lastIdleFrame >= IDLE_FRAME_MS) lastIdleFrame = now;
+      return lastIdleFrame === now;
+    },
     draw() {
       if (rack.frame) return;
       rack.frame=requestAnimationFrame(()=>{
         rack.frame=0;
-        if (rack.users && !renderer.getContext().isContextLost()) renderer.render(scene,camera);
+        if (rack.users && !document.hidden && !renderer.getContext().isContextLost()) renderer.render(scene,camera);
       });
     },
     release(localScene, container) {
       scene.remove(localScene); rack.entries.delete(container);
       if (rack.owner===container) rack.owner=null;
-      if (--rack.users) return;
+      if (--rack.users) { rack.draw(); return; }
+      grain.dispose();
+      weave.dispose();
       cancelAnimationFrame(rack.frame); environment.dispose(); renderer.dispose(); renderer.forceContextLoss();
       canvas.remove(); sharedRacks.delete(host);
     }
@@ -802,7 +814,9 @@ const Lanyard = ({
 
   useEffect(() => {
     applyRef.current?.();
-  });
+  }, [frontImage, backImage, imageFit, cardColor, orientation, finish, cornerRadius, size,
+    anchor, strapLength, strapImage, strapColor, strapWidth, metal, gravity, damping,
+    elasticity, breeze, interactive, intro]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -842,7 +856,7 @@ const Lanyard = ({
     rimLight.position.set(4, 2, -3);
     if (!rack) scene.add(rimLight);
 
-    const imageCache = new Map();
+    const imageCache = rack?.imageCache ?? new Map();
     const images = { front: null, back: null, strap: null };
     const frontCanvas = document.createElement('canvas');
     const backCanvas = document.createElement('canvas');
@@ -852,8 +866,9 @@ const Lanyard = ({
     const strapTexture = makeCanvasTexture(strapCanvas, anisotropy);
     strapTexture.wrapS = THREE.ClampToEdgeWrapping;
     strapTexture.wrapT = THREE.RepeatWrapping;
-    const grain = buildGrainTexture();
-    const weave = buildWeaveTexture();
+    const grain = rack?.grain ?? buildGrainTexture();
+    const weave = rack ? rack.weave.clone() : buildWeaveTexture();
+    if (rack) weave.needsUpdate = true;
     const foilUniforms = {
       beamTime: { value: 0 },
       beamAspect: { value: 1 },
@@ -940,7 +955,8 @@ const Lanyard = ({
     const mouth = new THREE.Vector3();
     const tuck = new THREE.Vector3();
     const curve = new THREE.CatmullRomCurve3(controls, false, 'centripetal');
-    const view = { width: 1, height: 1 };
+    curve.arcLengthDivisions = SAMPLES;
+    const view = { width: 1, height: 1, renderWidth: 1, renderHeight: 1 };
     let layout = cardLayout('portrait', 0.3);
     let applied = {};
     let strapScale = STRAP_WIDTH;
@@ -948,6 +964,8 @@ const Lanyard = ({
     let raf = 0;
     let last = performance.now();
     let time = 0;
+    let interactiveUntil = 0;
+    let bandRepeats = 0;
     let visible = false;
     let alive = true;
     let placed = false;
@@ -992,12 +1010,10 @@ const Lanyard = ({
       let viewHeight = layout.height / clamp(s.size, 0.15, 0.9);
       const minimumWidth = layout.width / 0.8;
       if (viewHeight * aspect < minimumWidth) viewHeight = minimumWidth / aspect;
-      const rackWidth = rack ? Math.max(rack.host.clientWidth, window.innerWidth - 32) : view.width;
-      const renderHeight = rack ? view.height + 120 : view.height;
-      const viewWidth = viewHeight * rackWidth / view.height;
-      const projectionHeight = viewHeight * renderHeight / view.height;
-      const cameraY = -viewHeight * (renderHeight - view.height) / (2 * view.height);
-      camera.aspect = rackWidth / renderHeight;
+      const viewWidth = viewHeight * view.renderWidth / view.height;
+      const projectionHeight = viewHeight * view.renderHeight / view.height;
+      const cameraY = -viewHeight * (view.renderHeight - view.height) / (2 * view.height);
+      camera.aspect = view.renderWidth / view.renderHeight;
       camera.position.set(0, cameraY, projectionHeight / 2 / Math.tan((FOV * Math.PI) / 360));
       camera.lookAt(0, cameraY, 0);
       camera.updateProjectionMatrix();
@@ -1005,11 +1021,18 @@ const Lanyard = ({
       foilUniforms.foilKey.value.set(-2.5, 4, 6).normalize().transformDirection(camera.matrixWorldInverse);
       foilUniforms.foilFill.value.set(3, -1, 4).normalize().transformDirection(camera.matrixWorldInverse);
       foilUniforms.foilTop.value.set(0.5, 4.5, 8).normalize().transformDirection(camera.matrixWorldInverse);
-      const slot = container.getBoundingClientRect();
-      const rackRect = rack ? canvas.getBoundingClientRect() : null;
-      const fraction = rack ? (slot.left + slot.width / 2 - rackRect.left) / rackRect.width : (ANCHORS[s.anchor] ?? 0.5);
-      const anchorX = (fraction - .5) * viewWidth;
-      const anchorY = viewHeight / 2 + 0.2;
+      let anchorX = ((ANCHORS[s.anchor] ?? 0.5) - .5) * viewWidth;
+      let anchorY = viewHeight / 2 + 0.2;
+      const hook = rack && container.closest('.trainer-installation')?.querySelector('.trainer-rail-hook');
+      if (hook) {
+        const hookRect = hook.getBoundingClientRect();
+        const canvasRect = canvas.getBoundingClientRect();
+        // Map the physical collar's exit to the camera plane at z = 0.
+        const x = (hookRect.left + hookRect.width / 2 - canvasRect.left) / view.renderWidth;
+        const y = (hookRect.bottom - 3 - canvasRect.top) / view.renderHeight;
+        anchorX = (x - .5) * viewWidth;
+        anchorY = cameraY + (.5 - y) * projectionHeight;
+      }
       const cardTop = viewHeight / 2 - viewHeight * mix(0.12, 0.42, clamp(s.strapLength, 0, 1));
       const hangTop = cardTop + (layout.hangY - layout.height / 2);
       sim.anchor.set(anchorX, anchorY, 0);
@@ -1039,7 +1062,7 @@ const Lanyard = ({
         ring.position.set(0, layout.ringY, 0);
         applied.framingKey = '';
       }
-      const framingKey = `${layoutKey}|${s.size}|${s.anchor}|${s.strapLength}|${view.width}|${view.height}`;
+      const framingKey = `${layoutKey}|${s.size}|${s.anchor}|${s.strapLength}|${view.width}|${view.height}|${view.renderWidth}|${view.renderHeight}`;
       if (framingKey !== applied.framingKey) {
         frameView();
         if (!placed) {
@@ -1069,8 +1092,8 @@ const Lanyard = ({
         });
       }
       const faceKey = `${layoutKey}|${s.cardColor}|${s.imageFit}`;
-      if (faceKey !== applied.faceKey) paintFaces();
-      if (s.strapColor !== applied.strapColor) repaintStrap();
+      if (images.front && faceKey !== applied.faceKey) paintFaces();
+      if (images.strap && s.strapColor !== applied.strapColor) repaintStrap();
 
       const finish = FINISHES[s.finish] || FINISHES.glossy;
       const card = parseColor(s.cardColor, [1, 1, 1]);
@@ -1144,6 +1167,7 @@ const Lanyard = ({
       const columns = BAND_COLUMNS.length;
       const restLength = sim.rest * JOINTS;
       const repeats = restLength / (strapScale * tileRatio);
+      const repeatChanged = repeats !== bandRepeats;
       const width = strapScale / Math.pow(Math.max(1, length / Math.max(restLength, 0.001)), 0.35);
       const { tangent, toCamera, across, facing } = work;
       for (let i = 0; i < SAMPLES; i++) {
@@ -1172,13 +1196,16 @@ const Lanyard = ({
             facing.y * bendCos + across.y * bendSin,
             facing.z * bendCos + across.z * bendSin
           );
-          uv.setXY(k, BAND_COLUMNS[c], v);
+          if (repeatChanged) uv.setXY(k, BAND_COLUMNS[c], v);
         }
       }
       work.end.copy(across);
       position.needsUpdate = true;
       normal.needsUpdate = true;
-      uv.needsUpdate = true;
+      if (repeatChanged) {
+        bandRepeats = repeats;
+        uv.needsUpdate = true;
+      }
 
       across.copy(work.end).addScaledVector(axis, -work.end.dot(axis)).normalize();
       facing.crossVectors(across, axis).normalize();
@@ -1227,7 +1254,14 @@ const Lanyard = ({
     const tick = now => {
       raf = 0;
       if (!alive || !visible || document.hidden) return;
-      const dt = Math.min(1 / 30, Math.max(1 / 240, (now - last) / 1000));
+      const elapsed = now - last;
+      const entering = settingsRef.current.intro && !reducedMotion && time < introDelay + 2;
+      if (!entering && !sim.grab && now >= interactiveUntil &&
+          !(rack ? rack.idleFrame(now) : elapsed >= IDLE_FRAME_MS)) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      const dt = Math.min(1 / 30, Math.max(1 / 240, elapsed / 1000));
       last = now;
       time += dt;
       foilUniforms.beamTime.value = reducedMotion ? 0 : time;
@@ -1282,6 +1316,7 @@ const Lanyard = ({
         direction = scratch.b.subVectors(point, body.position).cross(away).dot(up) < 0 ? -1 : 1;
       }
       sim.turn = sim.turn === 0 ? Math.PI * direction : 0;
+      interactiveUntil = performance.now() + INTERACTION_SETTLE_MS;
       body.angular.addScaledVector(up, FLIP_SPIN * direction);
       if (reducedMotion) {
         body.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), sim.turn);
@@ -1325,6 +1360,7 @@ const Lanyard = ({
 
     const onPointerMove = event => {
       if (!settingsRef.current.interactive) return;
+      if (rack?.owner && rack.owner !== container) return;
       toPointer(event);
       if (sim.grab) {
         if (press && Math.hypot(event.clientX - press.x, event.clientY - press.y) > 6) press = null;
@@ -1340,7 +1376,10 @@ const Lanyard = ({
       if (event.pointerType === 'touch') return;
       const wasHovering = hovering;
       hovering = !!pickCard();
-      if (hovering !== wasHovering) start();
+      if (hovering !== wasHovering) {
+        interactiveUntil = performance.now() + IDLE_FRAME_MS;
+        start();
+      }
       setCursor(hovering ? 'grab' : '');
     };
 
@@ -1348,6 +1387,7 @@ const Lanyard = ({
       if (!sim.grab) return;
       sim.grab = null;
       if (rack?.owner === container) rack.owner=null;
+      interactiveUntil = performance.now() + INTERACTION_SETTLE_MS;
       if (press && event.type === 'pointerup' && performance.now() - press.time < 450) flip(press.point);
       container.dataset.interaction = 'released';
       press = null;
@@ -1370,17 +1410,27 @@ const Lanyard = ({
     canvas.addEventListener('lostpointercapture', onPointerUp);
     canvas.addEventListener('touchstart', onTouchStart, { passive: false });
 
+    const rendererSize = new THREE.Vector2();
     const resize = () => {
-      view.width = Math.max(1, container.clientWidth);
-      view.height = Math.max(1, container.clientHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
-      renderer.setSize(rack ? Math.max(rack.host.clientWidth, window.innerWidth - 32) : view.width, rack ? view.height + 120 : view.height, false);
+      const slot = container.getBoundingClientRect();
+      view.width = Math.max(1, slot.width);
+      view.height = Math.max(1, slot.height);
+      const renderBounds = rack ? canvas.getBoundingClientRect() : slot;
+      view.renderWidth = Math.max(1, renderBounds.width);
+      view.renderHeight = Math.max(1, renderBounds.height);
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.25);
+      if (renderer.getPixelRatio() !== pixelRatio) renderer.setPixelRatio(pixelRatio);
+      renderer.getSize(rendererSize);
+      if (rendererSize.x !== view.renderWidth || rendererSize.y !== view.renderHeight) {
+        renderer.setSize(view.renderWidth, view.renderHeight, false);
+      }
       apply();
       render();
     };
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
+    if (rack) resizeObserver.observe(canvas);
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       if (visible) start();
@@ -1422,7 +1472,8 @@ const Lanyard = ({
       canvas.removeEventListener('touchstart', onTouchStart);
       [bodyMesh, frontMesh, backMesh, ring, clampMesh, eyelet, band].forEach(mesh => mesh.geometry?.dispose());
       [frontMaterial, backMaterial, edgeMaterial, metalMaterial, bandMaterial].forEach(material => material.dispose());
-      [frontTexture, backTexture, strapTexture, grain, weave].forEach(texture => texture.dispose());
+      [frontTexture, backTexture, strapTexture, weave].forEach(texture => texture.dispose());
+      if (!rack) grain.dispose();
       if (rack) rack.release(scene,container);
       else {
         environment.dispose(); renderer.dispose(); renderer.forceContextLoss();
