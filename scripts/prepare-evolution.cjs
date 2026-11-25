@@ -10,7 +10,7 @@ const resolveTool = (env, module, fallback) => process.env[env] || (() => { try 
 const ffmpeg = resolveTool('FFMPEG_PATH', 'ffmpeg-static', 'ffmpeg');
 const ffprobe = resolveTool('FFPROBE_PATH', 'ffprobe-static', 'ffprobe');
 const input = path.resolve(process.argv[2] || path.join(root, 'assets/video/human-evolution/source.mp4'));
-const output = path.join(root, 'public/animations/nexus-evolution');
+const output = path.join(root, 'assets/evolution/nexus-evolution');
 const temp = path.join(root, 'qa/evolution-processing');
 const watermark = { x: 1650, y: 810, width: 210, height: 210 };
 const run = args => new Promise((resolve, reject) => { const child = spawn(ffmpeg, args, { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] }); let error = ''; child.stderr.on('data', data => { error = (error + data).slice(-5000); }); child.on('error', reject); child.on('close', code => code ? reject(new Error(error)) : resolve()); });

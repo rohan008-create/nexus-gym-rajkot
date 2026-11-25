@@ -3,18 +3,18 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const sharp = require('sharp');
 const base = process.env.ARMORY_TEST_URL || 'http://127.0.0.1:3001';
-const manifest = JSON.parse(fs.readFileSync('public/animations/nexus-evolution/manifest.json', 'utf8'));
+const manifest = JSON.parse(fs.readFileSync('assets/evolution/nexus-evolution/manifest.json', 'utf8'));
 const source = p => p < .5 ? p : p < .78 ? .5 + (p - .5) / .28 * .41 : .91 + (p - .78) / .22 * .09;
 (async () => {
   assert.equal(manifest.frameCount, manifest.source.frameCount);
   assert.equal(manifest.frameCount, 239);
   for (const variant of ['desktop', 'mobile']) {
-    const dir = `public/animations/nexus-evolution/${variant}`;
+    const dir = `assets/evolution/nexus-evolution/${variant}`;
     assert.equal(fs.readdirSync(dir).filter(name => name.endsWith('.webp')).length, manifest.frameCount);
     for (let i = 1; i <= manifest.frameCount; i++) assert.ok(fs.statSync(`${dir}/frame-${String(i).padStart(4, '0')}.webp`).size > 0);
     for (const i of [1, 75, 150, 239]) { const image = sharp(`${dir}/frame-${String(i).padStart(4, '0')}.webp`); const meta = await image.metadata(); assert.equal(meta.hasAlpha, true); assert.equal(meta.width, manifest[variant].width); assert.equal(meta.height, manifest[variant].height); const stats = await image.stats(); assert.ok(stats.channels[3].min === 0 && stats.channels[3].max === 255); }
     if (manifest.packs) for (let first = 0; first < manifest.frameCount; first += manifest.packs.framesPerPack) {
-      const data = fs.readFileSync(`public/animations/nexus-evolution/${variant}-packs/pack-${String(first / manifest.packs.framesPerPack + 1).padStart(3, '0')}.bin`);
+      const data = fs.readFileSync(`assets/evolution/nexus-evolution/${variant}-packs/pack-${String(first / manifest.packs.framesPerPack + 1).padStart(3, '0')}.bin`);
       assert.equal(data.readUInt32LE(0), first); const count = data.readUInt32LE(4); let offset = 8;
       for (let i = 0; i < count; i++) { const length = data.readUInt32LE(offset); offset += 4; assert.deepEqual(data.subarray(offset, offset + length), fs.readFileSync(`${dir}/frame-${String(first + i + 1).padStart(4, '0')}.webp`)); offset += length; }
       assert.equal(offset, data.length);

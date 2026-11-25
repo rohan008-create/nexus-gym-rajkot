@@ -1,0 +1,57 @@
+/* The shadcn button variants reference design tokens this site does not define,
+   so the toggle carries its own skin using the site's theme variables. */
+button.animated-theme-toggle {
+  position: fixed;
+  z-index: 10001;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #d5c9b5;
+  border-radius: 25px;
+  background: linear-gradient(145deg, #fffdf6, #ece7da);
+  color: #776044;
+  box-shadow: inset 0 1px 0 #fff, 0 5px 20px #181f3026;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+button.animated-theme-toggle svg {
+  display: block;
+}
+
+button.animated-theme-toggle[aria-checked='true'] {
+  border-color: #64708c;
+  background: radial-gradient(circle at 25% 20%, #495270 0, transparent 55%), linear-gradient(140deg, #1b263e, #0c1324);
+  color: #e2e8ff;
+  box-shadow: inset 0 1px 0 #a9b9ef26, 0 5px 20px #0005;
+}
+
+button.animated-theme-toggle:hover {
+  filter: brightness(1.04);
+}
+
+button.animated-theme-toggle:focus-visible {
+  outline: 2px solid var(--theme-ink, #f7f5ef);
+  outline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+  button.animated-theme-toggle {
+    top: max(12px, env(safe-area-inset-top));
+    right: 12px;
+    width: 68px;
+    height: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.animated-theme-toggle {
+    transition: none;
+  }
+}

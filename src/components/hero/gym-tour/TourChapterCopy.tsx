@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion, useIsPresent } from 'framer-motion';
+import { AnimatePresence, motion, useIsPresent } from 'motion/react';
 import TactileHighlight from '../../ui/tactile-highlight';
 import { TOUR_CHAPTERS, TOUR_MARKER_SPACING } from './gymTourConfig';
 

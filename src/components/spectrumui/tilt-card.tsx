@@ -7,7 +7,7 @@
  * pointer across the card. Tilt only engages for mouse pointers and is
  * disabled entirely under prefers-reduced-motion.
  *
- * Dependencies: framer-motion, @/lib/utils
+ * Dependencies: motion, @/lib/utils
  *
  * @example
  * <TiltCard className="max-w-sm p-6">
@@ -32,7 +32,7 @@ import {
   useReducedMotion,
   useSpring,
   useTransform,
-} from "framer-motion"
+} from "motion/react"
 import { cn } from "@/lib/utils"
 
 // ─── Types ───────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 import Navbar from '../layout/Navbar';
 import GymTourHero from './gym-tour/GymTourHero';
 import NexusOpening from './NexusOpening';
@@ -23,6 +23,27 @@ import SmoothScroll from '../layout/SmoothScroll';
 import NexusFooter from '../footer/NexusFooter';
 import './iron-world.css';
 
+// Below-the-fold sections have no tour/dialog state. Keeping them behind a memo
+// means a tour status change or opening the trial dialog cannot reconcile them.
+const PageSections = memo(function PageSections({ onTrial, onEnquire }: {
+  onTrial: () => void;
+  onEnquire: (plan: string) => void;
+}) {
+  return <>
+    <ProgramsSection onTrial={onTrial} />
+    <NexusAdvantageSection />
+    <NexusTrainersSection />
+    <NexusVoices />
+    <NexusMembershipCards onEnquire={onEnquire} />
+    <RoadToNexus />
+    <VisitFAQ />
+    <WhatsAppBooking />
+    <GymProductsSection />
+    <NexusSocialSection />
+    <NexusFooter linkBase="" />
+  </>;
+});
+
 export default function HeroSection() {
   const root = useRef<HTMLElement>(null), progress = useRef(0), pointer = useRef({ x: 0, y: 0 });
   const velocity = useRef(0);
@@ -34,32 +55,24 @@ export default function HeroSection() {
   const [trial, setTrial] = useState(false);
   const [membershipPlan, setMembershipPlan] = useState<string | undefined>();
   useHeroTransition(root, { progress, pointer, velocity, layout }, reduced, undefined, true, true);
+  const openTrial = useCallback(() => setTrial(true), []);
+  const closeTrial = useCallback(() => { setTrial(false); setMembershipPlan(undefined); }, []);
+  const enquire = useCallback((plan: string) => { setMembershipPlan(plan); setTrial(true); }, []);
   const explorePrograms = useCallback(() => {
     document.getElementById('programs')?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth', block: 'start' });
   }, [reduced]);
-  const content = useMemo(() => <main ref={root} className="site-shell rope-experience" data-rope-status={status} onPointerMove={event => { pointer.current.x = event.clientX / window.innerWidth * 2 - 1; pointer.current.y = 1 - event.clientY / window.innerHeight * 2; }} onPointerLeave={() => { pointer.current.x = 0; pointer.current.y = 0; }}>
-    {openingFinished && <Navbar onTrial={() => setTrial(true)} />}
-    <div className="hero-experience">
-      <GymTourHero openingFinished={openingFinished} reduced={reduced} onStatus={setStatus} onTrial={() => setTrial(true)} onExplorePrograms={explorePrograms} />
-      <section className="continuation-section about-section" id="about" aria-labelledby="about-title">
-        <AboutNexus panel="About" onTrial={() => setTrial(true)} />
-      </section>
-    </div>
-    <ProgramsSection onTrial={() => setTrial(true)} />
-    <NexusAdvantageSection />
-    <NexusTrainersSection />
-    <NexusVoices />
-    <NexusMembershipCards onEnquire={plan => { setMembershipPlan(plan); setTrial(true); }} />
-    <RoadToNexus />
-    <VisitFAQ />
-    <WhatsAppBooking />
-    <GymProductsSection />
-    <NexusSocialSection />
-    <NexusFooter linkBase="" />
-    <TrialDialog open={trial} membershipPlan={membershipPlan} onClose={() => { setTrial(false); setMembershipPlan(undefined); }} />
-  </main>, [status, openingFinished, trial, membershipPlan, reduced, explorePrograms]);
   return <SmoothScroll>
     {!openingFinished && <NexusOpening onFinish={finishOpening} />}
-    {content}
+    <main ref={root} className="site-shell rope-experience" data-rope-status={status} onPointerMove={event => { pointer.current.x = event.clientX / window.innerWidth * 2 - 1; pointer.current.y = 1 - event.clientY / window.innerHeight * 2; }} onPointerLeave={() => { pointer.current.x = 0; pointer.current.y = 0; }}>
+      {openingFinished && <Navbar onTrial={openTrial} />}
+      <div className="hero-experience">
+        <GymTourHero openingFinished={openingFinished} reduced={reduced} onStatus={setStatus} onTrial={openTrial} onExplorePrograms={explorePrograms} />
+        <section className="continuation-section about-section" id="about" aria-labelledby="about-title">
+          <AboutNexus panel="About" onTrial={openTrial} />
+        </section>
+      </div>
+      <PageSections onTrial={openTrial} onEnquire={enquire} />
+      <TrialDialog open={trial} membershipPlan={membershipPlan} onClose={closeTrial} />
+    </main>
   </SmoothScroll>;
 }

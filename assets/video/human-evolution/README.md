@@ -19,7 +19,7 @@ The pipeline probes/counts the source, decodes at 24 FPS without adding fabricat
 
 Delivery:
 
-- `public/animations/nexus-evolution/desktop/frame-0001.webp` … `frame-0239.webp`: 1280 × 720, quality 84, 12,988,758 bytes combined.
+- `assets/evolution/nexus-evolution/desktop/frame-0001.webp` … `frame-0239.webp`: 1280 × 720, quality 84, 12,988,758 bytes combined.
 - `mobile/`: 768 × 432, quality 80, 6,051,398 bytes combined.
 - `manifest.json`: measured source/output properties, frame count, sizes, alpha bounds and attribution regions.
 - `poster.webp`: transparent first frame; no website background baked into it.

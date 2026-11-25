@@ -7,7 +7,6 @@ import { directionsUrl, nexusLocation } from './globeConfig';
 import type { CesiumGlobeHandle } from './CesiumGlobe';
 import GlobeLoading from './GlobeLoading';
 import './nexusGlobe.css';
-import 'cesium/Build/Cesium/Widgets/widgets.css';
 
 // Lazy-load CesiumGlobe on client-side only
 const CesiumGlobe = dynamic(() => import('./CesiumGlobe'), {

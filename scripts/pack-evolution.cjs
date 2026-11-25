@@ -1,7 +1,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 (async () => {
-  const root = path.resolve(__dirname, '../public/animations/nexus-evolution');
+  const root = path.resolve(__dirname, '../assets/evolution/nexus-evolution');
   const manifest = JSON.parse(await fs.readFile(path.join(root, 'manifest.json'), 'utf8'));
   const framesPerPack = 4;
   for (const variant of ['desktop', 'mobile']) {

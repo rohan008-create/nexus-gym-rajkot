@@ -17,6 +17,7 @@ import {
 } from './globeConfig';
 import GlobeLocationCard from './GlobeLocationCard';
 import GlobeLoading from './GlobeLoading';
+import 'cesium/Build/Cesium/Widgets/widgets.css';
 
 function loadCesium(): Promise<typeof CesiumType> {
   if (typeof window === 'undefined') return Promise.reject(new Error('Window undefined'));

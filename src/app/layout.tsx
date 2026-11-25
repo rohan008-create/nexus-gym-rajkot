@@ -10,7 +10,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 const title = 'NEXUS Fitness Club | Transform Your Potential';
 const description = 'Rajkot’s premium fitness club. Build strength, endurance and the best version of you.';
 export const metadata: Metadata = {
-  title, description, icons: { icon: '/assets/nexus-logo.png' },
+  title, description, icons: { icon: '/favicon-32.png' },
   ...(siteUrl ? { metadataBase: new URL(siteUrl), alternates: { canonical: '/' } } : {}),
   openGraph: { title, description, type: 'website', locale: 'en_IN', siteName: 'Nexus Fitness Club', ...(siteUrl ? { url: siteUrl, images: ['/models/nexus-gym/arrival-street.webp'] } : {}) },
   twitter: { card: 'summary_large_image', title, description },

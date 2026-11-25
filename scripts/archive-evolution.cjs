@@ -3,7 +3,7 @@ const path = require('node:path');
 (async () => {
   const { zipSync, unzipSync } = await import('three/examples/jsm/libs/fflate.module.js');
   const root = path.resolve(__dirname, '..');
-  const input = path.join(root, 'public/animations/nexus-evolution');
+  const input = path.join(root, 'assets/evolution/nexus-evolution');
   const manifest = JSON.parse(await fs.readFile(path.join(input, 'manifest.json'), 'utf8'));
   // The portable archive is the original extracted sequence. Transport batches
   // are an optional website optimization, reproducible with pack:evolution.

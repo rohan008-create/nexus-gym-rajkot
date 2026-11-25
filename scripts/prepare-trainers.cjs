@@ -18,12 +18,13 @@ async function writeBadge(image, id, side) {
   const path = `public/assets/trainers/${id}-${side}`;
   const png = await image.png().toBuffer();
   await Promise.all([
-    fs.writeFile(`${path}.png`, png),
+    fs.writeFile(`assets/generated/trainers/${id}-${side}.png`, png),
     sharp(png).webp({ lossless: true, effort: 6 }).toFile(`${path}.webp`)
   ]);
 }
 (async () => {
   await fs.mkdir('public/assets/trainers', { recursive: true });
+  await fs.mkdir('assets/generated/trainers', { recursive: true });
   const logo = await sharp('public/assets/nexus-logo.png').resize({ width: 245, height: 62, fit: 'inside' }).png().toBuffer();
   for (let i = 0; i < names.length; i++) {
     const id = names[i]; const number = String(i + 1).padStart(2, '0');

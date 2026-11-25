@@ -77,7 +77,7 @@ export default function Navbar({ onTrial }: { onTrial: () => void }) {
     if (event.key === 'Escape' && open) { event.preventDefault(); close(); }
   }}>
     <a href="#home" className="brand" aria-label="Nexus Fitness Club home" onClick={event => navigate(event, 'home')}>
-      <img src="/assets/nexus-logo.png" alt="" width={2172} height={724} />
+      <img src="/assets/nexus-logo.webp" alt="" width={2172} height={724} />
     </a>
     <button ref={toggle} type="button" className="menu-toggle" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} aria-controls="primary-navigation" onClick={() => setOpen(value => !value)}>{open ? <X aria-hidden /> : <Menu aria-hidden />}</button>
     <nav className={`nav-links ${open ? 'is-open' : ''}`} id="primary-navigation" aria-label="Main navigation" data-lenis-prevent={open ? '' : undefined}>

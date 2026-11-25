@@ -77,10 +77,13 @@ export default function NexusOpening({ onFinish }: { onFinish: () => void }) {
     };
 
     let rafId = 0;
+    let lastFrame = 0;
     let dpr = 1;
 
     const sizeCanvas = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // Decorative full-screen canvas: cap resolution so high-DPI screens do not
+      // clear millions of pixels per frame during the intro.
+      dpr = Math.min(window.devicePixelRatio || 1, 1.25);
       canvas.width = Math.max(1, Math.round(root.clientWidth * dpr));
       canvas.height = Math.max(1, Math.round(root.clientHeight * dpr));
     };
@@ -88,16 +91,16 @@ export default function NexusOpening({ onFinish }: { onFinish: () => void }) {
     sizeCanvas();
     window.addEventListener('resize', sizeCanvas);
 
-    // Real-time 60 FPS Canvas: live athletic ECG laser pulse + precision barbell caliper ruler
-    const drawWaveform = () => {
-      if (!ctx2d) return;
+    // 30 FPS is enough for the live ECG laser pulse and halves the canvas work.
+    const drawWaveform = (now: number) => {
+      if (!ctx2d || waveState.waveAlpha <= 0.005) return;
+      rafId = window.requestAnimationFrame(drawWaveform);
+      if (now - lastFrame < 33) return;
+      lastFrame = now;
 
       const w = canvas.width;
       const h = canvas.height;
       ctx2d.clearRect(0, 0, w, h);
-
-      if (waveState.waveAlpha <= 0.005) return;
-      rafId = window.requestAnimationFrame(drawWaveform);
 
       const p = waveState.progress / 100;
       const cy = h * 0.5;

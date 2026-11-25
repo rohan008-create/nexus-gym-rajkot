@@ -12,10 +12,12 @@ const THICKNESS = 0.018;
 const BEVEL = 0.007;
 const JOINTS = 4;
 const NODE_WEIGHT = 1 / 0.05;
-const MAX_STEP = 1 / 960;
+// Breeze keeps idle badges moving, so the solver never fully rests. Halving the
+// substep count and easing the idle cadence keeps the same sway at ~1/3 the CPU.
+const MAX_STEP = 1 / 480;
 const ITERATIONS = 2;
 const SAMPLES = 72;
-const IDLE_FRAME_MS = 32;
+const IDLE_FRAME_MS = 48;
 const INTERACTION_SETTLE_MS = 1800;
 const FOV = 24;
 const STRAP_WIDTH = 0.36;
